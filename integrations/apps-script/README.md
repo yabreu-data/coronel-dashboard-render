@@ -13,6 +13,12 @@ Este documento explica cómo dejar el Google Apps Script (`Código.gs`) correcta
 
 El dashboard **no llama a este script**: lee la hoja pública con *gviz*. El script solo alimenta y limpia los datos.
 
+## 1.1 Archivos de este directorio
+
+- `Codigo.gs`: versión **sin secretos** (la que se publica en el repo).
+- `Codigo.local.gs`: misma versión **con token, PIN y API key reales** (no se sube a Git). **Usa esta para pegar en Apps Script.**
+
+
 ## 2. Cambios obligatorios en `Código.gs`
 
 Busca y reemplaza estas constantes:
@@ -27,8 +33,9 @@ const PIN_ADMIN = '<PIN_REAL>';
 /* 3) API key de OCR.space */
 const OCR_SPACE_API_KEY = '<OCR_KEY_REAL>';
 
-/* 4) Exigir token también en el POST de guardado */
-const REQUIRIR_TOKEN_POST = true;
+/* 4) Exigir token también en el POST de guardado: se deja en false para no
+      romper el formulario si aún no envía token; cámbialo a true al confirmarlo */
+const REQUIRIR_TOKEN_POST = false;
 ```
 
 > Los valores reales están en `SECRETOS.local.md` (local, no versionado).

@@ -123,3 +123,6 @@ drizzle/migrations/
 # Secretos locales de integraciones (nunca publicar)
 integrations/apps-script/*.local.md
 integrations/apps-script/SECRETOS*
+
+# Apps Script con credenciales locales
+integrations/apps-script/Codigo.local.gs
