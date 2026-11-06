@@ -1,0 +1,178 @@
+import { and, count, desc, eq, gte, like, lte, or } from "drizzle-orm";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { BirthdayCampaign, InsertBirthdayCampaign, InsertCallLog, InsertPriorityItem, InsertPromotion, InsertResponsibleUser, InsertUser, adminAuditLog, birthdayCampaigns, callLogs, priorityHistory, priorityItems, promotions, responsibleUsers, sessionHistory, teamTargetHistory, teamTargets, users } from "../drizzle/schema";
+import { ENV } from "./_core/env";
+
+let _db: NodePgDatabase | null = null;
+let _pool: Pool | null = null;
+
+const LOCAL_HOST_PATTERN = /(^|@|\/\/)(localhost|127\.0\.0\.1|::1)(:|\/|$)/i;
+
+function isLocalConnection(connectionString: string) {
+  return LOCAL_HOST_PATTERN.test(connectionString);
+}
+
+/**
+ * Supabase (y casi cualquier PostgreSQL gestionado) exige TLS. En conexiones
+ * remotas forzamos TLS aceptando el certificado del pooler; en local se
+ * mantiene la conexión sin TLS.
+ */
+function buildPool(connectionString: string) {
+  return new Pool({
+    connectionString,
+    max: 10,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 15_000,
+    ...(isLocalConnection(connectionString) ? {} : { ssl: { rejectUnauthorized: false } }),
+  });
+}
+
+export async function getDb() {
+  if (_db) return _db;
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) return null;
+  try {
+    _pool = buildPool(connectionString);
+    _pool.on("error", error => console.error("[Database] Error inesperado en el pool:", error));
+    _db = drizzle(_pool);
+    console.log("[Database] Conectado a PostgreSQL", isLocalConnection(connectionString) ? "(local)" : "(gestionado)");
+  } catch (error) {
+    console.warn("[Database] Failed to connect:", error);
+    _db = null;
+  }
+  return _db;
+}
+
+export async function closeDb() {
+  if (_pool) {
+    await _pool.end().catch(() => undefined);
+    _pool = null;
+    _db = null;
+  }
+}
+
+export async function upsertUser(user: InsertUser): Promise<void> {
+  if (!user.openId) throw new Error("User openId is required for upsert");
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot upsert user: database not available"); return; }
+  const values: InsertUser = { openId: user.openId };
+  const updateSet: Record<string, unknown> = {};
+  const textFields = ["name", "email", "loginMethod"] as const;
+  for (const field of textFields) {
+    if (user[field] !== undefined) { values[field] = user[field] ?? null; updateSet[field] = user[field] ?? null; }
+  }
+  if (user.lastSignedIn !== undefined) { values.lastSignedIn = user.lastSignedIn; updateSet.lastSignedIn = user.lastSignedIn; }
+  if (user.role !== undefined) { values.role = user.role; updateSet.role = user.role; }
+  else if (user.openId === ENV.supabaseAdminUserId) { values.role = "admin"; updateSet.role = "admin"; }
+  if (!values.lastSignedIn) values.lastSignedIn = new Date();
+  if (!Object.keys(updateSet).length) updateSet.lastSignedIn = new Date();
+  await db.insert(users).values(values).onConflictDoUpdate({ target: users.openId, set: updateSet });
+}
+
+export async function getUserByOpenId(openId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function listAccessUsers() { const db = await getDb(); if (!db) return []; return db.select({ id: users.id, openId: users.openId, name: users.name, email: users.email, role: users.role, canViewCustomers: users.canViewCustomers, canManageCalls: users.canManageCalls, canManageTargets: users.canManageTargets, canManageUsers: users.canManageUsers, canViewAudit: users.canViewAudit, active: users.active, avatarPreset: users.avatarPreset, lastSignedIn: users.lastSignedIn }).from(users).orderBy(users.name); }
+export async function updateAccessUser(input: { id: number; role: "user" | "admin"; canViewCustomers: number; canManageCalls: number; canManageTargets: number; canManageUsers: number; canViewAudit: number; active: number }) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.update(users).set({ role: input.role, canViewCustomers: input.canViewCustomers, canManageCalls: input.canManageCalls, canManageTargets: input.canManageTargets, canManageUsers: input.canManageUsers, canViewAudit: input.canViewAudit, active: input.active }).where(eq(users.id, input.id)); return listAccessUsers(); }
+export async function updateUserAvatar(openId: string, avatarPreset: string) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.update(users).set({ avatarPreset }).where(eq(users.openId, openId)); return getUserByOpenId(openId); }
+export async function recordSessionEvent(input: { openId: string; action: "login" | "logout"; ipAddress?: string; userAgent?: string }) { const db = await getDb(); if (!db) return; await db.insert(sessionHistory).values(input); }
+export async function listSessionHistory(openId: string) { const db = await getDb(); if (!db) return []; return db.select().from(sessionHistory).where(eq(sessionHistory.openId, openId)).orderBy(desc(sessionHistory.createdAt)).limit(100); }
+export async function listAdminSessionHistory(input: { from?: Date; to?: Date; userQuery?: string; limit: number; offset: number }) { const db = await getDb(); if (!db) return { rows: [], total: 0 }; const conditions = []; if (input.from) conditions.push(gte(sessionHistory.createdAt, input.from)); if (input.to) conditions.push(lte(sessionHistory.createdAt, input.to)); if (input.userQuery?.trim()) { const query = `%${input.userQuery.trim()}%`; conditions.push(or(like(users.name, query), like(users.email, query), like(sessionHistory.openId, query))); } const where = conditions.length ? and(...conditions) : undefined; const [rows, totalRows] = await Promise.all([db.select({ id: sessionHistory.id, openId: sessionHistory.openId, action: sessionHistory.action, ipAddress: sessionHistory.ipAddress, userAgent: sessionHistory.userAgent, createdAt: sessionHistory.createdAt, userName: users.name, userEmail: users.email }).from(sessionHistory).leftJoin(users, eq(sessionHistory.openId, users.openId)).where(where).orderBy(desc(sessionHistory.createdAt)).limit(input.limit).offset(input.offset), db.select({ total: count() }).from(sessionHistory).leftJoin(users, eq(sessionHistory.openId, users.openId)).where(where)]); return { rows, total: Number(totalRows[0]?.total ?? 0) }; }
+export async function listCallLogs() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(callLogs).orderBy(desc(callLogs.callDate)).limit(250);
+}
+export async function createCallLog(input: InsertCallLog) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db.insert(callLogs).values(input);
+  const rows = await db.select().from(callLogs).orderBy(desc(callLogs.id)).limit(1);
+  return rows[0];
+}
+export async function listBirthdayCampaigns() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(birthdayCampaigns).orderBy(desc(birthdayCampaigns.updatedAt));
+}
+export async function saveBirthdayCampaign(input: InsertBirthdayCampaign) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db.insert(birthdayCampaigns).values(input).onConflictDoUpdate({ target: birthdayCampaigns.clientKey, set: { clientName: input.clientName, phone: input.phone ?? null, stage: input.stage, channel: input.channel, updatedBy: input.updatedBy ?? null } });
+  const rows = await db.select().from(birthdayCampaigns).where(eq(birthdayCampaigns.clientKey, input.clientKey)).limit(1);
+  return rows[0] as BirthdayCampaign | undefined;
+}
+export async function getTeamTargets() {
+  const db = await getDb();
+  if (!db) return { surveysPerServer: 10, surveysPerDelivery: 10, positiveQualityPercent: 80 };
+  const rows = await db.select().from(teamTargets).where(eq(teamTargets.id, 1)).limit(1);
+  return rows[0] ?? { surveysPerServer: 10, surveysPerDelivery: 10, positiveQualityPercent: 80 };
+}
+
+export async function saveTeamTargets(input: { surveysPerServer: number; surveysPerDelivery: number; positiveQualityPercent: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db.insert(teamTargets).values({ id: 1, ...input }).onConflictDoUpdate({ target: teamTargets.id, set: input });
+  const rows = await db.select().from(teamTargets).where(eq(teamTargets.id, 1)).limit(1);
+  return rows[0];
+}
+
+export async function listPriorityItems() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(priorityItems);
+}
+
+export async function savePriorityItem(input: Pick<InsertPriorityItem, "priorityKey" | "status" | "responsible" | "dueDate" | "updatedBy">) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db.insert(priorityItems).values(input).onConflictDoUpdate({ target: priorityItems.priorityKey, set: { status: input.status, responsible: input.responsible ?? null, dueDate: input.dueDate ?? null, updatedBy: input.updatedBy ?? null } });
+  const historyStatus: "pending" | "in_progress" | "done" = input.status ?? "pending";
+  await db.insert(priorityHistory).values({ priorityKey: input.priorityKey, status: historyStatus, responsible: input.responsible ?? null, dueDate: input.dueDate ?? null, changedBy: input.updatedBy ?? "Dashboard" } as any);
+  const rows = await db.select().from(priorityItems).where(eq(priorityItems.priorityKey, input.priorityKey)).limit(1);
+  return rows[0];
+}
+
+export async function listPriorityHistory(priorityKey: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(priorityHistory).where(eq(priorityHistory.priorityKey, priorityKey)).orderBy(desc(priorityHistory.changedAt)).limit(100);
+}
+
+export async function listSystemUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({ id: users.id, name: users.name, email: users.email, role: users.role }).from(users).orderBy(users.name);
+}
+
+export async function listPromotions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(promotions).where(eq(promotions.active, 1)).orderBy(promotions.name);
+}
+export async function listAllPromotions() { const db = await getDb(); if (!db) return []; return db.select().from(promotions).orderBy(promotions.name); }
+
+export async function savePromotion(input: InsertPromotion) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db.insert(promotions).values(input).onConflictDoUpdate({ target: promotions.name, set: { category: input.category, active: 1 } });
+  return listPromotions();
+}
+export async function updatePromotion(input: { id: number; name: string; category: "recuperacion" | "cumpleanos" | "fidelidad" | "general"; active: number }) {
+  const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible");
+  await db.update(promotions).set({ name: input.name, category: input.category, active: input.active }).where(eq(promotions.id, input.id));
+  return listPromotions();
+}
+export async function listResponsibleUsers() { const db = await getDb(); if (!db) return []; return db.select().from(responsibleUsers).where(eq(responsibleUsers.active, 1)).orderBy(responsibleUsers.name); }
+export async function listAllResponsibleUsers() { const db = await getDb(); if (!db) return []; return db.select().from(responsibleUsers).orderBy(responsibleUsers.name); }
+export async function saveResponsibleUser(input: InsertResponsibleUser) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.insert(responsibleUsers).values(input); return listResponsibleUsers(); }
+export async function updateResponsibleUser(input: { id: number; name: string; email?: string | null; active: number }) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.update(responsibleUsers).set({ name: input.name, email: input.email ?? null, active: input.active }).where(eq(responsibleUsers.id, input.id)); return listResponsibleUsers(); }
+export async function listTeamTargetHistory() { const db = await getDb(); if (!db) return []; return db.select().from(teamTargetHistory).orderBy(desc(teamTargetHistory.changedAt)).limit(240); }
+export async function saveTeamTargetHistory(input: { surveysPerServer: number; surveysPerDelivery: number; positiveQualityPercent: number; periodLabel: string; changedBy?: string | null }) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.insert(teamTargetHistory).values(input); return listTeamTargetHistory(); }
+export async function listAdminAuditLog() { const db = await getDb(); if (!db) return []; return db.select().from(adminAuditLog).orderBy(desc(adminAuditLog.changedAt)).limit(300); }
+export async function recordAdminAudit(input: { entity: string; action: string; entityId?: string | null; details?: string | null; changedBy: string }) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.insert(adminAuditLog).values(input); return listAdminAuditLog(); }

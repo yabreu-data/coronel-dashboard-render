@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: coronel-dashboard
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: pnpm install --prod=false --frozen-lockfile=false && pnpm build
+    startCommand: node dist/index.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: NODE_ENV
+        value: production
+      - key: GOOGLE_SHEET_ID
+        value: 1q9WMz_O_J15B0QKv8QF4zYp7uvwGwm-5aTGfTdz6vHU
+      - key: GOOGLE_SHEET_TAB
+        value: Encuestas
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ADMIN_USER_ID
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PIN
+        sync: false
