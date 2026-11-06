@@ -3908,6 +3908,8 @@ function Overview({
     [records, profiles, promotions]
   );
   const birthdaysToday = birthdayMarketing.filter(item => item.days === 0);
+  const answeredCount = good + regular + bad;
+  const overallCi = answeredCount ? wilsonInterval(good, answeredCount) : null;
   return (
     <>
       <section className="alert-banner">
@@ -3990,7 +3992,11 @@ function Overview({
         <Stat
           label="CALIDAD POSITIVA"
           value={`${Math.round(positive * 100)}%`}
-          detail={`${good} de ${good + regular + bad} con respuesta · ${Math.max(0, records.length - (good + regular + bad))} sin calificar`}
+          detail={`${good} de ${answeredCount} con respuesta · ${Math.max(0, records.length - answeredCount)} sin calificar${
+            overallCi
+              ? ` · IC95 ${Math.round(overallCi[0] * 100)}–${Math.round(overallCi[1] * 100)}%`
+              : ""
+          }`}
           accent="green"
           icon={Sparkles}
           onClick={() => onNavigate("voice")}
@@ -7979,6 +7985,7 @@ function Team({
       ci: wilsonInterval(good, answered.length),
     };
   });
+  const lowSampleServers = qualityByServer.filter(server => server.answered < 20);
   const salonRecords = periodRecords.filter(
     r => displayServer(r.registeredBy) !== "DELIVERY / WEB"
   );
@@ -8313,9 +8320,26 @@ function Team({
             </div>
             <Pill tone="green">Meta: {qualityGoal}%</Pill>
           </div>
+          {lowSampleServers.length ? (
+            <div className="sample-warning" role="status">
+              <AlertTriangle size={16} />
+              <div>
+                <b>Muestra insuficiente para comparar</b>
+                <span>
+                  {lowSampleServers
+                    .map(server => `${server.name} (n=${server.answered})`)
+                    .join(" · ")}
+                  : menos de 20 encuestas calificadas. El porcentaje es una señal,
+                  no una conclusión; acumula más respuestas o compara varios
+                  meses.
+                </span>
+              </div>
+            </div>
+          ) : null}
           {qualityByServer.length ? (
             qualityByServer.map((s, i) => {
               const meets = s.count >= surveyGoal && s.pct >= qualityGoal;
+              const lowSample = s.answered < 20;
               return (
                 <div
                   className={`score-row ${meets ? "team-target-met" : ""}`}
@@ -8334,12 +8358,14 @@ function Team({
                         : ""}
                     </small>
                   </span>
-                  <Pill tone={meets ? "green" : "orange"}>
-                    {meets
-                      ? "META"
-                      : s.pct < qualityGoal
-                        ? "MEJORAR CALIDAD"
-                        : "FALTA VOLUMEN"}
+                  <Pill tone={lowSample ? "orange" : meets ? "green" : "orange"}>
+                    {lowSample
+                      ? "MUESTRA BAJA"
+                      : meets
+                        ? "META"
+                        : s.pct < qualityGoal
+                          ? "MEJORAR CALIDAD"
+                          : "FALTA VOLUMEN"}
                   </Pill>
                   <Face
                     tone={

@@ -128,6 +128,10 @@ indicadores auditados coinciden con el cálculo independiente:
   **Pasadas**.
 - Scorecard de meseros con **n** (encuestas calificadas) e **IC95** (intervalo de
   confianza de Wilson).
+- **IC95 en el resumen general**: 96/106 = 90,6 % · IC95 **83–95 %**.
+- **Aviso “MUESTRA BAJA”** cuando un mesero tiene menos de 20 encuestas
+  calificadas (hoy: Betty, n=19); su porcentaje se muestra como señal, no como
+  conclusión.
 - Catálogo visible de etiquetas de pedidos (Tiempo, Papas, Sabor, Variedad,
   Promos, Ambiente, Sugerencia) con su conteo.
 - Indicador de calidad con el detalle **“6 sin calificar”** para hacer visible la

@@ -1514,3 +1514,8 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
 
 .voice-tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .voice-tag-row .voice-tag { font-size: 10px; }
+
+/* Aviso de muestra pequeña en el scorecard */
+.sample-warning { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 12px; padding: 10px 12px; border: 1px solid #b7791f; border-radius: 10px; background: #2a1f0c; color: #ffe9b8; }
+.sample-warning b { display: block; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+.sample-warning span { display: block; margin-top: 2px; font-size: 11px; line-height: 1.45; }
