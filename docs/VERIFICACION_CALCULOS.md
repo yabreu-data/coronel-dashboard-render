@@ -103,7 +103,7 @@ indicadores auditados coinciden con el cálculo independiente:
 
 ## 5. Recomendaciones siguientes
 
-1. **Renombrar etapas del embudo** a “0–3 días”, “4–7 días”, “>7 días” y
+1. **Renombrar etapas del embudo** a “0–3 días”, “4–7 días”, “8–30 días” y
    “Pasadas” para que no se confundan con “Esta semana”.
 2. **Mostrar n y margen de error** en los porcentajes por mesero; no rankear con
    n < 20.
@@ -121,3 +121,38 @@ indicadores auditados coinciden con el cálculo independiente:
 - Verificación de UI: navegación con Playwright y usuario temporal; se leyeron
   los `stat-card`, `score-row` y métricas de cumpleaños.
 - El usuario temporal se eliminó y no quedaron registros de prueba.
+
+## 7. Mejoras aplicadas después de la verificación
+
+- Etapas del embudo renombradas a **0–3 días**, **4–7 días**, **8–30 días** y
+  **Pasadas**.
+- Scorecard de meseros con **n** (encuestas calificadas) e **IC95** (intervalo de
+  confianza de Wilson).
+- Catálogo visible de etiquetas de pedidos (Tiempo, Papas, Sabor, Variedad,
+  Promos, Ambiente, Sugerencia) con su conteo.
+- Indicador de calidad con el detalle **“6 sin calificar”** para hacer visible la
+  no respuesta.
+- Pruebas automáticas de métricas y fechas: **30 pruebas** (11 archivos) pasan.
+
+## 8. Cómo leer las advertencias estadísticas
+
+Un **intervalo de confianza al 95 %** es el rango donde probablemente está el
+valor real del mesero si pudiera medirse a todos sus clientes. No es “el dato
+está mal”: es la **incertidumbre por tener pocas respuestas**.
+
+- Shirley: 94,6 % con n=37 → IC95 **82–99 %**.
+- Betty: 89,5 % con n=19 → IC95 **69–97 %**.
+- Sr. Carlos: 96,0 % con n=25 → IC95 **80–99 %**.
+
+Los tres intervalos se solapan: con estos volúmenes **no se puede afirmar** que
+un mesero sea mejor que otro. Para decidir con más seguridad:
+
+1. Acumular más respuestas (ideal n ≥ 30 por mesero/periodo).
+2. Mostrar siempre n e IC95; evitar rankings con n < 20.
+3. Usar suavizado bayesiano o medias móviles para estabilizar.
+4. Comparar tendencias de varios meses, no una foto.
+5. Cuidar la **no respuesta**: 6 encuestas `Sin calificar` (5,4 %) pueden sesgar
+   el resultado si quienes no califican están más insatisfechos.
+6. Validar manualmente una muestra de comentarios: la clasificación por palabras
+   clave puede fallar con negaciones o sarcasmo.
+
