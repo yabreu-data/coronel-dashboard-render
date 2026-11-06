@@ -64,8 +64,10 @@ Si `REQUIRIR_TOKEN_POST = true`, el `index.html` del formulario debe enviar `tok
 
 1. Pega los cambios en el editor de Apps Script y guarda.
 2. **Implementar → Gestionar implementaciones → ✏️ → Nueva versión → Implementar** (la URL `/exec` no cambia).
-3. En la hoja: menú **Datos → Actualizar Encuestas_Limpias** (crea la pestaña).
-4. Menú **Datos → Instalar actualización cada 15 minutos** (mantiene la pestaña al día).
+3. En la hoja: menú **Coronel → Configurar todo (actualizar + trigger)**.
+   - Si el menú **Coronel** no aparece: guarda el script, recarga la hoja (F5) y vuelve a mirar.
+   - Alternativa sin menú: en el editor de Apps Script elige la función `configuracionInicial` y pulsa **Ejecutar**.
+4. Menú **Coronel → Instalar actualización cada 15 minutos** (si no usaste “Configurar todo”).
 5. Verifica en el Sheet que exista la pestaña **Encuestas_Limpias** con `ID Único` y `Timestamp` en la fila 1.
 6. Ejecuta la verificación del dashboard:
 

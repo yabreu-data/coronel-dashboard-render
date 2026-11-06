@@ -6,8 +6,8 @@
  *    (La versión publicada en el repositorio usa placeholders; los valores
  *    reales viven en Codigo.local.gs, que no se versiona.)
  *  - Corregida la validación de la API key de OCR (detecta placeholders).
- *  - REQUIRIR_TOKEN_POST = true por defecto: el formulario debe enviar token.
- *  - Menú "Datos" ampliado: Configurar todo y Verificar capa limpia.
+ *  - REQUIRIR_TOKEN_POST queda en false; cámbialo a true cuando el formulario envíe token.
+ *  - Menú "Coronel" ampliado: Configurar todo y Verificar capa limpia.
  *  - La reconstrucción de Encuestas_Limpias repara IDs faltantes antes de leer.
  *
  * FLUJO GENERAL:
@@ -1112,7 +1112,7 @@ function configuracionInicial() {
 }
 
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu('Datos')
+  SpreadsheetApp.getUi().createMenu('Coronel')
     .addItem('Actualizar Encuestas_Limpias', 'actualizarEncuestasLimpias')
     .addItem('Configurar todo (actualizar + trigger)', 'configuracionInicial')
     .addItem('Instalar actualización cada 15 minutos', 'instalarActualizacionCada15Minutos')
