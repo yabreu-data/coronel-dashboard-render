@@ -8,30 +8,62 @@ import pg from "pg";
  * Este script programa un job de PostgreSQL que cada 5 minutos hace un GET al
  * endpoint /healthz del servicio, manteniéndolo despierto.
  *
+ * Por defecto NO se ejecuta entre 01:30 y 06:30 hora de Lima (America/Lima,
+ * UTC-5), evaluado dentro de PostgreSQL con `now() AT TIME ZONE`.
+ *
  * Uso:
  *   node scripts/setup-keepalive.mjs                 # instala extensiones y programa el job
- *   node scripts/setup-keepalive.mjs --test          # dispara un ping y muestra la respuesta
+ *   node scripts/setup-keepalive.mjs --status        # muestra configuración y últimas ejecuciones
+ *   node scripts/setup-keepalive.mjs --test          # fuerza un ping ahora y muestra la respuesta
  *   node scripts/setup-keepalive.mjs --remove        # elimina el job programado
  *   node scripts/setup-keepalive.mjs https://mi-app.onrender.com/healthz
  *
  * Variables opcionales:
- *   KEEPALIVE_URL      URL a pingear (por defecto https://coronel-dashboard.onrender.com/healthz)
- *   KEEPALIVE_CRON     Expresión cron de 5 campos (por defecto "*\/5 * * * *")
- *   DATABASE_URL       Connection string de Supabase (obligatoria)
+ *   KEEPALIVE_URL            URL a pingear (por defecto https://coronel-dashboard.onrender.com/healthz)
+ *   KEEPALIVE_CRON           Expresión cron de 5 campos (por defecto "*\/5 * * * *")
+ *   KEEPALIVE_TZ             Zona horaria de la ventana (por defecto "America/Lima")
+ *   KEEPALIVE_BLACKOUT_START Inicio de la ventana sin pings (por defecto "01:30")
+ *   KEEPALIVE_BLACKOUT_END   Fin de la ventana sin pings (por defecto "06:30")
+ *   KEEPALIVE_BLACKOUT=off   Desactiva la ventana (pings 24/7)
+ *   DATABASE_URL             Connection string de Supabase (obligatoria)
  */
 
 const DEFAULT_URL = "https://coronel-dashboard.onrender.com/healthz";
 const JOB_NAME = "coronel-render-keepalive";
 const DEFAULT_SCHEDULE = "*/5 * * * *";
+const DEFAULT_TZ = "America/Lima";
+const DEFAULT_BLACKOUT_START = "01:30";
+const DEFAULT_BLACKOUT_END = "06:30";
+
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+const TZ_PATTERN = /^[A-Za-z][A-Za-z0-9_+-]*(?:\/[A-Za-z0-9_+-]+)*$/;
 
 const args = process.argv.slice(2);
 const urlFromArgs = args.find(arg => /^https?:\/\//i.test(arg));
 const targetUrl = (urlFromArgs || process.env.KEEPALIVE_URL || DEFAULT_URL).trim();
 const schedule = (process.env.KEEPALIVE_CRON || DEFAULT_SCHEDULE).trim();
-const mode = args.includes("--remove") ? "remove" : args.includes("--test") ? "test" : "setup";
+const timeZone = (process.env.KEEPALIVE_TZ || DEFAULT_TZ).trim();
+const blackoutEnabled = (process.env.KEEPALIVE_BLACKOUT || "").toLowerCase() !== "off";
+const blackoutStart = (process.env.KEEPALIVE_BLACKOUT_START || DEFAULT_BLACKOUT_START).trim();
+const blackoutEnd = (process.env.KEEPALIVE_BLACKOUT_END || DEFAULT_BLACKOUT_END).trim();
+const mode = args.includes("--remove")
+  ? "remove"
+  : args.includes("--test")
+    ? "test"
+    : args.includes("--status")
+      ? "status"
+      : "setup";
 
 if (!process.env.DATABASE_URL) {
   console.error("DATABASE_URL no está definido (.env)");
+  process.exit(1);
+}
+if (!TIME_PATTERN.test(blackoutStart) || !TIME_PATTERN.test(blackoutEnd)) {
+  console.error("KEEPALIVE_BLACKOUT_START/END deben tener formato HH:MM (24 h), p. ej. 01:30");
+  process.exit(1);
+}
+if (!TZ_PATTERN.test(timeZone)) {
+  console.error("KEEPALIVE_TZ inválida");
   process.exit(1);
 }
 
@@ -42,6 +74,42 @@ const client = new pg.Client({
 });
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const escapeSql = value => String(value).replace(/'/g, "''");
+
+/** SQL que ejecuta pg_cron: pingea salvo que la hora local esté en la ventana excluida. */
+function buildPingCommand() {
+  if (!blackoutEnabled) {
+    return `SELECT net.http_get('${escapeSql(targetUrl)}'::text, '{}'::jsonb, '{}'::jsonb, 60000)`;
+  }
+  return [
+    "DO $coronel_keepalive$",
+    "DECLARE",
+    `  lima_time time := (now() AT TIME ZONE '${escapeSql(timeZone)}')::time;`,
+    "BEGIN",
+    `  IF lima_time >= time '${blackoutStart}' AND lima_time < time '${blackoutEnd}' THEN`,
+    "    RETURN;",
+    "  END IF;",
+    `  PERFORM net.http_get('${escapeSql(targetUrl)}'::text, '{}'::jsonb, '{}'::jsonb, 60000);`,
+    "END",
+    "$coronel_keepalive$",
+  ].join("\n");
+}
+
+/** Hora actual en la zona configurada, formato HH:MM (24 h). */
+function localTimeNow() {
+  return new Intl.DateTimeFormat("es-PE", {
+    timeZone: timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date());
+}
+
+function isInsideBlackout() {
+  if (!blackoutEnabled) return false;
+  const now = localTimeNow();
+  return now >= blackoutStart && now < blackoutEnd;
+}
 
 async function ensureExtensions() {
   await client.query("CREATE EXTENSION IF NOT EXISTS pg_cron");
@@ -54,24 +122,20 @@ async function ensureExtensions() {
 }
 
 async function removeJob() {
-  const result = await client.query(
-    "SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = $1",
-    [JOB_NAME]
-  );
+  const result = await client.query("SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = $1", [JOB_NAME]);
   console.log(result.rowCount ? `- job "${JOB_NAME}" eliminado` : `- no existía el job "${JOB_NAME}"`);
 }
 
 async function scheduleJob() {
   await removeJob();
-  const result = await client.query(
-    `SELECT cron.schedule($1, $2, $3) AS jobid`,
-    [
-      JOB_NAME,
-      schedule,
-      `SELECT net.http_get('${targetUrl.replace(/'/g, "''")}'::text, '{}'::jsonb, '{}'::jsonb, 60000)`,
-    ]
-  );
-  console.log(`- job "${JOB_NAME}" programado (jobid ${result.rows[0].jobid}) con cron "${schedule}" → ${targetUrl}`);
+  const command = buildPingCommand();
+  const result = await client.query("SELECT cron.schedule($1, $2, $3) AS jobid", [JOB_NAME, schedule, command]);
+  console.log(`- job "${JOB_NAME}" programado (jobid ${result.rows[0].jobid}) · cron "${schedule}" · ${targetUrl}`);
+  if (blackoutEnabled) {
+    console.log(`- ventana sin pings: ${blackoutStart}–${blackoutEnd} (${timeZone}), evaluada en PostgreSQL`);
+  } else {
+    console.log("- ventana sin pings: desactivada (pings 24/7)");
+  }
 }
 
 async function firePing() {
@@ -102,15 +166,14 @@ async function firePing() {
 }
 
 async function showStatus() {
-  const jobs = await client.query(
-    "SELECT jobid, jobname, schedule, active FROM cron.job WHERE jobname = $1",
-    [JOB_NAME]
-  );
+  console.log(`- ahora en ${timeZone}: ${localTimeNow()} → ${isInsideBlackout() ? "DENTRO de la ventana (sin pings)" : "FUERA de la ventana (pings activos)"}`);
+
+  const jobs = await client.query("SELECT jobid, jobname, schedule, active, command FROM cron.job WHERE jobname = $1", [JOB_NAME]);
   if (!jobs.rowCount) {
     console.log("- no hay job programado");
   } else {
     for (const job of jobs.rows) {
-      console.log(`- job activo: ${job.jobname} · cron "${job.schedule}" · jobid ${job.jobid}`);
+      console.log(`- job activo: ${job.jobname} · cron "${job.schedule}" · jobid ${job.jobid} · active=${job.active}`);
     }
     const runs = await client.query(
       `SELECT status, return_message, start_time FROM cron.job_run_details
@@ -126,7 +189,7 @@ async function showStatus() {
   }
 
   const responses = await client.query(
-    `SELECT status_code, timed_out, created FROM net._http_response ORDER BY id DESC LIMIT 5`
+    "SELECT status_code, timed_out, created FROM net._http_response ORDER BY id DESC LIMIT 5"
   );
   if (responses.rowCount) {
     console.log("- últimos pings registrados por pg_net:");
@@ -155,16 +218,22 @@ async function main() {
   }
 
   if (mode === "test") {
+    console.log("- el ping de prueba se envía siempre, aunque estés dentro de la ventana");
     const ok = await firePing();
     await showStatus();
     if (!ok) process.exitCode = 1;
     return;
   }
 
+  if (mode === "status") {
+    await showStatus();
+    return;
+  }
+
   await scheduleJob();
   await showStatus();
-  console.log("\nNota: el cron corre en UTC. Con \"*/5 * * * *\" el servicio queda despierto 24/7 (~744 h/mes, dentro de las 750 h gratis de Render).");
-  console.log("Para limitarlo a horario de oficina (07:00–23:00 Bogotá = 12:00–04:00 UTC): KEEPALIVE_CRON=\"*/5 12-23,0-3 * * *\".");
+  console.log("\nNota: pg_cron corre en UTC, pero la ventana se evalúa con fecha/hora de la zona configurada.");
+  console.log("Con */5 y la ventana 01:30–06:30 Lima el servicio queda despierto ~19 h/día (~578 h/mes de las 750 h gratuitas).");
 }
 
 main()

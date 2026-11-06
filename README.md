@@ -68,7 +68,7 @@ pnpm dev                  # http://localhost:3000
 | `pnpm test` | Pruebas unitarias (Vitest) |
 | `pnpm db:generate` / `pnpm db:migrate` / `pnpm db:push` | Migraciones Drizzle |
 | `pnpm db:import` | Importa `database/coronel-data.json` a PostgreSQL |
-| `pnpm keepalive:setup` / `keepalive:test` / `keepalive:remove` | Keep-alive de Render vía `pg_cron` + `pg_net` de Supabase |
+| `pnpm keepalive:setup` / `status` / `test` / `remove` | Keep-alive de Render vía `pg_cron` + `pg_net` de Supabase |
 | `node scripts/smoke-test.mjs <url>` | Prueba end-to-end contra un servidor desplegado |
 
 ## Autenticación
@@ -86,10 +86,11 @@ Ver [`docs/DEPLOY_RENDER_SUPABASE.md`](docs/DEPLOY_RENDER_SUPABASE.md) y [`docs/
 
 ## Keep-alive (plan free de Render)
 
-El servicio free de Render duerme tras 15 min de inactividad. Para evitarlo, Supabase ejecuta un job de `pg_cron` que cada 5 minutos hace `GET /healthz` con `pg_net` (sin depender de tu PC ni de cuentas externas):
+El servicio free de Render duerme tras 15 min de inactividad. Para evitarlo, Supabase ejecuta un job de `pg_cron` que cada 5 minutos hace `GET /healthz` con `pg_net` (sin depender de tu PC ni de cuentas externas), **excepto entre 01:30 y 06:30 hora de Lima**, ventana evaluada en PostgreSQL con `America/Lima`:
 
 ```bash
 pnpm keepalive:setup   # crea/actualiza el job (idempotente)
+pnpm keepalive:status  # ventana actual y últimas ejecuciones
 pnpm keepalive:test    # dispara un ping y muestra el HTTP status
 pnpm keepalive:remove  # elimina el job
 ```

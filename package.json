@@ -15,6 +15,7 @@
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "db:import": "node scripts/import-supabase.mjs",
     "keepalive:setup": "node scripts/setup-keepalive.mjs",
+    "keepalive:status": "node scripts/setup-keepalive.mjs --status",
     "keepalive:test": "node scripts/setup-keepalive.mjs --test",
     "keepalive:remove": "node scripts/setup-keepalive.mjs --remove"
   },
