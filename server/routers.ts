@@ -303,6 +303,65 @@ export const appRouter = router({
         promotionRedeemed: input.promotionRedeemed ? 1 : 0,
         createdBy: currentActor(ctx),
       })),
+    update: publicProcedure
+      .input(
+        z.object({
+          id: z.number().int(),
+          outcome: z.string().min(1).max(80),
+          promotion: z.string().max(180).optional(),
+          promotionRedeemed: z.number().int().min(0).max(1),
+          recoveryResult: z.string().max(120).optional(),
+          notes: z.string().max(2000).optional(),
+          callDate: z.string().datetime().optional(),
+          nextCallDate: z.string().datetime().nullable().optional(),
+          assignedTo: z.string().max(160).optional(),
+          adminPin: z.string().min(1),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        requirePin(input.adminPin);
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Solo un administrador puede editar el historial de llamadas" });
+        }
+        const { adminPin: _pin, ...values } = input;
+        const updated = await db.updateCallLog({
+          id: values.id,
+          outcome: values.outcome,
+          promotion: values.promotion ?? null,
+          promotionRedeemed: values.promotionRedeemed,
+          recoveryResult: values.recoveryResult ?? null,
+          notes: values.notes ?? null,
+          callDate: values.callDate ? new Date(values.callDate) : new Date(),
+          nextCallDate: values.nextCallDate ? new Date(values.nextCallDate) : null,
+          assignedTo: values.assignedTo ?? null,
+        });
+        if (!updated) throw new TRPCError({ code: "NOT_FOUND", message: "Registro de llamada no encontrado" });
+        await db.recordAdminAudit({
+          entity: "llamada",
+          action: "editada",
+          entityId: String(values.id),
+          details: `${values.outcome} · ${values.promotion || "sin promoción"}`,
+          changedBy: currentActor(ctx, "Administrador"),
+        });
+        return updated;
+      }),
+    remove: publicProcedure
+      .input(z.object({ id: z.number().int(), adminPin: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        requirePin(input.adminPin);
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Solo un administrador puede eliminar registros de llamadas" });
+        }
+        const result = await db.deleteCallLog(input.id);
+        await db.recordAdminAudit({
+          entity: "llamada",
+          action: "eliminada",
+          entityId: String(input.id),
+          details: "Registro eliminado del historial",
+          changedBy: currentActor(ctx, "Administrador"),
+        });
+        return result;
+      }),
   }),
   birthdayCampaigns: router({
     list: protectedProcedure.query(() => db.listBirthdayCampaigns()),

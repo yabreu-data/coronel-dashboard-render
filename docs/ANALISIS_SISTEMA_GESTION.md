@@ -212,6 +212,8 @@ Ya implementado en el dashboard:
 - **Tarjetas accionables**: promoción ofrecida editable por cliente, responsable, **próxima acción con fecha** (con botones +1/+3/+7/+14 días), canal, **familiar (nombre y fecha)** y registro de **motivo de no redención**.
 - **Llamada funcional**: al pulsar “Llamar” se abre un panel con el número, enlace `tel:`, copiar número y botones para registrar el resultado (contactado / aceptó / redimió / no redimió).
 - **Próxima acción visible y vencimientos**: cada tarjeta muestra su próxima acción (o “Programar”), con filtros **Vencidas** y **Reintentar**, alerta clicable de vencidas y fecha editable con botones +1/+3/+7/+14 días.
+- **Historial de llamadas editable por el administrador**: columna de acciones para **editar** o **eliminar** registros (pide credencial administrativa y deja rastro en auditoría), y **“Ver historial”** en cada tarjeta de cumpleaños que abre la ficha del cliente en la sección *Contactos*.
+- **Contador de intentos por cliente**: muestra cuántas llamadas registradas hay y la fecha del último intento.
 - **Reintentos por llamada no contestada**: botón **No contestó** que registra el intento, programa el reintento para el día siguiente y muestra “Intentos: N”.
 - **Mensajes de WhatsApp editables** por etapa (mes, semana, día, seguimiento) con variables `{nombre}`, `{fecha}`, `{beneficio}`, `{plato}`; se aplican al abrir WhatsApp o copiar.
 - **Ficha única del cliente** (modal): teléfono, cumpleaños, segmento, plato favorito, promoción, responsable, próxima acción, familiares, visitas/encuestas y contactos.

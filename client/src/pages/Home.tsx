@@ -1111,6 +1111,7 @@ export default function Home() {
                 <CallsHistory
                   logs={(callsQuery.data ?? []) as CallLog[]}
                   search={search}
+                  isAdmin={isAdmin}
                   promotions={
                     (promotionsAdminQuery.data ?? []) as PromotionItem[]
                   }
@@ -2288,6 +2289,7 @@ function BirthdayWorkspace({
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [callKey, setCallKey] = useState<string | null>(null);
   const [historyKey, setHistoryKey] = useState<string | null>(null);
+  const [historySection, setHistorySection] = useState<"summary" | "contacts">("summary");
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState("mes");
   const [templateDraft, setTemplateDraft] = useState("");
@@ -2328,6 +2330,12 @@ function BirthdayWorkspace({
         const attempts = clientLogs.filter(log =>
           normalizeText(log.outcome).includes("no contest")
         ).length;
+        const callAttempts = clientLogs.length;
+        const lastAttemptAt = clientLogs.reduce<Date | null>((latest, log) => {
+          const date = new Date(log.callDate);
+          if (Number.isNaN(date.getTime())) return latest;
+          return !latest || date > latest ? date : latest;
+        }, null);
         return {
           item,
           key,
@@ -2339,6 +2347,8 @@ function BirthdayWorkspace({
           redeemed,
           noanswer,
           attempts,
+          callAttempts,
+          lastAttemptAt,
         };
       }),
     [items, logs, campaignByKey]
@@ -2623,6 +2633,12 @@ function BirthdayWorkspace({
 
   const callRow = callKey ? rowsByKey.get(callKey) : undefined;
   const historyRow = historyKey ? rowsByKey.get(historyKey) : undefined;
+
+  useEffect(() => {
+    if (!historyKey || historySection !== "contacts") return;
+    const target = document.getElementById("bw-history-contacts");
+    if (target) target.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [historyKey, historySection]);
   const historyRecords = historyRow
     ? records.filter(item => clientKeyOf(item) === historyRow.key)
     : [];
@@ -2837,11 +2853,27 @@ function BirthdayWorkspace({
                               + Programar próxima acción
                             </button>
                           )}
-                          {row.attempts > 0 && (
-                            <span className="bw-attempts">
-                              Intentos: {row.attempts}
-                            </span>
-                          )}
+                          <span className="bw-attempts">
+                            {row.callAttempts > 0
+                              ? `☎ ${row.callAttempts} intento${row.callAttempts === 1 ? "" : "s"}${
+                                  row.lastAttemptAt
+                                    ? ` · último ${row.lastAttemptAt.toLocaleDateString(
+                                        "es-PE",
+                                        { day: "2-digit", month: "short" }
+                                      )}`
+                                    : ""
+                                }`
+                              : "Sin llamadas registradas"}
+                          </span>
+                          <button
+                            className="bw-history-link"
+                            onClick={() => {
+                              setHistoryKey(row.key);
+                              setHistorySection("contacts");
+                            }}
+                          >
+                            Ver historial
+                          </button>
                         </div>
                         <div className="bw-meta">
                           {item.record.phone || "Sin teléfono"} ·{" "}
@@ -2919,7 +2951,10 @@ function BirthdayWorkspace({
                         </button>
                         <button
                           className="bw-action"
-                          onClick={() => setHistoryKey(row.key)}
+                          onClick={() => {
+                            setHistoryKey(row.key);
+                            setHistorySection("summary");
+                          }}
                         >
                           Ver ficha
                         </button>
@@ -3186,7 +3221,7 @@ function BirthdayWorkspace({
                   {!historyRecords.length && <li>Sin visitas registradas.</li>}
                 </ul>
               </div>
-              <div>
+              <div id="bw-history-contacts">
                 <b>Contactos ({historyLogs.length})</b>
                 <ul>
                   {historyLogs.slice(-8).reverse().map(log => (
@@ -6065,16 +6100,92 @@ function CallsHistory({
   logs,
   search,
   promotions,
+  isAdmin,
 }: {
   logs: CallLog[];
   search: string;
   promotions: PromotionItem[];
+  isAdmin: boolean;
 }) {
   const [outcome, setOutcome] = useState("Todos");
   const [redeemed, setRedeemed] = useState("Todos");
   const [promotion, setPromotion] = useState("Todas");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const utils = trpc.useUtils();
+  const [editLog, setEditLog] = useState<CallLog | null>(null);
+  const [draft, setDraft] = useState({
+    outcome: "",
+    promotion: "",
+    promotionRedeemed: false,
+    recoveryResult: "",
+    notes: "",
+    callDate: "",
+    nextCallDate: "",
+    assignedTo: "",
+  });
+  const updateCall = trpc.calls.update.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.calls.list.invalidate(),
+        utils.adminAudit.list.invalidate(),
+      ]);
+      setEditLog(null);
+    },
+  });
+  const removeCall = trpc.calls.remove.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.calls.list.invalidate(),
+        utils.adminAudit.list.invalidate(),
+      ]);
+    },
+  });
+  const startEdit = (log: CallLog) => {
+    setEditLog(log);
+    setDraft({
+      outcome: log.outcome,
+      promotion: log.promotion ?? "",
+      promotionRedeemed: Boolean(log.promotionRedeemed),
+      recoveryResult: log.recoveryResult ?? "",
+      notes: log.notes ?? "",
+      callDate: toDateInputValue(log.callDate),
+      nextCallDate: toDateInputValue(log.nextCallDate),
+      assignedTo: log.assignedTo ?? "",
+    });
+  };
+  const saveEdit = () => {
+    if (!editLog) return;
+    const pin = window.prompt("Credencial administrativa:");
+    if (!pin) return;
+    updateCall.mutate({
+      id: editLog.id,
+      outcome: draft.outcome.trim(),
+      promotion: draft.promotion || undefined,
+      promotionRedeemed: draft.promotionRedeemed ? 1 : 0,
+      recoveryResult: draft.recoveryResult || undefined,
+      notes: draft.notes || undefined,
+      callDate: draft.callDate
+        ? new Date(`${draft.callDate}T12:00:00`).toISOString()
+        : undefined,
+      nextCallDate: draft.nextCallDate
+        ? new Date(`${draft.nextCallDate}T12:00:00`).toISOString()
+        : null,
+      assignedTo: draft.assignedTo || undefined,
+      adminPin: pin,
+    });
+  };
+  const deleteLog = (log: CallLog) => {
+    if (
+      !window.confirm(
+        `¿Eliminar el registro de ${log.clientName || "cliente"} del ${formatDateTime(log.callDate)}?`
+      )
+    )
+      return;
+    const pin = window.prompt("Credencial administrativa:");
+    if (!pin) return;
+    removeCall.mutate({ id: log.id, adminPin: pin });
+  };
   const query = normalizeText(search);
   const dateMatch = (value: Date | string, from: string, to: string) => {
     const date = value instanceof Date ? value : new Date(value);
@@ -6268,6 +6379,7 @@ function CallsHistory({
                   <th>Seguimiento</th>
                   <th>Notas</th>
                   <th>Registró / Responsable</th>
+                  {isAdmin && <th>Acciones</th>}
                 </tr>
               </thead>
               <tbody>
@@ -6311,6 +6423,22 @@ function CallsHistory({
                           : ""}
                       </small>
                     </td>
+                    {isAdmin && (
+                      <td className="calls-actions">
+                        <button
+                          className="small-action"
+                          onClick={() => startEdit(log)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="small-action danger"
+                          onClick={() => deleteLog(log)}
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -6320,6 +6448,138 @@ function CallsHistory({
           <Empty text="No hay llamadas que coincidan con la búsqueda y filtros." />
         )}
       </section>
+      {editLog && (
+        <div className="bw-modal-backdrop" onClick={() => setEditLog(null)}>
+          <div
+            className="bw-modal bw-modal-wide"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="bw-modal-head">
+              <h3>Editar registro de llamada</h3>
+              <button onClick={() => setEditLog(null)}>×</button>
+            </div>
+            <p className="bw-modal-hint">
+              El cambio queda registrado en auditoría. Se pedirá la credencial
+              administrativa al guardar.
+            </p>
+            <div className="calls-edit-grid">
+              <label>
+                Fecha
+                <input
+                  type="date"
+                  value={draft.callDate}
+                  onChange={event =>
+                    setDraft(current => ({ ...current, callDate: event.target.value }))
+                  }
+                />
+              </label>
+              <label>
+                Resultado
+                <input
+                  value={draft.outcome}
+                  onChange={event =>
+                    setDraft(current => ({ ...current, outcome: event.target.value }))
+                  }
+                />
+              </label>
+              <label>
+                Promoción
+                <select
+                  value={draft.promotion}
+                  onChange={event =>
+                    setDraft(current => ({ ...current, promotion: event.target.value }))
+                  }
+                >
+                  <option value="">Sin promoción</option>
+                  {promotions.map(item => (
+                    <option key={item.id} value={item.name}>
+                      {item.name}
+                    </option>
+                  ))}
+                  {draft.promotion &&
+                    !promotions.some(item => item.name === draft.promotion) && (
+                      <option value={draft.promotion}>{draft.promotion}</option>
+                    )}
+                </select>
+              </label>
+              <label>
+                ¿Redimida?
+                <select
+                  value={draft.promotionRedeemed ? "si" : "no"}
+                  onChange={event =>
+                    setDraft(current => ({
+                      ...current,
+                      promotionRedeemed: event.target.value === "si",
+                    }))
+                  }
+                >
+                  <option value="no">No</option>
+                  <option value="si">Sí</option>
+                </select>
+              </label>
+              <label>
+                Próxima llamada
+                <input
+                  type="date"
+                  value={draft.nextCallDate}
+                  onChange={event =>
+                    setDraft(current => ({
+                      ...current,
+                      nextCallDate: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <label>
+                Responsable
+                <input
+                  value={draft.assignedTo}
+                  onChange={event =>
+                    setDraft(current => ({
+                      ...current,
+                      assignedTo: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+            </div>
+            <label className="calls-edit-full">
+              Seguimiento
+              <input
+                value={draft.recoveryResult}
+                onChange={event =>
+                  setDraft(current => ({
+                    ...current,
+                    recoveryResult: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="calls-edit-full">
+              Notas
+              <textarea
+                rows={3}
+                value={draft.notes}
+                onChange={event =>
+                  setDraft(current => ({ ...current, notes: event.target.value }))
+                }
+              />
+            </label>
+            <div className="bw-modal-actions">
+              <button
+                className="bw-action bw-action-whatsapp"
+                onClick={saveEdit}
+                disabled={updateCall.isPending}
+              >
+                {updateCall.isPending ? "Guardando…" : "Guardar cambios"}
+              </button>
+              <button className="bw-action" onClick={() => setEditLog(null)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

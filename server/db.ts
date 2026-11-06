@@ -98,6 +98,43 @@ export async function createCallLog(input: InsertCallLog) {
   const rows = await db.select().from(callLogs).orderBy(desc(callLogs.id)).limit(1);
   return rows[0];
 }
+
+export async function updateCallLog(input: {
+  id: number;
+  outcome: string;
+  promotion?: string | null;
+  promotionRedeemed: number;
+  recoveryResult?: string | null;
+  notes?: string | null;
+  callDate: Date;
+  nextCallDate?: Date | null;
+  assignedTo?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db
+    .update(callLogs)
+    .set({
+      outcome: input.outcome,
+      promotion: input.promotion ?? null,
+      promotionRedeemed: input.promotionRedeemed,
+      recoveryResult: input.recoveryResult ?? null,
+      notes: input.notes ?? null,
+      callDate: input.callDate,
+      nextCallDate: input.nextCallDate ?? null,
+      assignedTo: input.assignedTo ?? null,
+    })
+    .where(eq(callLogs.id, input.id));
+  const rows = await db.select().from(callLogs).where(eq(callLogs.id, input.id)).limit(1);
+  return rows[0];
+}
+
+export async function deleteCallLog(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db.delete(callLogs).where(eq(callLogs.id, id));
+  return { success: true } as const;
+}
 export async function listBirthdayCampaigns() {
   const db = await getDb();
   if (!db) return [];

@@ -122,9 +122,9 @@ Requisito de configuración (ya aplicado en este proyecto): en Supabase → Auth
 |---|---|
 | ![Edición](docs/screenshots/birthday-edit.png) | ![Plantillas](docs/screenshots/birthday-templates.png) |
 
-| Próxima acción vencida y reintentos | — |
+| Próxima acción vencida y reintentos | Historial de llamadas editable (admin) |
 |---|---|
-| ![Reintento](docs/screenshots/birthday-retry.png) | |
+| ![Reintento](docs/screenshots/birthday-retry.png) | ![Historial](docs/screenshots/calls-history-edit.png) |
 
 ## Identidad visual
 

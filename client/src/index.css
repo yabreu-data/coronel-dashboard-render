@@ -1479,3 +1479,20 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
 /* La tira semanal vive dentro del calendario */
 .birthday-week-inline { margin: 14px 0 4px; }
 .birthday-week-inline .eyebrow { margin-bottom: 6px; }
+
+/* Historial de llamadas: acciones de administración */
+.calls-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+.calls-actions .small-action { white-space: nowrap; }
+.calls-actions .small-action.danger { border-color: #b25d68; color: #ffd7db; background: #351b2b; }
+.calls-edit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.calls-edit-grid label, .calls-edit-full { display: flex; flex-direction: column; gap: 4px; color: #8fa6bd; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+.calls-edit-full { margin-bottom: 10px; }
+.calls-edit-grid input, .calls-edit-grid select, .calls-edit-full input, .calls-edit-full textarea { padding: 8px 10px; border: 1px solid #2a5270; border-radius: 8px; background: #0b1a2c; color: #eaf3fb; font-size: 12px; }
+.calls-edit-full textarea { resize: vertical; }
+@media (max-width: 760px) {
+  .calls-edit-grid { grid-template-columns: 1fr; }
+}
+
+/* Enlace "Ver historial" en la tarjeta de cumpleaños */
+.bw-history-link { border: 0; background: transparent; color: #8be7ff; font-size: 10px; font-weight: 800; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; padding: 0; margin-left: 6px; }
+.bw-history-link:hover { color: #c7f4ff; }
