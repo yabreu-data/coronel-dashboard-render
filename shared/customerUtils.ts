@@ -1,7 +1,24 @@
 function parseBirthday(value: string): Date | null {
-  const local = value.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (local) return new Date(Number(local[3]), Number(local[2]) - 1, Number(local[1]));
-  const parsed = new Date(value);
+  const text = String(value ?? "").trim();
+  // dd/mm, dd/mm/yy y dd/mm/yyyy. El año de 2 dígitos se interpreta como
+  // 2000+ si es <= 26; si no, 1900+. Evita que "08/11/83" se lea como agosto.
+  const local = text.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+  if (local) {
+    const day = Number(local[1]);
+    const month = Number(local[2]);
+    let year = local[3] ? Number(local[3]) : new Date().getFullYear();
+    if (local[3] && year < 100) year += year <= 26 ? 2000 : 1900;
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+    return date;
+  }
+  const parsed = new Date(text);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 

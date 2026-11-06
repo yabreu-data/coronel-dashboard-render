@@ -247,6 +247,8 @@ const normalizeText = (value: string) =>
 const phoneDigits = (value: string) => value.replace(/\D/g, "");
 const clientKeyOf = (record: Pick<RecordItem, "phone" | "clientName">) =>
   phoneDigits(record.phone) || normalizeText(record.clientName) || "sin-nombre";
+const hasScoredQuality = (quality: string) =>
+  ["bueno", "regular", "malo"].includes(clean(quality));
 const displayServer = (value: string) => {
   const v = clean(value);
   if (
@@ -286,11 +288,27 @@ const parseDate = (value: string) => {
 /* Para cumpleaños sin año ("05/11") se usa el año actual solo para ubicar
    la próxima fecha; la edad no se calcula con este dato. */
 const parseBirthdayDate = (value: string) => {
-  const short = String(value || "").trim().match(/^(\d{1,2})\/(\d{1,2})$/);
-  if (short) {
-    return new Date(new Date().getFullYear(), Number(short[2]) - 1, Number(short[1]));
+  const text = String(value || "").trim();
+  // Acepta dd/mm, dd/mm/yy y dd/mm/yyyy. El año de 2 dígitos se interpreta
+  // como 2000+ si es <= 26; si no, 1900+. Un "dd/mm/yy" NO debe caer en el
+  // parser de Date nativo porque lo lee como mes/día (08/11/83 → agosto).
+  const match = text.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+  if (match) {
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    let year = match[3] ? Number(match[3]) : new Date().getFullYear();
+    if (match[3] && year < 100) year += year <= 26 ? 2000 : 1900;
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+    return date;
   }
-  return parseDate(value);
+  return parseDate(text);
 };
 function birthdayRecordsWithin(
   records: RecordItem[],
@@ -576,12 +594,15 @@ export default function Home() {
             : `${clientText} ${commentText} ${serverText}`.includes(query);
     });
   }, [records, qualityFilter, search, searchScope, serverCatalog]);
-  const answered = filtered.filter(r => r.quality.trim());
+  const answered = filtered.filter(r => hasScoredQuality(r.quality));
   const good = answered.filter(r => clean(r.quality) === "bueno").length;
   const regular = answered.filter(r => clean(r.quality) === "regular").length;
   const bad = answered.filter(r => clean(r.quality) === "malo").length;
   const positive = answered.length ? good / answered.length : 0;
   const comments = filtered.filter(r => r.comment.trim());
+  const reviewCount = filtered.filter(
+    r => clean(r.quality) === "regular" || clean(r.quality) === "malo"
+  ).length;
   const clientCount = new Set(filtered.map(clientKeyOf)).size;
   const birthdays = useMemo(
     () =>
@@ -1095,6 +1116,7 @@ export default function Home() {
               {page === "voice" && (
                 <Voice
                   comments={comments}
+                  reviewCount={reviewCount}
                   topicPhrases={topicPhrases}
                   positiveHighlights={positiveHighlights}
                   negativeHighlights={negativeHighlights}
@@ -3867,7 +3889,7 @@ function Overview({
       const key = r.dish.trim() || "Sin producto";
       map[key] ??= { count: 0, good: 0, answered: 0 };
       map[key].count += 1;
-      if (r.quality.trim()) {
+      if (hasScoredQuality(r.quality)) {
         map[key].answered += 1;
         if (clean(r.quality) === "bueno") map[key].good += 1;
       }
@@ -7188,12 +7210,14 @@ function TargetPerformanceChart({
 
 function Voice({
   comments,
+  reviewCount,
   topicPhrases,
   positiveHighlights,
   negativeHighlights,
   positive,
 }: {
   comments: RecordItem[];
+  reviewCount: number;
   topicPhrases: [string, number][];
   positiveHighlights: SentimentHighlight[];
   negativeHighlights: SentimentHighlight[];
@@ -7202,6 +7226,7 @@ function Voice({
   const [selected, setSelected] = useState<SentimentHighlight | null>(null);
   const repeatedComments = useMemo(() => buildRepeatedComments(comments), [comments]);
   const requestComments = useMemo(() => buildRequestComments(comments), [comments]);
+  const visibleRequests = requestComments.slice(0, 10);
   const wordCard = (
     item: SentimentHighlight,
     tone: "positive" | "negative"
@@ -7258,11 +7283,7 @@ function Voice({
         />
         <Stat
           label="REVISAR"
-          value={
-            comments.filter(
-              r => clean(r.quality) === "malo" || clean(r.quality) === "regular"
-            ).length
-          }
+          value={reviewCount}
           detail="asociados a alerta"
           accent="red"
           icon={AlertTriangle}
@@ -7280,8 +7301,7 @@ function Voice({
           detail="sugerencias detectadas"
           accent="orange"
           icon={Sparkles}
-        />
-      </div>
+        />      </div>
       <div className="dashboard-grid voice-grid">
         <section className="panel">
           <div className="panel-head">
@@ -7318,7 +7338,7 @@ function Voice({
           </div>
           <div className="voice-list">
             {requestComments.length ? (
-              requestComments.map(record => (
+              visibleRequests.map(record => (
                 <div
                   className="voice-list-item"
                   key={`${record.id}-${record.timestamp}`}
@@ -7511,7 +7531,7 @@ function MonthlyComparison({ records }: { records: RecordItem[] }) {
     const cutoff = latest.getDate();
     const prevRows = prevRowsAll.filter(x => x.d.getDate() <= cutoff);
     const positive = (rows: typeof currentRows) => {
-      const answered = rows.filter(x => x.r.quality.trim());
+      const answered = rows.filter(x => hasScoredQuality(x.r.quality));
       return answered.length
         ? Math.round(
             (answered.filter(x => clean(x.r.quality) === "bueno").length /
@@ -7679,7 +7699,7 @@ function PeriodComparison({
       inRange(r.timestamp, previousFrom, previousTo)
     );
     const metrics = (rows: RecordItem[]) => {
-      const answered = rows.filter(r => r.quality.trim());
+      const answered = rows.filter(r => hasScoredQuality(r.quality));
       const good = answered.filter(r => clean(r.quality) === "bueno").length;
       const salon = rows.filter(
         r => displayServer(r.registeredBy) !== "DELIVERY / WEB"
@@ -7932,7 +7952,7 @@ function Team({
         displayServer(r.registeredBy) !== "DELIVERY / WEB" &&
         displayTeamName(displayServer(r.registeredBy)) === name
     );
-    const answered = rows.filter(r => r.quality.trim());
+    const answered = rows.filter(r => hasScoredQuality(r.quality));
     const good = answered.filter(r => clean(r.quality) === "bueno").length;
     return {
       name,
@@ -8432,9 +8452,9 @@ function requestTag(comment: string) {
 }
 
 function buildRequestComments(comments: RecordItem[]) {
-  return comments
-    .filter(record => REQUEST_PATTERN.test(normalizeText(record.comment)))
-    .slice(0, 10);
+  return comments.filter(record =>
+    REQUEST_PATTERN.test(normalizeText(record.comment))
+  );
 }
 
 function downloadGenericCsv(
