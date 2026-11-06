@@ -197,7 +197,8 @@ function normalizeQualityLabel(value: string) {
   if (key === "bueno") return "Bueno";
   if (key === "regular") return "Regular";
   if (key === "malo") return "Malo";
-  return "";
+  // Se conserva explícitamente para no confundirlo con un dato perdido.
+  return "Sin calificar";
 }
 
 async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
@@ -214,15 +215,15 @@ async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
     .map((row, index) => {
       const status = getCell(row, headers, "Estado Registro");
       const rawComment = getFirstCell(row, headers, ["Opinión Limpia", "comment", "Opinión del Producto y Mejoras"]);
-      const comment = cleanSurveyComment(rawComment);
+      const cleanedComment = cleanSurveyComment(rawComment);
+      const commentInvalid = normalizeCell(cleanedComment).includes("error de lectura");
+      const comment = commentInvalid ? "" : cleanedComment;
       const quality = normalizeQualityLabel(
         getFirstCell(row, headers, ["Calidad Limpia", "quality", "Calidad del Producto", "Calidad Original"])
       );
-      // Limpieza en la app: no depende de la pestaña Encuestas_Limpias.
-      const dirty =
-        CLEAN_SHEET_FILTER &&
-        (normalizeCell(status).includes("advertencia") ||
-          normalizeCell(comment).includes("error de lectura"));
+      // Una encuesta con comentario ilegible sigue siendo válida para calidad/
+      // volumen; solo se descarta el comentario, no el registro completo.
+      const dirty = CLEAN_SHEET_FILTER && normalizeCell(status).includes("advertencia");
       if (dirty) return null;
       return {
         id: getFirstCell(row, headers, ["ID Único", "id", "ID de Envío"]) || `fila-${index + 1}`,

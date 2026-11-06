@@ -2062,7 +2062,7 @@ function FilterBar({
           value={qualityFilter}
           onChange={e => setQualityFilter(e.target.value)}
         >
-          {["Todos", "Bueno", "Regular", "Malo"].map(value => (
+          {["Todos", "Bueno", "Regular", "Malo", "Sin calificar"].map(value => (
             <option key={value} value={value}>
               {value}
             </option>
@@ -5561,7 +5561,7 @@ function ClientFilterBar({
       </div>
       <div className="filter-group">
         <span>Calidad</span>
-        {["Todos", "Bueno", "Regular", "Malo"].map(value => (
+        {["Todos", "Bueno", "Regular", "Malo", "Sin calificar"].map(value => (
           <button
             key={value}
             className={qualityFilter === value ? "selected" : ""}
