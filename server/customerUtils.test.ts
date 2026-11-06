@@ -16,4 +16,15 @@ describe("isBirthdayInNextDays", () => {
     expect(isBirthdayInNextDays("02/01/1990", new Date(2026, 11, 29))).toBe(true);
     expect(isBirthdayInNextDays("10/01/1990", new Date(2026, 11, 29))).toBe(false);
   });
+
+  it("interpreta años de dos dígitos sin confundir mes y día", () => {
+    // 08/11/83 = 8 de noviembre de 1983 (antes se leía como agosto).
+    expect(isBirthdayInNextDays("08/11/83", new Date(2026, 10, 6))).toBe(true);
+    expect(isBirthdayInNextDays("15/11/89", new Date(2026, 10, 10))).toBe(true);
+  });
+
+  it("acepta cumpleaños sin año (dd/mm)", () => {
+    expect(isBirthdayInNextDays("05/11", new Date(2026, 10, 4))).toBe(true);
+    expect(isBirthdayInNextDays("05/11", new Date(2026, 10, 6))).toBe(false);
+  });
 });

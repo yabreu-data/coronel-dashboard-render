@@ -37,7 +37,7 @@ describe("survey.latest", () => {
     const result = await appRouter.createCaller(context).survey.latest();
     expect(result.source).toBe("Google Sheets · Encuestas_Limpias");
     expect(result.records).toEqual([
-      expect.objectContaining({ id: "ENC-1", dish: "Pollo", registeredBy: "BETTY" }),
+      expect.objectContaining({ id: "ENC-1", dish: "Pollo", registeredBy: "Betty" }),
       expect.objectContaining({ id: "ENC-2", dish: "Parrillas", registeredBy: "Cliente (Formulario Web)" }),
     ]);
     expect(result.serverCatalog).toEqual([

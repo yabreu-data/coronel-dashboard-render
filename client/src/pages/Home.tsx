@@ -28,6 +28,7 @@ import {
   History,
 } from "lucide-react";
 import { isBirthdayInNextDays } from "@shared/customerUtils";
+import { hasScoredQuality, wilsonInterval } from "@shared/metricsUtils";
 import { isWithinDateRange } from "@shared/teamUtils";
 import { getPreviousPeriod } from "@shared/periodUtils";
 import {
@@ -247,8 +248,6 @@ const normalizeText = (value: string) =>
 const phoneDigits = (value: string) => value.replace(/\D/g, "");
 const clientKeyOf = (record: Pick<RecordItem, "phone" | "clientName">) =>
   phoneDigits(record.phone) || normalizeText(record.clientName) || "sin-nombre";
-const hasScoredQuality = (quality: string) =>
-  ["bueno", "regular", "malo"].includes(clean(quality));
 const displayServer = (value: string) => {
   const v = clean(value);
   if (
@@ -2174,23 +2173,23 @@ const BIRTHDAY_HORIZONS: {
   when: string;
   hint: string;
 }[] = [
-  { key: "dia", label: "Día", when: "T-3 al día", hint: "Confirmar y activar" },
+  { key: "dia", label: "0–3 días", when: "Próximos 3 días", hint: "Confirmar y activar" },
   {
     key: "semana",
-    label: "Semana",
-    when: "T-14 y T-7",
+    label: "4–7 días",
+    when: "Próxima semana",
     hint: "Sembrar expectativa y reservar",
   },
   {
     key: "mes",
-    label: "Mes",
-    when: "T-30 a T-21",
+    label: "8–30 días",
+    when: "Este mes",
     hint: "Validar datos y planificar",
   },
   {
     key: "seguimiento",
-    label: "Seguimiento",
-    when: "T+1 a T+7",
+    label: "Pasadas",
+    when: "Ya pasó",
     hint: "Agradecer, recuperar y medir",
   },
 ];
@@ -3991,7 +3990,7 @@ function Overview({
         <Stat
           label="CALIDAD POSITIVA"
           value={`${Math.round(positive * 100)}%`}
-          detail={`${good} de ${good + regular + bad} con respuesta`}
+          detail={`${good} de ${good + regular + bad} con respuesta · ${Math.max(0, records.length - (good + regular + bad))} sin calificar`}
           accent="green"
           icon={Sparkles}
           onClick={() => onNavigate("voice")}
@@ -7227,6 +7226,14 @@ function Voice({
   const repeatedComments = useMemo(() => buildRepeatedComments(comments), [comments]);
   const requestComments = useMemo(() => buildRequestComments(comments), [comments]);
   const visibleRequests = requestComments.slice(0, 10);
+  const requestTags = useMemo(() => {
+    const counts: Record<string, number> = {};
+    requestComments.forEach(record => {
+      const tag = requestTag(record.comment);
+      counts[tag] = (counts[tag] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [requestComments]);
   const wordCard = (
     item: SentimentHighlight,
     tone: "positive" | "negative"
@@ -7336,6 +7343,15 @@ function Voice({
             </div>
             <Pill tone="orange">{requestComments.length}</Pill>
           </div>
+          {requestTags.length ? (
+            <div className="voice-tag-row">
+              {requestTags.map(([tag, count]) => (
+                <span className="voice-tag" key={tag}>
+                  {tag} · {count}
+                </span>
+              ))}
+            </div>
+          ) : null}
           <div className="voice-list">
             {requestComments.length ? (
               visibleRequests.map(record => (
@@ -7957,7 +7973,10 @@ function Team({
     return {
       name,
       count,
+      good,
+      answered: answered.length,
       pct: answered.length ? (good / answered.length) * 100 : 0,
+      ci: wilsonInterval(good, answered.length),
     };
   });
   const salonRecords = periodRecords.filter(
@@ -8309,6 +8328,10 @@ function Team({
                     <small>
                       {s.count} encuestas ·{" "}
                       {s.pct ? `${Math.round(s.pct)}% positivo` : "sin calidad"}
+                      {s.answered ? ` · n=${s.answered}` : ""}
+                      {s.ci
+                        ? ` · IC95 ${Math.round(s.ci[0] * 100)}–${Math.round(s.ci[1] * 100)}%`
+                        : ""}
                     </small>
                   </span>
                   <Pill tone={meets ? "green" : "orange"}>

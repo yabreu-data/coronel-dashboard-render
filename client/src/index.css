@@ -1511,3 +1511,6 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
 .voice-list-item p { margin: 4px 0 0; font-size: 12px; line-height: 1.5; color: #dbe9f5; }
 .voice-count { float: right; color: #8be7ff; font-weight: 800; font-size: 11px; }
 .voice-tag { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: #ffd18b; border: 1px solid #7a5a23; border-radius: 999px; padding: 2px 7px; }
+
+.voice-tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.voice-tag-row .voice-tag { font-size: 10px; }
