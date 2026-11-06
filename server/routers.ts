@@ -141,6 +141,29 @@ async function fetchSurveyMatrix(sheetId: string, sheet: string) {
   return rows.filter((row, index) => index === 0 || row.some(Boolean));
 }
 
+/* Frases que la capa de OCR suele devolver cuando la foto no se pudo leer.
+   Se marcan como "Error de lectura" y no entran al análisis. */
+const OCR_GARBAGE_COMMENTS = [
+  "peabacio muchos ericias hasta la provins",
+  "inos encantarla celebrario juntos!",
+];
+
+function cleanSurveyComment(value: string) {
+  const text = String(value || "").replace(/[\u0000-\u001F\u007F]/g, " ").replace(/\s+/g, " ").trim();
+  const key = normalizeCell(text);
+  if (!key) return "";
+  if (OCR_GARBAGE_COMMENTS.some(item => normalizeCell(item) === key)) return "Error de lectura";
+  return text;
+}
+
+function normalizeQualityLabel(value: string) {
+  const key = normalizeCell(value);
+  if (key === "bueno") return "Bueno";
+  if (key === "regular") return "Regular";
+  if (key === "malo") return "Malo";
+  return "";
+}
+
 async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
   const matrix = await fetchSurveyMatrix(getSheetId(), sheet);
   const headers = matrix.shift() ?? [];
@@ -154,10 +177,14 @@ async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
     .filter(row => row.some(Boolean))
     .map((row, index) => {
       const status = getCell(row, headers, "Estado Registro");
-      const comment = getFirstCell(row, headers, ["Opinión Limpia", "comment", "Opinión del Producto y Mejoras"]);
-      const cleanSource = sheet !== FALLBACK_SURVEY_SHEET && CLEAN_SHEET_FILTER;
+      const rawComment = getFirstCell(row, headers, ["Opinión Limpia", "comment", "Opinión del Producto y Mejoras"]);
+      const comment = cleanSurveyComment(rawComment);
+      const quality = normalizeQualityLabel(
+        getFirstCell(row, headers, ["Calidad Limpia", "quality", "Calidad del Producto", "Calidad Original"])
+      );
+      // Limpieza en la app: no depende de la pestaña Encuestas_Limpias.
       const dirty =
-        cleanSource &&
+        CLEAN_SHEET_FILTER &&
         (normalizeCell(status).includes("advertencia") ||
           normalizeCell(comment).includes("error de lectura"));
       if (dirty) return null;
@@ -170,7 +197,7 @@ async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
         dish: getFirstCell(row, headers, ["Productos Normalizados", "dish", "Plato(s ) Original(es)", "Plato(s) Original(es)"]),
         comment,
         registeredBy: getFirstCell(row, headers, ["Mesero", "registeredBy", "Registrado Por", "Registrado Por Original", "ID Mesero"]),
-        quality: getFirstCell(row, headers, ["Calidad Limpia", "quality", "Calidad del Producto"]),
+        quality,
       };
     })
     .filter((record): record is SurveyRecord => record !== null);

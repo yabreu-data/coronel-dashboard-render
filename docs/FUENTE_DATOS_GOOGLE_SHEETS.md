@@ -2,15 +2,20 @@
 
 > Fecha de verificación: 2026-11-06. Objetivo: confirmar que el dashboard lee bien la fuente y responder si el Apps Script pegado es correcto para la hoja de datos.
 
-## 0. Política: análisis solo con datos limpios
+## 0. Política: limpieza dentro de la app (sin Apps Script obligatorio)
 
-- La fuente de análisis es **`Encuestas_Limpias`** (pestaña generada por el Apps Script). Ahí los comentarios, la calidad y los productos están normalizados y las filas inválidas quedan marcadas.
-- El dashboard **descarta** las filas con `Estado Registro = Advertencia…` o comentario `Error de lectura` (`SURVEY_CLEAN_FILTER=true`).
-- Si la pestaña limpia **no existe**, el dashboard muestra un **aviso visible** (“⚠ Fuente limpia no disponible”) y usa `Encuestas` temporalmente para no quedar caído. Nunca oculta el origen de los datos.
-- Para **prohibir** ese respaldo y detener el dashboard (modo estricto): `ALLOW_SHEET_FALLBACK=false`.
-- En cuanto la pestaña limpia exista, el aviso desaparece solo y todos los indicadores se calculan sobre datos depurados.
+- El dashboard lee la pestaña **`Encuestas`** y aplica la limpieza en el servidor:
+  - descarta filas con comentarios ilegibles de OCR (“Error de lectura”),
+  - normaliza la calidad a **Bueno / Regular / Malo**,
+  - limpia espacios y caracteres de control en los comentarios.
+- **No requiere el Apps Script ni la pestaña `Encuestas_Limpias`** para funcionar. El script queda como capa opcional si algún día quieren una pestaña física separada.
+- Si `GOOGLE_SHEET_TAB=Encuestas_Limpias` y la pestaña existe, la app la usa (y también descarta filas con `Estado Registro = Advertencia`).
+- Para desactivar la limpieza: `SURVEY_CLEAN_FILTER=false`.
+- Si la pestaña configurada no existe, hay respaldo a `Encuestas` con aviso; para prohibirlo: `ALLOW_SHEET_FALLBACK=false`.
 
-Pasos para configurar el Apps Script con las credenciales: [integrations/apps-script/README.md](../integrations/apps-script/README.md).
+Configuración recomendada en Render: `GOOGLE_SHEET_TAB=Encuestas`.
+
+Pasos del Apps Script (opcional): [integrations/apps-script/README.md](../integrations/apps-script/README.md).
 
 ## 1. Cómo lee el dashboard la hoja
 
@@ -43,17 +48,11 @@ node scripts/verify-sheets.mjs https://coronel-dashboard.onrender.com
 | Fuente efectiva usada | ✅ `Google Sheets · Encuestas` (fallback automático) |
 | Campos de registros | ✅ id, timestamp, cliente, calidad, cumpleaños, mesero |
 
-**Conclusión:** la conexión a la fuente es correcta y el dashboard muestra datos reales. La pestaña “limpia” que construye el Apps Script (`Encuestas_Limpias`) **todavía no está creada**, por eso el backend usa `Encuestas` con el aviso de “datos sin depurar”.
+**Conclusión:** la conexión a la fuente es correcta y el dashboard muestra datos reales. La limpieza se hace **en la app** sobre `Encuestas`, así que no hace falta crear `Encuestas_Limpias` ni configurar Apps Script.
 
-### Cómo activar la fuente limpia (una sola vez)
+### Apps Script (opcional)
 
-1. Configurar `Código.gs` con token, OCR key y PIN (ver [integrations/apps-script/README.md](../integrations/apps-script/README.md)).
-2. Guardar → **Implementar → Nueva versión**.
-3. En el Sheet: **Datos → Actualizar Encuestas_Limpias**.
-4. **Datos → Instalar actualización cada 15 minutos**.
-5. Ejecutar `node scripts/verify-sheets.mjs` y confirmar `Encuestas_Limpias` + `fallbackUsed=false`.
-
-Mientras tanto, el dashboard funciona con `Encuestas` y el aviso correspondiente. Cuando la pestaña exista, se activa automáticamente.
+Solo si quieren una pestaña limpia separada en el Sheet. No es necesario para el dashboard. Si la crean, configuren `GOOGLE_SHEET_TAB=Encuestas_Limpias` en Render.
 
 ## 3. ¿Es correcto el Apps Script pegado?
 

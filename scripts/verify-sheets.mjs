@@ -90,7 +90,7 @@ async function main() {
     hasSurveyHeaders(fallback.firstRow),
     (fallback.firstRow ?? []).slice(0, 8).join(" | ")
   );
-  if (!configuredLooksMissing) {
+  if (!configuredLooksMissing && CONFIGURED_TAB !== FALLBACK_TAB) {
     const cleanHeaders = configured.firstRow?.map(value => String(value).trim()) ?? [];
     record(
       "la pestaña limpia tiene columnas de control",
