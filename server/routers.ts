@@ -24,7 +24,7 @@ const SURVEY_TIMESTAMP_HEADERS = ["Timestamp", "timestamp"];
 type SurveyRecord = { id: string; timestamp: string; clientName: string; phone: string; birthday: string; dish: string; comment: string; registeredBy: string; quality: string };
 type ServerCatalogItem = { id: string; name: string; active: boolean };
 
-const surveyCache = new Map<string, { at: number; value: { records: SurveyRecord[]; serverCatalog: ServerCatalogItem[] } }>();
+const surveyCache = new Map<string, { at: number; sheet: string; value: { records: SurveyRecord[]; serverCatalog: ServerCatalogItem[] } }>();
 
 function getSheetId() {
   return (process.env.GOOGLE_SHEET_ID || "").trim() || DEFAULT_SHEET_ID;
@@ -180,7 +180,7 @@ async function getSurveyPayload(sheet: string) {
   const cacheKey = `${getSheetId()}::${sheet}`;
   const cached = surveyCache.get(cacheKey);
   if (cached && Date.now() - cached.at < SURVEY_CACHE_TTL_MS) {
-    return { ...cached.value, sheet, cached: true };
+    return { ...cached.value, sheet: cached.sheet, cached: true };
   }
 
   const load = async (target: string) => {
@@ -205,10 +205,10 @@ async function getSurveyPayload(sheet: string) {
       }
     }
 
-    surveyCache.set(cacheKey, { at: Date.now(), value });
+    surveyCache.set(cacheKey, { at: Date.now(), sheet: resolvedSheet, value });
     return { ...value, sheet: resolvedSheet, cached: false };
   } catch (error) {
-    if (cached) return { ...cached.value, sheet, cached: true };
+    if (cached) return { ...cached.value, sheet: cached.sheet, cached: true };
     throw error;
   }
 }

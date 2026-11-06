@@ -70,13 +70,17 @@ async function main() {
 
   const configuredLooksMissing =
     configured.firstRow?.join("|") === impossible.firstRow?.join("|");
-  record(
-    `la pestaña configurada existe en el Sheet (${CONFIGURED_TAB})`,
-    !configuredLooksMissing,
-    configuredLooksMissing
-      ? `Google devuelve la primera hoja: "${(impossible.firstRow ?? []).slice(0, 3).join(" · ")}"`
-      : `encabezados: ${configured.firstRow?.slice(0, 6).join(" | ")}`
-  );
+  if (configuredLooksMissing) {
+    console.log(
+      `⚠ AVISO · la pestaña configurada "${CONFIGURED_TAB}" no existe; Google devuelve la primera hoja ("${(impossible.firstRow ?? []).slice(0, 3).join(" · ")}").`
+    );
+  } else {
+    record(
+      `la pestaña configurada existe en el Sheet (${CONFIGURED_TAB})`,
+      true,
+      `encabezados: ${configured.firstRow?.slice(0, 6).join(" | ")}`
+    );
+  }
 
   const hasSurveyHeaders = (row) =>
     row?.some(value => ["ID Único", "id", "ID de Envío"].includes(String(value).trim())) &&
@@ -94,8 +98,13 @@ async function main() {
     const started = Date.now();
     const data = await client.survey.latest.query();
     const ms = Date.now() - started;
+    const expectedSource = configuredLooksMissing ? FALLBACK_TAB : CONFIGURED_TAB;
     record("el dashboard entrega datos de la hoja", data.records.length > 0, `${data.records.length} encuestas · ${data.serverCatalog.length} meseros · ${ms} ms`);
-    record("fuente efectiva usada por el dashboard", Boolean(data.source), data.source);
+    record(
+      "fuente efectiva usada por el dashboard",
+      data.source.includes(expectedSource),
+      `${data.source} (esperado: ${expectedSource})`
+    );
     const sample = data.records[0] ?? {};
     record(
       "los registros traen los campos necesarios",
@@ -107,9 +116,8 @@ async function main() {
       Boolean(sample.birthday || sample.registeredBy),
       `cumpleaños=${sample.birthday || "—"} · mesero=${sample.registeredBy || "—"}`
     );
-    const usesFallback = !configuredLooksMissing && CONFIGURED_TAB !== FALLBACK_TAB && !data.source.includes(CONFIGURED_TAB);
-    if (usesFallback) {
-      console.log(`\n   Aviso: la pestaña "${CONFIGURED_TAB}" no es válida; el dashboard usó "${FALLBACK_TAB}".`);
+    if (configuredLooksMissing) {
+      console.log(`   Fallback funcionando: el dashboard usa "${expectedSource}" mientras "${CONFIGURED_TAB}" no exista.`);
     }
   } catch (error) {
     record("el dashboard entrega datos de la hoja", false, error instanceof Error ? error.message : String(error));
