@@ -960,6 +960,29 @@ function rangoEdad_(edad) {
   return '65+';
 }
 
+function ajustarCumpleanos_(cumple, fechaEncuesta) {
+  // Un año de nacimiento solo es confiable si es anterior al año de la encuesta.
+  // Si el formulario puso el año actual (2026) o un año futuro, se descarta el
+  // año para edad/segmentos pero se conserva día/mes para la campaña.
+  const anio = cumple.anio;
+  if (!Number.isInteger(anio)) return { cumple: cumple, revisar: false };
+  const anioEncuesta = (fechaEncuesta || new Date()).getFullYear();
+  if (anio < 1900 || anio >= anioEncuesta) {
+    return {
+      cumple: {
+        original: cumple.original,
+        dia: cumple.dia,
+        mes: cumple.mes,
+        anio: '',
+        tieneAnio: 'No',
+        fechaReal: null
+      },
+      revisar: true
+    };
+  }
+  return { cumple: cumple, revisar: false };
+}
+
 function comentarioLimpio_(valor) {
   let s = texto_(valor);
   const k = clave_(s);
@@ -975,7 +998,7 @@ function calidadLimpia_(valor) {
   if (k === 'bueno') return 'Bueno';
   if (k === 'regular') return 'Regular';
   if (k === 'malo') return 'Malo';
-  return '';
+  return 'Sin calificar';
 }
 
 function comentarioValido_(valor) {
@@ -1072,8 +1095,16 @@ function reconstruirEncuestasLimpias_() {
     const productos = (productosPorEncuesta[id] || separarProductos_(platoOriginal)).map(titulo_);
     const timestamp = valorCampo_(e, ['Timestamp', 'timestamp']);
     const fecha = aFecha(timestamp);
-    const edad = calcularEdad_(cumple, fecha);
-    const prox = proximaFechaCumpleanos_(cumple.dia, cumple.mes, ahora);
+    const cumpleAjuste = ajustarCumpleanos_(cumple, fecha);
+    const cumpleFinal = cumpleAjuste.cumple;
+    const edadBase = calcularEdad_(cumpleFinal, fecha);
+    const edad = cumpleAjuste.revisar
+      ? { edad: '', estado: 'Revisar', rango: 'Edad a revisar' }
+      : edadBase;
+    const prox = proximaFechaCumpleanos_(cumpleFinal.dia, cumpleFinal.mes, ahora);
+    const reglaCumple = cumpleAjuste.revisar
+      ? 'Año de nacimiento no confiable · se usa día/mes'
+      : prox.regla;
     const estado = !id ? 'Advertencia: sin ID Único' : (!fecha ? 'Advertencia: fecha inválida' : 'Válido');
     const registrados = titulo_(valorCampo_(e, ['Registrado Por Original', 'Registrado Por', 'registeredBy']));
     const esRegistroWeb = normalizarTexto(registrados).indexOf('formulario web') !== -1 ||
@@ -1085,14 +1116,14 @@ function reconstruirEncuestasLimpias_() {
     const fuenteTipo = titulo_(fuente['Tipo']);
     return [
       id, timestamp, fecha ? Utilities.formatDate(fecha, Session.getScriptTimeZone(), 'dd/MM/yyyy') : '',
-      idCliente, nombre, contacto, cumple.original, cumple.dia, cumple.mes, cumple.anio,
-      cumple.tieneAnio, idMesero, nombreMesero, idFuente, fuenteNombre,
+      idCliente, nombre, contacto, cumpleFinal.original, cumpleFinal.dia, cumpleFinal.mes, cumpleFinal.anio,
+      cumpleFinal.tieneAnio, idMesero, nombreMesero, idFuente, fuenteNombre,
       fuenteTipo, texto_(valorCampo_(e, ['ID de Envío'])), platoOriginal,
       productos.join('; '), opinionOriginal, opinion, comentarioValido_(opinion), calidadOriginal,
       calidad, estado, ahora, edad.edad, edad.estado, edad.rango,
-      id, timestamp, nombre, contacto, cumple.original,
-      productos.join('; '), opinion, nombreMesero || registrados, calidad, cumple.dia,
-      cumple.mes, cumple.anio, prox.fecha, prox.regla,
+      id, timestamp, nombre, contacto, cumpleFinal.original,
+      productos.join('; '), opinion, nombreMesero || registrados, calidad, cumpleFinal.dia,
+      cumpleFinal.mes, cumpleFinal.anio, prox.fecha, reglaCumple,
       edad.edad, edad.estado, edad.rango
     ];
   });
