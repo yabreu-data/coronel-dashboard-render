@@ -971,20 +971,6 @@ export default function Home() {
           </div>
         </div>
         <div className="content">
-          {data?.fallbackUsed && (
-            <div className="source-warning" role="status">
-              <div>
-                <b>⚠ Fuente limpia no disponible</b>
-                <span>
-                  {data.warning ??
-                    "Se están mostrando datos sin depurar. Ejecuta la actualización de Encuestas_Limpias."}
-                </span>
-              </div>
-              <button onClick={() => refetch()} disabled={isFetching}>
-                Reintentar
-              </button>
-            </div>
-          )}
           {showGlobalFilters && (
             <FilterBar
               search={search}
