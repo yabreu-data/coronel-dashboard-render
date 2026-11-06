@@ -57,6 +57,42 @@ function normalizeCell(value: string) {
     .trim();
 }
 
+const NAME_PARTICLES = new Set([
+  "de", "del", "la", "las", "los", "y", "e", "da", "das", "do", "dos",
+  "van", "von", "di", "du", "le", "les", "des",
+]);
+
+/** Mayúsculas tipo título: "HUMBERTO julon LARA" → "Humberto Julon Lara". */
+function titleCaseName(value: string) {
+  const base = String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+  if (!base) return "";
+  if (base === "cliente (formulario web)") return "Cliente (Formulario Web)";
+  if (base === "registro por mesero") return "Registro por Mesero";
+  return base
+    .split(" ")
+    .map((word, index) => {
+      if (index > 0 && NAME_PARTICLES.has(word)) return word;
+      return word.replace(/(^|[-'’])([a-záéíóúüñ])/g, (_match, separator: string, char: string) =>
+        separator + char.toUpperCase()
+      );
+    })
+    .join(" ");
+}
+
+function titleCaseDish(value: string) {
+  return String(value || "")
+    .split(";")
+    .map(part => titleCaseName(part))
+    .join("; ");
+}
+
+function titleCasePersonOrCode(value: string) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/^[A-Z]{2,}-\d+$/i.test(text)) return text.toUpperCase();
+  return titleCaseName(text);
+}
+
 /** Sondea solo la fila de encabezados: evita escanear toda la hoja cuando la pestaña no sirve. */
 async function sheetHasSurveyStructure(sheet: string) {
   try {
@@ -191,12 +227,12 @@ async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
       return {
         id: getFirstCell(row, headers, ["ID Único", "id", "ID de Envío"]) || `fila-${index + 1}`,
         timestamp: getFirstCell(row, headers, ["Timestamp", "timestamp"]),
-        clientName: getFirstCell(row, headers, ["Nombre Cliente", "clientName", "Nombre del Cliente"]),
+        clientName: titleCaseName(getFirstCell(row, headers, ["Nombre Cliente", "clientName", "Nombre del Cliente"])),
         phone: getFirstCell(row, headers, ["Número Contacto", "phone", "Número de Contacto"]),
         birthday: getFirstCell(row, headers, ["Cumpleaños Original", "birthday", "Fecha de Cumpleaños"]),
-        dish: getFirstCell(row, headers, ["Productos Normalizados", "dish", "Plato(s ) Original(es)", "Plato(s) Original(es)"]),
+        dish: titleCaseDish(getFirstCell(row, headers, ["Productos Normalizados", "dish", "Plato(s ) Original(es)", "Plato(s) Original(es)"])),
         comment,
-        registeredBy: getFirstCell(row, headers, ["Mesero", "registeredBy", "Registrado Por", "Registrado Por Original", "ID Mesero"]),
+        registeredBy: titleCasePersonOrCode(getFirstCell(row, headers, ["Mesero", "registeredBy", "Registrado Por", "Registrado Por Original", "ID Mesero"])),
         quality,
       };
     })

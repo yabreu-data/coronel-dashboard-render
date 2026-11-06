@@ -733,7 +733,24 @@ function listarMeseros() {
 
 function aFecha(v) {
   if (v instanceof Date) return v;
-  const d = new Date(v);
+  const s = String(v == null ? '' : v).trim();
+  if (!s) return null;
+
+  // Acepta dd/mm/yyyy, d/m/yy, dd-mm-yyyy y con hora opcional.
+  // Google Sheets puede devolver estas fechas como texto cuando la columna
+  // viene de una importación, y `new Date('29/9/2026')` no las interpreta.
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (m) {
+    let anio = parseInt(m[3], 10);
+    if (anio < 100) anio += anio <= 26 ? 2000 : 1900;
+    const d = new Date(
+      anio, parseInt(m[2], 10) - 1, parseInt(m[1], 10),
+      parseInt(m[4] || '0', 10), parseInt(m[5] || '0', 10), parseInt(m[6] || '0', 10)
+    );
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  const d = new Date(s);
   return isNaN(d.getTime()) ? null : d;
 }
 
@@ -798,6 +815,29 @@ function texto_(v) {
 }
 
 function clave_(v) { return normalizarTexto(texto_(v)); }
+
+/* Mayúsculas tipo título: "HUMBERTO julon LARA" → "Humberto Julon Lara".
+   Mantiene en minúscula partículas de nombres (de, del, la, los, y, …). */
+const PARTICULAS_NOMBRE_ = {
+  de: 1, del: 1, la: 1, las: 1, los: 1, y: 1, e: 1,
+  da: 1, das: 1, do: 1, dos: 1, van: 1, von: 1, di: 1, du: 1, le: 1, les: 1, des: 1
+};
+
+function titulo_(valor) {
+  const base = texto_(valor).toLowerCase();
+  if (!base) return '';
+
+  // Casos especiales que no deben quedar como "Cliente (formulario web)".
+  if (base === 'cliente (formulario web)') return 'Cliente (Formulario Web)';
+  if (base === 'registro por mesero') return 'Registro por Mesero';
+
+  return base.split(/\s+/).map(function (word, index) {
+    if (index > 0 && PARTICULAS_NOMBRE_[word]) return word;
+    return word.replace(/(^|[-'’])([a-záéíóúüñ])/g, function (_, sep, ch) {
+      return sep + ch.toUpperCase();
+    });
+  }).join(' ');
+}
 
 function valorCampo_(obj, nombres) {
   for (let i = 0; i < nombres.length; i++) {
@@ -1011,7 +1051,7 @@ function reconstruirEncuestasLimpias_() {
     const cliente = clienteId[idCliente] || {};
     const mesero = meseroId[idMesero] || {};
     const fuente = fuenteId[idFuente] || {};
-    const nombre = texto_(valorCampo_(e, ['Nombre del Cliente', 'Nombre', 'clientName'])) || texto_(cliente['Nombre']);
+    const nombre = titulo_(valorCampo_(e, ['Nombre del Cliente', 'Nombre', 'clientName']) || cliente['Nombre']);
     const contacto = normalizarTelefono(valorCampo_(e, ['Número de Contacto', 'Contacto', 'phone'])) || normalizarTelefono(cliente['Contacto']);
     const cumple = parsearCumpleanos_(valorCampo_(e, ['Fecha de Cumpleaños', 'Cumpleaños Original', 'birthday']) || cliente['Fecha de Cumpleaños']);
     const platoOriginal = texto_(valorCampo_(e, ['Plato(s) Original(es)', 'Plato Elegido Hoy', 'Plato', 'dish']));
@@ -1019,19 +1059,23 @@ function reconstruirEncuestasLimpias_() {
     const opinion = comentarioLimpio_(opinionOriginal);
     const calidadOriginal = texto_(valorCampo_(e, ['Calidad del Producto', 'Calidad', 'quality']));
     const calidad = calidadLimpia_(calidadOriginal);
-    const productos = productosPorEncuesta[id] || separarProductos_(platoOriginal);
+    const productos = (productosPorEncuesta[id] || separarProductos_(platoOriginal)).map(titulo_);
     const timestamp = valorCampo_(e, ['Timestamp', 'timestamp']);
     const fecha = aFecha(timestamp);
     const edad = calcularEdad_(cumple, fecha);
     const prox = proximaFechaCumpleanos_(cumple.dia, cumple.mes, ahora);
     const estado = !id ? 'Advertencia: sin ID Único' : (!fecha ? 'Advertencia: fecha inválida' : 'Válido');
-    const registrados = texto_(valorCampo_(e, ['Registrado Por Original', 'Registrado Por', 'registeredBy']));
-    const nombreMesero = texto_(mesero['Nombre']) || (idMesero ? idMesero : registrados);
+    const registrados = titulo_(valorCampo_(e, ['Registrado Por Original', 'Registrado Por', 'registeredBy']));
+    const nombreMesero = texto_(mesero['Nombre'])
+      ? titulo_(mesero['Nombre'])
+      : (idMesero ? idMesero : registrados);
+    const fuenteNombre = titulo_(fuente['Nombre']);
+    const fuenteTipo = titulo_(fuente['Tipo']);
     return [
       id, timestamp, fecha ? Utilities.formatDate(fecha, Session.getScriptTimeZone(), 'dd/MM/yyyy') : '',
       idCliente, nombre, contacto, cumple.original, cumple.dia, cumple.mes, cumple.anio,
-      cumple.tieneAnio, idMesero, nombreMesero, idFuente, texto_(fuente['Nombre']),
-      texto_(fuente['Tipo']), texto_(valorCampo_(e, ['ID de Envío'])), platoOriginal,
+      cumple.tieneAnio, idMesero, nombreMesero, idFuente, fuenteNombre,
+      fuenteTipo, texto_(valorCampo_(e, ['ID de Envío'])), platoOriginal,
       productos.join('; '), opinionOriginal, opinion, comentarioValido_(opinion), calidadOriginal,
       calidad, estado, ahora, id, timestamp, nombre, contacto, cumple.original,
       productos.join('; '), opinion, nombreMesero || registrados, calidad, cumple.dia,
