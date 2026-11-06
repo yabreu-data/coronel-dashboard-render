@@ -85,7 +85,7 @@ Resultado esperado: `14/14 OK`.
 
 ## 5. Notas operativas
 
-- El plan Free de Render suspende la instancia por inactividad: la primera petición tras el reposo tarda unos segundos.
+- El plan Free de Render suspende la instancia por inactividad: la primera petición tras el reposo tarda unos segundos. Para evitarlo hay un keep-alive de `pg_cron` (Supabase) que hace `GET /healthz` cada 5 minutos: ver [`KEEPALIVE_RENDER.md`](KEEPALIVE_RENDER.md) y ejecutar `pnpm keepalive:setup`.
 - Supabase exige TLS. El runtime usa `ssl: { rejectUnauthorized: false }`; `drizzle.config.ts` añade `sslmode=no-verify` porque `pg >= 8.20` interpreta `require` como verificación completa.
 - Guarda `SUPABASE_SERVICE_ROLE_KEY` solo en Render/entorno local: no se inyecta en el bundle del cliente.
 - Tras conectar Render puedes volver privado el repositorio instalando la GitHub App de Render.
