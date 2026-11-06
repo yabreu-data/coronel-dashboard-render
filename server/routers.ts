@@ -17,6 +17,9 @@ const DEFAULT_SURVEY_SHEET = "Encuestas_Limpias";
 const SERVERS_SHEET = "Meseros";
 const SURVEY_CACHE_TTL_MS = 60_000;
 
+const SURVEY_ID_HEADERS = ["ID Único", "id", "ID de Envío"];
+const SURVEY_TIMESTAMP_HEADERS = ["Timestamp", "timestamp"];
+
 type SurveyRecord = { id: string; timestamp: string; clientName: string; phone: string; birthday: string; dish: string; comment: string; registeredBy: string; quality: string };
 type ServerCatalogItem = { id: string; name: string; active: boolean };
 
@@ -29,6 +32,24 @@ function getSheetId() {
 /** Pestaña productiva configurada por `GOOGLE_SHEET_TAB`. */
 function getConfiguredSurveySheet() {
   return (process.env.GOOGLE_SHEET_TAB || "").trim() || DEFAULT_SURVEY_SHEET;
+}
+
+function hasSurveyHeaders(headers: string[]) {
+  const normalized = headers.map(value => value.trim());
+  return (
+    normalized.some(value => SURVEY_ID_HEADERS.includes(value)) &&
+    normalized.some(value => SURVEY_TIMESTAMP_HEADERS.includes(value))
+  );
+}
+
+/** Sondea solo la fila de encabezados: evita escanear toda la hoja cuando la pestaña no sirve. */
+async function sheetHasSurveyStructure(sheet: string) {
+  try {
+    const matrix = await fetchSheetMatrix(getSheetId(), sheet, "A1:Z1");
+    return hasSurveyHeaders(matrix[0] ?? []);
+  } catch {
+    return false;
+  }
 }
 
 function parseCsv(text: string) {
@@ -108,10 +129,8 @@ async function fetchSurveyMatrix(sheetId: string, sheet: string) {
 async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
   const matrix = await fetchSurveyMatrix(getSheetId(), sheet);
   const headers = matrix.shift() ?? [];
-  const hasId = headers.some(value => ["ID Único", "id", "ID de Envío"].includes(value.trim()));
-  const hasTimestamp = headers.some(value => ["Timestamp", "timestamp"].includes(value.trim()));
 
-  if (!hasId || !hasTimestamp) {
+  if (!hasSurveyHeaders(headers)) {
     if (sheet === DEFAULT_SURVEY_SHEET) return [];
     throw new Error(`La pestaña ${sheet} todavía no tiene el formato esperado: se requieren un identificador y Timestamp.`);
   }
@@ -169,12 +188,22 @@ async function getSurveyPayload(sheet: string) {
   };
 
   try {
-    let value = await load(sheet);
     let resolvedSheet = sheet;
-    if (!value.records.length && sheet !== FALLBACK_SURVEY_SHEET) {
-      const fallback = await load(FALLBACK_SURVEY_SHEET).catch(() => null);
-      if (fallback?.records.length) { value = fallback; resolvedSheet = FALLBACK_SURVEY_SHEET; }
+    // Si la pestaña configurada no existe o no tiene encabezados de encuestas,
+    // se usa la pestaña de respaldo sin recorrer toda la hoja.
+    if (sheet !== FALLBACK_SURVEY_SHEET && !(await sheetHasSurveyStructure(sheet))) {
+      resolvedSheet = FALLBACK_SURVEY_SHEET;
     }
+
+    let value = await load(resolvedSheet);
+    if (!value.records.length && resolvedSheet !== FALLBACK_SURVEY_SHEET) {
+      const fallback = await load(FALLBACK_SURVEY_SHEET).catch(() => null);
+      if (fallback?.records.length) {
+        value = fallback;
+        resolvedSheet = FALLBACK_SURVEY_SHEET;
+      }
+    }
+
     surveyCache.set(cacheKey, { at: Date.now(), value });
     return { ...value, sheet: resolvedSheet, cached: false };
   } catch (error) {

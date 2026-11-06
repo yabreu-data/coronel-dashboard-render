@@ -42,7 +42,7 @@ Copia `.env.example` a `.env` y completa los valores:
 | `SUPABASE_ADMIN_USER_ID` | UUID del usuario de Supabase Auth con rol administrador |
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Inyectadas en el bundle del cliente |
 | `GOOGLE_SHEET_ID` | ID del Google Sheet de encuestas |
-| `GOOGLE_SHEET_TAB` | Pestaña productiva (por defecto `Encuestas_Limpias`; en este proyecto `Encuestas`) |
+| `GOOGLE_SHEET_TAB` | Pestaña productiva (por defecto `Encuestas_Limpias`). Si no existe o no tiene encabezados de encuestas, el backend usa automáticamente la pestaña `Encuestas`. |
 | `JWT_SECRET` | Reservado para sesiones firmadas propias |
 | `ADMIN_PIN` | PIN para acciones administrativas sensibles (por defecto `5956`) |
 | `PORT` / `NODE_ENV` | Puerto y entorno (Render los define) |

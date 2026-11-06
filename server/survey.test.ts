@@ -66,13 +66,22 @@ describe("survey.latest", () => {
     expect(result.records[0]).toMatchObject({ id: "UNICO-1", dish: "Pollo; Otros", comment: "Muy rico", quality: "Bueno", birthday: "29/02" });
   });
 
-  it("devuelve una fuente limpia vacía mientras la pestaña temporal no tenga estructura de encuestas", async () => {
+  it("sondea solo encabezados y cae a Encuestas si la pestaña configurada no sirve", async () => {
     stubSheetEnv("Encuestas_Limpias", "sheet-test-3");
     const temporaryBirthdayCsv = '"","CUMPLEAÑEROS DEL MES","","","TEMPORAL"\n"","10","","","Se actualiza"\n"","Nombre","","",""';
-    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => new Response(String(input).includes("sheet=Meseros") ? catalogCsv : temporaryBirthdayCsv, { status: 200 })));
+    const requestedUrls: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url.includes("sheet=Meseros")) return new Response(catalogCsv, { status: 200 });
+      if (url.includes("sheet=Encuestas_Limpias")) return new Response(temporaryBirthdayCsv, { status: 200 });
+      return new Response(csv, { status: 200 });
+    }));
     const result = await appRouter.createCaller(context).survey.latest({ tab: "limpia" });
-    expect(result.source).toBe("Google Sheets · Encuestas_Limpias");
-    expect(result.records).toEqual([]);
+    const requestedLimpias = requestedUrls.filter(url => url.includes("sheet=Encuestas_Limpias"));
+    expect(requestedLimpias).toHaveLength(1);
+    expect(result.source).toBe("Google Sheets · Encuestas");
+    expect(result.records).toHaveLength(2);
   });
 
   it("usa GOOGLE_SHEET_TAB como fuente productiva cuando está configurada", async () => {
@@ -89,17 +98,23 @@ describe("survey.latest", () => {
     expect(result.records).toHaveLength(2);
   });
 
-  it("cae a la pestaña Encuestas si la pestaña configurada no tiene estructura válida", async () => {
+  it("prioriza la pestaña configurada y no consulta Encuestas cuando es válida", async () => {
     stubSheetEnv("Encuestas_Limpias", "sheet-test-5");
-    const temporaryBirthdayCsv = '"","CUMPLEAÑEROS DEL MES","","","TEMPORAL"\n"","10","","","Se actualiza"';
+    const cleanCsv = [
+      '"ID Único","ID de Envío","Timestamp","Nombre Cliente","Número Contacto","Cumpleaños Original","Productos Normalizados","Opinión Limpia","Mesero","Calidad Limpia"',
+      '"UNICO-9","ENVIO-9","22/09/2026 12:00:00","Ana","999111222","29/02","Pollo","Muy rico","MES-000001","Bueno"',
+    ].join("\n");
+    const requestedUrls: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
+      requestedUrls.push(url);
       if (url.includes("sheet=Meseros")) return new Response(catalogCsv, { status: 200 });
-      if (url.includes("sheet=Encuestas_Limpias")) return new Response(temporaryBirthdayCsv, { status: 200 });
+      if (url.includes("sheet=Encuestas_Limpias")) return new Response(cleanCsv, { status: 200 });
       return new Response(csv, { status: 200 });
     }));
     const result = await appRouter.createCaller(context).survey.latest({ tab: "limpia" });
-    expect(result.source).toBe("Google Sheets · Encuestas");
-    expect(result.records).toHaveLength(2);
+    expect(result.source).toBe("Google Sheets · Encuestas_Limpias");
+    expect(result.records).toHaveLength(1);
+    expect(requestedUrls.some(url => url.includes("sheet=Encuestas&"))).toBe(false);
   });
 });
