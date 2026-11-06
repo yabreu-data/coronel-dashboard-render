@@ -207,19 +207,23 @@ Hoy: Clientes, Voz del cliente y Llamadas son pantallas separadas. Propuesta: **
 
 Ya implementado en el dashboard:
 
-- **Pestaña Cumpleaños rediseñada** para trabajar en segundos: métricas del mes (total, hoy, próximos 7 días, contactados, redimidos), filtros por etapa, búsqueda, toggle “solo sin contactar”, tarjetas compactas con fecha y acciones, y calendario opcional.
-- **Protocolo de cumpleaños** colapsable dentro de la pestaña, con horizontes **Mes / Semana / Día / Seguimiento**, objetivo, pasos, canal, mensaje de ejemplo copiable y “no hacer”.
-- **Enlaces de contacto directo por cliente**: WhatsApp con el mensaje ya redactado (`wa.me`) y llamada (`tel:`), más el botón de copiar plantilla y el seguimiento contactado / aceptó / redimida.
+- **Pestaña Cumpleaños rediseñada** para trabajar en segundos: métricas (mes, **semana**, hoy, contactados, redimidos), **embudo** base → contactados → aceptaron → redimieron, filtros por etapa, búsqueda y toggle “solo sin contactar”.
+- **Calendario arriba del listado**, con estados visibles: **hoy** resaltado, días con cumpleaños en ámbar, día seleccionado y leyenda; al elegir un día se filtra el listado.
+- **Tarjetas accionables**: promoción ofrecida editable por cliente, responsable, **próxima acción con fecha** (con botones +1/+3/+7/+14 días), canal, **familiar (nombre y fecha)** y registro de **motivo de no redención**.
+- **Llamada funcional**: al pulsar “Llamar” se abre un panel con el número, enlace `tel:`, copiar número y botones para registrar el resultado (contactado / aceptó / redimió / no redimió).
+- **Mensajes de WhatsApp editables** por etapa (mes, semana, día, seguimiento) con variables `{nombre}`, `{fecha}`, `{beneficio}`, `{plato}`; se aplican al abrir WhatsApp o copiar.
+- **Ficha única del cliente** (modal): teléfono, cumpleaños, segmento, plato favorito, promoción, responsable, próxima acción, familiares, visitas/encuestas y contactos.
+- **Protocolo de cumpleaños** colapsable con Mes / Semana / Día / Seguimiento, pasos, canal, ejemplo y “no hacer”.
 - **Responsable sugerido**: cajera en horario de baja demanda, visible en el protocolo y en la pestaña.
 - **Pool de base de datos ajustado** (5 conexiones, liberación rápida) para respetar el límite del pooler de Supabase.
 
-Pendiente para la siguiente iteración (Fase 1 completa):
+Pendiente para las siguientes iteraciones:
 
-1. Fecha de **próxima acción** y tablero de vencidas/hoy/mañana.
-2. **Embudo** de cumpleaños (contactados → aceptaron → redimieron).
-3. **Ficha única del cliente** con historial de contacto.
-4. Registro estructurado de **familiares** (nombre y fecha) y motivo de no redención.
-5. Configurar la **vigencia por campaña** desde la app (hoy se define al preparar la campaña).
+1. **Automatizaciones**: recordatorios automáticos (correo/WhatsApp) de acciones vencidas.
+2. **Vigencia por campaña** como campo en la app (hoy se define al preparar la campaña).
+3. **Edición de datos** dentro de la app (hoy la fuente sigue siendo Google Sheets).
+4. **Índice de atención** que combine calidad, recuperación y cobertura de cumpleaños.
+5. Reporte ejecutivo mensual de cumpleaños (cobertura, redención, recompra).
 
 ## 9.2 Decisiones que faltan definir
 

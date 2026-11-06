@@ -1,7 +1,7 @@
 import { and, count, desc, eq, gte, like, lte, ne, or } from "drizzle-orm";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { AccessRequest, BirthdayCampaign, InsertBirthdayCampaign, InsertCallLog, InsertPriorityItem, InsertPromotion, InsertResponsibleUser, InsertUser, accessRequests, adminAuditLog, birthdayCampaigns, callLogs, priorityHistory, priorityItems, promotions, responsibleUsers, sessionHistory, teamTargetHistory, teamTargets, users } from "../drizzle/schema";
+import { AccessRequest, BirthdayCampaign, InsertBirthdayCampaign, InsertCallLog, InsertPriorityItem, InsertPromotion, InsertResponsibleUser, InsertUser, accessRequests, adminAuditLog, birthdayCampaigns, callLogs, messageTemplates, priorityHistory, priorityItems, promotions, responsibleUsers, sessionHistory, teamTargetHistory, teamTargets, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: NodePgDatabase | null = null;
@@ -106,9 +106,85 @@ export async function listBirthdayCampaigns() {
 export async function saveBirthdayCampaign(input: InsertBirthdayCampaign) {
   const db = await getDb();
   if (!db) throw new Error("La base de datos no está disponible");
-  await db.insert(birthdayCampaigns).values(input).onConflictDoUpdate({ target: birthdayCampaigns.clientKey, set: { clientName: input.clientName, phone: input.phone ?? null, stage: input.stage, channel: input.channel, updatedBy: input.updatedBy ?? null } });
+  await db
+    .insert(birthdayCampaigns)
+    .values(input)
+    .onConflictDoUpdate({
+      target: birthdayCampaigns.clientKey,
+      set: {
+        clientName: input.clientName,
+        phone: input.phone ?? null,
+        stage: input.stage,
+        channel: input.channel,
+        promotion: input.promotion ?? null,
+        responsible: input.responsible ?? null,
+        nextActionAt: input.nextActionAt ?? null,
+        nextActionLabel: input.nextActionLabel ?? null,
+        familyName: input.familyName ?? null,
+        familyBirthday: input.familyBirthday ?? null,
+        noRedeemReason: input.noRedeemReason ?? null,
+        notes: input.notes ?? null,
+        updatedBy: input.updatedBy ?? null,
+      },
+    });
   const rows = await db.select().from(birthdayCampaigns).where(eq(birthdayCampaigns.clientKey, input.clientKey)).limit(1);
   return rows[0] as BirthdayCampaign | undefined;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Plantillas de mensajes por etapa                                          */
+/* -------------------------------------------------------------------------- */
+
+export const DEFAULT_MESSAGE_TEMPLATES: { key: string; name: string; body: string }[] = [
+  {
+    key: "mes",
+    name: "Mes · planificación",
+    body:
+      "Hola {nombre} 👋 En Coronel estamos preparando algo especial por tu cumpleaños del {fecha}. ¿Te gustaría que te reservemos un detalle? Beneficio: {beneficio}.",
+  },
+  {
+    key: "semana",
+    name: "Semana · expectativa y reserva",
+    body:
+      "Hola {nombre}, falta menos de una semana para tu cumpleaños. Tenemos una sorpresa preparada para ti: {beneficio}. ¿Te la reservamos para el salón o para delivery?",
+  },
+  {
+    key: "dia",
+    name: "Día · confirmación y activación",
+    body:
+      "¡Feliz cumpleaños, {nombre}! 🎉 Hoy te espera tu {beneficio} en Coronel. ¿Te reservamos mesa para celebrar? También podemos enviarlo a tu casa.",
+  },
+  {
+    key: "seguimiento",
+    name: "Seguimiento · agradecimiento",
+    body:
+      "Gracias por celebrar con nosotros, {nombre} 🎂 ¿Nos cuentas cómo fue tu experiencia? Nos ayuda a atenderte mejor la próxima vez. Tu beneficio fue: {beneficio}.",
+  },
+];
+
+export async function listMessageTemplates() {
+  const db = await getDb();
+  if (!db) return [];
+  const existing = await db.select().from(messageTemplates).orderBy(messageTemplates.key);
+  if (existing.length >= DEFAULT_MESSAGE_TEMPLATES.length) return existing;
+  const present = new Set(existing.map(item => item.key));
+  const missing = DEFAULT_MESSAGE_TEMPLATES.filter(item => !present.has(item.key));
+  if (missing.length) {
+    await db.insert(messageTemplates).values(missing).onConflictDoNothing();
+    return db.select().from(messageTemplates).orderBy(messageTemplates.key);
+  }
+  return existing;
+}
+
+export async function saveMessageTemplate(key: string, body: string, updatedBy: string) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  const fallback = DEFAULT_MESSAGE_TEMPLATES.find(item => item.key === key);
+  await db
+    .insert(messageTemplates)
+    .values({ key, name: fallback?.name ?? key, body, updatedBy })
+    .onConflictDoUpdate({ target: messageTemplates.key, set: { body, updatedBy } });
+  return listMessageTemplates();
 }
 export async function getTeamTargets() {
   const db = await getDb();

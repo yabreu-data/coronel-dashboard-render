@@ -1356,3 +1356,104 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
   .birthday-toolbar { width: 100%; }
   .birthday-toolbar-month { flex: 1; }
 }
+
+/* ---------------------------------------------------------------------------
+   Cumpleaños v2 · semana, embudo, edición, modales y calendario con estados
+--------------------------------------------------------------------------- */
+.bw-week-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
+.bw-week-day { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 7px 4px; border: 1px solid #24405c; border-radius: 10px; background: #0b1a2c; }
+.bw-week-day small { color: #8fa6bd; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; }
+.bw-week-day b { color: #eaf3fb; font-size: 14px; }
+.bw-week-day span { color: #8fa6bd; font-size: 9.5px; }
+.bw-week-day.today { border-color: #54d6f5; background: #123a53; }
+.bw-week-day.today b { color: #8be7ff; }
+.bw-week-day.has-events span { color: #ffc45e; }
+
+.bw-funnel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.bw-funnel-step { padding: 9px 11px; border: 1px solid #24405c; border-radius: 11px; background: #0b1a2c; }
+.bw-funnel-step small { display: block; color: #8fa6bd; font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+.bw-funnel-step b { color: #eaf3fb; font-size: 17px; }
+.bw-bar { display: block; height: 5px; margin-top: 5px; border-radius: 999px; background: #16283e; overflow: hidden; }
+.bw-bar i { display: block; height: 100%; background: linear-gradient(90deg, #54d6f5, #59d9a5); }
+.bw-funnel-alert { grid-column: 1 / -1; padding: 7px 10px; border: 1px solid #b25d68; border-radius: 9px; background: #2a1620; color: #ffd7db; font-size: 11px; font-weight: 800; }
+
+.bw-templates-button { border: 1px dashed #54d6f5; border-radius: 9px; padding: 7px 10px; background: transparent; color: #8be7ff; font-size: 11px; font-weight: 800; cursor: pointer; }
+
+.bw-card { display: block; }
+.bw-card-top { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.bw-card.is-expanded { border-color: #3d6f96; }
+.bw-next { color: #ffc45e; font-size: 10px; font-weight: 800; }
+.bw-next.overdue { color: #ff8f9c; }
+.bw-reason { margin-top: 5px; color: #ffb3ba; font-size: 10.5px; font-weight: 700; }
+.bw-status button.warn { border-color: #b25d68; color: #ffd7db; }
+.bw-edit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #24405c; }
+.bw-edit label { display: flex; flex-direction: column; gap: 4px; }
+.bw-edit label > span { color: #8fa6bd; font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.bw-edit select, .bw-edit input { padding: 7px 9px; border: 1px solid #2a5270; border-radius: 8px; background: #0b1a2c; color: #eaf3fb; font-size: 11.5px; }
+.bw-quick-dates { display: flex; gap: 4px; margin-top: 4px; }
+.bw-quick-dates button { border: 1px solid #35516d; border-radius: 6px; padding: 3px 6px; background: #10243a; color: #cfe4f5; font-size: 9.5px; font-weight: 800; cursor: pointer; }
+.bw-quick-dates button:hover { border-color: #54d6f5; color: #8be7ff; }
+
+.bw-modal-backdrop { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(3, 8, 15, 0.72); }
+.bw-modal { width: min(520px, 100%); max-height: 85vh; overflow: auto; padding: 20px; border: 1px solid #2a5270; border-radius: 16px; background: #0c1627; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5); }
+.bw-modal-wide { width: min(840px, 100%); }
+.bw-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.bw-modal-head h3 { margin: 0; color: #eaf3fb; font-size: 17px; }
+.bw-modal-head button { border: 0; background: transparent; color: #9fb6cb; font-size: 22px; cursor: pointer; line-height: 1; }
+.bw-modal-phone { margin: 6px 0 12px; color: #fff; font-size: 24px; font-weight: 900; letter-spacing: 0.02em; }
+.bw-modal-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bw-modal-hint { margin: 10px 0; color: #8fa6bd; font-size: 11px; line-height: 1.5; }
+.bw-modal-register { margin-top: 14px; padding-top: 12px; border-top: 1px solid #1d3550; }
+.bw-modal-register b { display: block; margin-bottom: 8px; color: #fff; font-size: 12px; }
+.bw-history-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.bw-history-grid div { padding: 9px 10px; border: 1px solid #24405c; border-radius: 10px; background: #0b1a2c; }
+.bw-history-grid small { display: block; color: #8fa6bd; font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+.bw-history-grid b { color: #eaf3fb; font-size: 12px; }
+.bw-history-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.bw-history-columns > div > b { display: block; margin-bottom: 6px; color: #fff; font-size: 12px; }
+.bw-history-columns ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow: auto; }
+.bw-history-columns li { display: flex; flex-direction: column; gap: 2px; padding: 8px 9px; border: 1px solid #24405c; border-radius: 9px; background: #0b1a2c; color: #cbd9e6; font-size: 11px; }
+.bw-history-columns li em { color: #8fa6bd; font-style: normal; }
+.bw-playbook-tabs { display: flex; gap: 6px; margin: 6px 0 10px; flex-wrap: wrap; }
+.bw-playbook-tabs button { border: 1px solid #35516d; border-radius: 999px; padding: 6px 12px; background: #0f2136; color: #b9cee2; font-size: 11px; font-weight: 800; cursor: pointer; }
+.bw-playbook-tabs button.active { border-color: #54d6f5; background: #123a53; color: #8be7ff; }
+.bw-template-textarea { width: 100%; padding: 10px 12px; border: 1px solid #2a5270; border-radius: 10px; background: #0b1a2c; color: #eaf3fb; font-size: 12px; line-height: 1.55; resize: vertical; }
+
+/* Calendario con estados visibles */
+.birthday-calendar-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: #9fb6cb; font-size: 10px; }
+.birthday-calendar-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.birthday-calendar-legend span::before { content: ""; width: 10px; height: 10px; border-radius: 3px; }
+.birthday-calendar-legend .legend-today::before { background: #54d6f5; }
+.birthday-calendar-legend .legend-birthday::before { background: #ffc45e; }
+.birthday-calendar-legend .legend-selected::before { background: transparent; border: 2px solid #8be7ff; }
+.birthday-calendar-day { border: 1px solid #1f3b57; border-radius: 10px; background: #0b1a2c; color: #cfe4f5; }
+.birthday-calendar-day.today { border-color: #54d6f5; background: #123a53; color: #8be7ff; box-shadow: inset 0 0 0 2px rgba(84, 214, 245, 0.45); }
+.birthday-calendar-day.today strong { color: #8be7ff; }
+.birthday-calendar-day.has-birthdays { border-color: rgba(255, 196, 94, 0.55); background: rgba(255, 196, 94, 0.1); }
+.birthday-calendar-day.has-birthdays.today { border-color: #54d6f5; background: #123a53; box-shadow: inset 0 0 0 2px rgba(84, 214, 245, 0.45); }
+.birthday-calendar-day.selected { border-color: #8be7ff; background: #1a4a66; box-shadow: 0 0 0 2px rgba(139, 231, 255, 0.45); }
+
+@media (max-width: 1100px) {
+  .bw-funnel { grid-template-columns: 1fr 1fr; }
+  .bw-card-top { grid-template-columns: 52px minmax(0, 1fr); }
+  .bw-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+  .bw-actions .bw-action { flex: 1; }
+}
+@media (max-width: 900px) {
+  .bw-edit { grid-template-columns: 1fr 1fr; }
+  .bw-history-grid { grid-template-columns: 1fr 1fr; }
+  .bw-history-columns { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .bw-week-strip { gap: 3px; }
+  .bw-week-day { padding: 6px 2px; }
+  .bw-edit { grid-template-columns: 1fr; }
+  .bw-modal { max-height: 90vh; padding: 16px; }
+  .bw-history-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Ajustes finales Cumpleaños v2 */
+.birthday-calendar-compact .birthday-calendar-grid { max-width: none; }
+.birthday-page-intro { flex-wrap: wrap; gap: 14px; }
+.birthday-toolbar { justify-content: flex-end; }
+.bw-footer { justify-content: flex-start; }

@@ -218,7 +218,21 @@ async function getSurveyPayload(sheet: string) {
 /* -------------------------------------------------------------------------- */
 
 const callInput = z.object({ clientKey: z.string().min(1), clientName: z.string().min(1), phone: z.string().optional(), callDate: z.string().optional(), outcome: z.string().min(1), promotion: z.string().optional(), promotionRedeemed: z.boolean().default(false), nextCallDate: z.string().optional(), recoveryResult: z.string().optional(), notes: z.string().optional(), assignedTo: z.string().max(160).optional(), campaignStage: z.enum(["week", "soon", "tomorrow", "today", "past"]).optional(), campaignChannel: z.enum(["llamada", "whatsapp", "correo", "sms"]).optional() });
-const birthdayCampaignInput = z.object({ clientKey: z.string().min(1), clientName: z.string().min(1), phone: z.string().optional(), stage: z.enum(["week", "soon", "tomorrow", "today", "past"]), channel: z.enum(["llamada", "whatsapp", "correo", "sms"]) });
+const birthdayCampaignInput = z.object({
+  clientKey: z.string().min(1),
+  clientName: z.string().min(1),
+  phone: z.string().optional(),
+  stage: z.enum(["week", "soon", "tomorrow", "today", "past"]),
+  channel: z.enum(["llamada", "whatsapp", "correo", "sms"]),
+  promotion: z.string().max(180).optional(),
+  responsible: z.string().max(160).optional(),
+  nextActionAt: z.string().datetime().nullable().optional(),
+  nextActionLabel: z.string().max(120).optional(),
+  familyName: z.string().max(160).optional(),
+  familyBirthday: z.string().max(20).optional(),
+  noRedeemReason: z.string().max(200).optional(),
+  notes: z.string().max(1000).optional(),
+});
 const teamTargetsInput = z.object({ surveysPerServer: z.number().int().min(1).max(10000), surveysPerDelivery: z.number().int().min(1).max(10000), positiveQualityPercent: z.number().int().min(1).max(100) });
 const priorityInput = z.object({ priorityKey: z.string().min(1).max(220), status: z.enum(["pending", "in_progress", "done"]), responsible: z.string().max(160).optional(), dueDate: z.string().datetime().nullable().optional() });
 
@@ -293,7 +307,19 @@ export const appRouter = router({
     list: protectedProcedure.query(() => db.listBirthdayCampaigns()),
     save: protectedProcedure
       .input(birthdayCampaignInput)
-      .mutation(({ input, ctx }) => db.saveBirthdayCampaign({ ...input, updatedBy: currentActor(ctx) })),
+      .mutation(({ input, ctx }) =>
+        db.saveBirthdayCampaign({
+          ...input,
+          nextActionAt: input.nextActionAt ? new Date(input.nextActionAt) : null,
+          updatedBy: currentActor(ctx),
+        })
+      ),
+  }),
+  messageTemplates: router({
+    list: protectedProcedure.query(() => db.listMessageTemplates()),
+    save: protectedProcedure
+      .input(z.object({ key: z.enum(["mes", "semana", "dia", "seguimiento"]), body: z.string().min(10).max(2000) }))
+      .mutation(({ input, ctx }) => db.saveMessageTemplate(input.key, input.body, currentActor(ctx))),
   }),
   targets: router({
     get: publicProcedure.query(() => db.getTeamTargets()),

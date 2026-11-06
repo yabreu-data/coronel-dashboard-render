@@ -114,9 +114,13 @@ Requisito de configuración (ya aplicado en este proyecto): en Supabase → Auth
 |---|---|
 | ![Panel](docs/screenshots/dashboard.png) | ![Móvil](docs/screenshots/login-mobile.png) |
 
-| Pestaña Cumpleaños (rediseñada) | Protocolo del equipo |
+| Cumpleaños (métricas, semana y embudo) | Calendario con estados visibles |
 |---|---|
-| ![Cumpleaños](docs/screenshots/birthday.png) | ![Protocolo](docs/screenshots/birthday-protocol.png) |
+| ![Cumpleaños](docs/screenshots/birthday.png) | ![Calendario](docs/screenshots/birthday-calendar.png) |
+
+| Tarjeta editable (promoción, próxima acción, familia) | Mensajes de WhatsApp editables |
+|---|---|
+| ![Edición](docs/screenshots/birthday-edit.png) | ![Plantillas](docs/screenshots/birthday-templates.png) |
 
 ## Identidad visual
 

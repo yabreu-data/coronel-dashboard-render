@@ -74,6 +74,14 @@ export const birthdayCampaigns = pgTable("birthday_campaigns", {
   phone: varchar("phone", { length: 40 }),
   stage: text("stage", { enum: ["week", "soon", "tomorrow", "today", "past"] }).notNull().default("week"),
   channel: text("channel", { enum: ["llamada", "whatsapp", "correo", "sms"] }).notNull().default("llamada"),
+  promotion: varchar("promotion", { length: 180 }),
+  responsible: varchar("responsible", { length: 160 }),
+  nextActionAt: timestamp("nextActionAt"),
+  nextActionLabel: varchar("nextActionLabel", { length: 120 }),
+  familyName: varchar("familyName", { length: 160 }),
+  familyBirthday: varchar("familyBirthday", { length: 20 }),
+  noRedeemReason: varchar("noRedeemReason", { length: 200 }),
+  notes: text("notes"),
   updatedBy: varchar("updatedBy", { length: 160 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt")
@@ -82,6 +90,21 @@ export const birthdayCampaigns = pgTable("birthday_campaigns", {
     .notNull(),
 });
 export type BirthdayCampaign = typeof birthdayCampaigns.$inferSelect;
+
+/** Plantillas de mensajes editables (WhatsApp / correo) por etapa del protocolo. */
+export const messageTemplates = pgTable("message_templates", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 60 }).notNull().unique(),
+  name: varchar("name", { length: 120 }).notNull(),
+  body: text("body").notNull(),
+  updatedBy: varchar("updatedBy", { length: 160 }),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+export type MessageTemplate = typeof messageTemplates.$inferSelect;
+export type InsertMessageTemplate = typeof messageTemplates.$inferInsert;
 export type InsertBirthdayCampaign = typeof birthdayCampaigns.$inferInsert;
 
 export const teamTargets = pgTable("team_targets", {

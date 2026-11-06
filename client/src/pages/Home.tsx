@@ -80,6 +80,7 @@ type CallLog = {
   campaignStage: CampaignStage | null;
   assignedTo: string | null;
   campaignChannel: CampaignChannel | null;
+  createdAt?: Date | string;
 };
 type CampaignStage = "week" | "soon" | "tomorrow" | "today" | "past";
 type BirthdayCampaign = {
@@ -89,6 +90,14 @@ type BirthdayCampaign = {
   phone: string | null;
   stage: "week" | "soon" | "tomorrow" | "today" | "past";
   channel: CampaignChannel;
+  promotion: string | null;
+  responsible: string | null;
+  nextActionAt: Date | string | null;
+  nextActionLabel: string | null;
+  familyName: string | null;
+  familyBirthday: string | null;
+  noRedeemReason: string | null;
+  notes: string | null;
   updatedBy: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -486,6 +495,11 @@ export default function Home() {
     undefined,
     { enabled: Boolean(user), staleTime: 0, refetchOnMount: "always" }
   );
+  const messageTemplatesQuery = trpc.messageTemplates.list.useQuery(undefined, {
+    enabled: Boolean(user),
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
   const prioritiesQuery = trpc.priorities.list.useQuery(undefined, {
     refetchInterval: 300000,
     staleTime: 120000,
@@ -1013,6 +1027,9 @@ export default function Home() {
                   promotions={(promotionsQuery.data ?? []) as PromotionItem[]}
                   campaigns={
                     (birthdayCampaignsQuery.data ?? []) as BirthdayCampaign[]
+                  }
+                  templates={
+                    (messageTemplatesQuery.data ?? []) as MessageTemplateItem[]
                   }
                   onNavigate={navigate}
                 />
@@ -2115,6 +2132,7 @@ type BirthdayMarketingItem = {
   promotion: string;
   template: string;
 };
+type MessageTemplateItem = { key: string; name: string; body: string };
 
 const BIRTHDAY_HORIZONS: {
   key: BirthdayHorizonKey;
@@ -2143,6 +2161,22 @@ const BIRTHDAY_HORIZONS: {
   },
 ];
 
+const BIRTHDAY_TEMPLATE_KEYS: Record<BirthdayHorizonKey, string> = {
+  mes: "mes",
+  semana: "semana",
+  dia: "dia",
+  seguimiento: "seguimiento",
+};
+
+const FALLBACK_TEMPLATES: Record<string, string> = {
+  mes: "Hola {nombre} 👋 En Coronel estamos preparando algo especial por tu cumpleaños del {fecha}. ¿Te gustaría que te reservemos un detalle? Beneficio: {beneficio}.",
+  semana:
+    "Hola {nombre}, falta menos de una semana para tu cumpleaños. Tenemos una sorpresa preparada para ti: {beneficio}. ¿Te la reservamos para el salón o para delivery?",
+  dia: "¡Feliz cumpleaños, {nombre}! 🎉 Hoy te espera tu {beneficio} en Coronel. ¿Te reservamos mesa para celebrar?",
+  seguimiento:
+    "Gracias por celebrar con nosotros, {nombre} 🎂 ¿Nos cuentas cómo fue tu experiencia? Nos ayuda a atenderte mejor la próxima vez.",
+};
+
 function birthdayHorizonOf(days: number): BirthdayHorizonKey {
   if (days < 0) return "seguimiento";
   if (days <= 3) return "dia";
@@ -2157,41 +2191,137 @@ function daysLabel(days: number) {
   return `Hace ${Math.abs(days)} día${Math.abs(days) === 1 ? "" : "s"}`;
 }
 
+function stageForDays(days: number): CampaignStage {
+  return days < 0
+    ? "past"
+    : days === 0
+      ? "today"
+      : days === 1
+        ? "tomorrow"
+        : days <= 3
+          ? "soon"
+          : "week";
+}
+
+function toDateInputValue(value: Date | string | null | undefined) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function dateInputToIso(value: string) {
+  if (!value) return null;
+  const date = new Date(`${value}T12:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function offsetDateInput(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return toDateInputValue(date);
+}
+
+function renderBirthdayTemplate(
+  body: string,
+  context: {
+    name: string;
+    date: string;
+    promotion: string;
+    dish: string;
+  }
+) {
+  return body
+    .replaceAll("{nombre}", context.name)
+    .replaceAll("{fecha}", context.date)
+    .replaceAll("{beneficio}", context.promotion)
+    .replaceAll("{plato}", context.dish)
+    .replaceAll("{negocio}", "Coronel");
+}
+
 function BirthdayWorkspace({
   items,
+  records,
+  profiles,
   logs,
+  promotions,
+  campaigns,
+  templates,
   monthName,
   selectedDate,
   onClearDate,
-  onOpenClients,
 }: {
   items: BirthdayMarketingItem[];
+  records: RecordItem[];
+  profiles: ClientProfile[];
   logs: CallLog[];
+  promotions: PromotionItem[];
+  campaigns: BirthdayCampaign[];
+  templates: MessageTemplateItem[];
   monthName: string;
   selectedDate: string | null;
   onClearDate: () => void;
-  onOpenClients: () => void;
 }) {
   const utils = trpc.useUtils();
-  const createLog = trpc.calls.create.useMutation({
+  const createCall = trpc.calls.create.useMutation({
     onSuccess: async () => {
       await utils.calls.list.invalidate();
+    },
+  });
+  const saveCampaign = trpc.birthdayCampaigns.save.useMutation({
+    onSuccess: async () => {
+      await utils.birthdayCampaigns.list.invalidate();
+    },
+  });
+  const saveTemplate = trpc.messageTemplates.save.useMutation({
+    onSuccess: async () => {
+      await utils.messageTemplates.list.invalidate();
+      setTemplateSaved(true);
+      window.setTimeout(() => setTemplateSaved(false), 2200);
     },
   });
   const [filter, setFilter] = useState<"todos" | BirthdayHorizonKey>("todos");
   const [query, setQuery] = useState("");
   const [onlyPending, setOnlyPending] = useState(false);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [callKey, setCallKey] = useState<string | null>(null);
+  const [historyKey, setHistoryKey] = useState<string | null>(null);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState("mes");
+  const [templateDraft, setTemplateDraft] = useState("");
+  const [templateSaved, setTemplateSaved] = useState(false);
   const [savedKey, setSavedKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const campaignByKey = useMemo(
+    () => new Map(campaigns.map(campaign => [campaign.clientKey, campaign])),
+    [campaigns]
+  );
+  const templateByKey = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const template of templates) map.set(template.key, template.body);
+    for (const [key, body] of Object.entries(FALLBACK_TEMPLATES)) {
+      if (!map.has(key)) map.set(key, body);
+    }
+    return map;
+  }, [templates]);
+
+  const todayStart = useMemo(() => {
+    const date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }, []);
 
   const rows = useMemo(
     () =>
       items.map(item => {
         const key = clientKeyOf(item.record);
+        const campaign = campaignByKey.get(key);
         const clientLogs = logs.filter(log => log.clientKey === key);
         const contacted = clientLogs.some(
           log =>
             log.outcome === "Contactado" ||
+            log.outcome === "Promoción aceptada" ||
+            log.outcome === "Promoción redimida" ||
             normalizeText(log.recoveryResult || "").includes("cumple")
         );
         const accepted = clientLogs.some(
@@ -2203,13 +2333,19 @@ function BirthdayWorkspace({
         return {
           item,
           key,
+          campaign,
           horizon: birthdayHorizonOf(item.days),
           contacted,
           accepted,
           redeemed,
         };
       }),
-    [items, logs]
+    [items, logs, campaignByKey]
+  );
+
+  const rowsByKey = useMemo(
+    () => new Map(rows.map(row => [row.key, row])),
+    [rows]
   );
 
   const counts = useMemo(
@@ -2224,25 +2360,55 @@ function BirthdayWorkspace({
   );
 
   const todayCount = rows.filter(row => row.item.days === 0).length;
-  const nextSevenCount = rows.filter(
-    row => row.item.days >= 0 && row.item.days <= 7
-  ).length;
   const contactedCount = rows.filter(row => row.contacted).length;
+  const acceptedCount = rows.filter(row => row.accepted).length;
   const redeemedCount = rows.filter(row => row.redeemed).length;
   const pendingCount = rows.filter(row => !row.contacted).length;
+
+  const weekDays = useMemo(() => {
+    const day = todayStart.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(todayStart);
+      date.setDate(date.getDate() + mondayOffset + index);
+      const iso = toDateInputValue(date);
+      const count = rows.filter(
+        row => toDateInputValue(row.item.target) === iso
+      ).length;
+      return {
+        iso,
+        label: date.toLocaleDateString("es-PE", { weekday: "short" }),
+        day: date.getDate(),
+        isToday: iso === toDateInputValue(todayStart),
+        count,
+      };
+    });
+  }, [rows, todayStart]);
+  const weekCount = weekDays.reduce((total, day) => total + day.count, 0);
+
+  const overdueCount = rows.filter(row => {
+    const next = row.campaign?.nextActionAt;
+    if (!next) return false;
+    const nextDate = new Date(next);
+    return (
+      nextDate < todayStart &&
+      !row.redeemed &&
+      row.item.days >= 0
+    );
+  }).length;
 
   const filteredRows = rows.filter(row => {
     if (filter !== "todos" && row.horizon !== filter) return false;
     if (onlyPending && row.contacted) return false;
     if (selectedDate) {
-      const target = row.item.target;
-      const key = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, "0")}-${String(target.getDate()).padStart(2, "0")}`;
-      if (key !== selectedDate) return false;
+      if (toDateInputValue(row.item.target) !== selectedDate) return false;
     }
     const search = normalizeText(query.trim());
     if (search) {
       const haystack = normalizeText(
-        `${row.item.record.clientName} ${row.item.record.phone} ${row.item.promotion}`
+        `${row.item.record.clientName} ${row.item.record.phone} ${
+          row.campaign?.promotion || row.item.promotion
+        }`
       );
       if (!haystack.includes(search)) return false;
     }
@@ -2263,64 +2429,154 @@ function BirthdayWorkspace({
       })
     : "";
 
-  const markStatus = (
-    row: (typeof rows)[number],
-    status: "contacted" | "accepted" | "redeemed"
-  ) => {
+  const promoteFor = (row: (typeof rows)[number]) =>
+    row.campaign?.promotion || row.item.promotion;
+
+  const templateFor = (row: (typeof rows)[number]) =>
+    templateByKey.get(BIRTHDAY_TEMPLATE_KEYS[row.horizon]) ??
+    FALLBACK_TEMPLATES[row.horizon];
+
+  const messageFor = (row: (typeof rows)[number]) => {
     const item = row.item;
-    const campaignStage: CampaignStage =
-      item.days < 0
-        ? "past"
-        : item.days === 0
-          ? "today"
-          : item.days === 1
-            ? "tomorrow"
-            : item.days <= 3
-              ? "soon"
-              : "week";
-    createLog.mutate(
+    const name = (item.record.clientName || "").trim().split(/\s+/)[0] || "amigo";
+    const date = item.target.toLocaleDateString("es-PE", {
+      day: "numeric",
+      month: "long",
+    });
+    return renderBirthdayTemplate(templateFor(row), {
+      name,
+      date,
+      promotion: promoteFor(row),
+      dish: item.profile?.dish || "tu plato favorito",
+    });
+  };
+
+  const persist = (
+    row: (typeof rows)[number],
+    patch: Partial<{
+      promotion: string;
+      responsible: string;
+      nextActionAt: string | null;
+      nextActionLabel: string;
+      familyName: string;
+      familyBirthday: string;
+      noRedeemReason: string;
+      channel: CampaignChannel;
+    }>
+  ) => {
+    const campaign = row.campaign;
+    saveCampaign.mutate(
       {
         clientKey: row.key,
         clientName:
-          item.record.clientName || item.profile?.name || "Cliente sin nombre",
-        phone: item.record.phone || item.profile?.phone || undefined,
-        outcome:
-          status === "contacted"
-            ? "Contactado"
-            : status === "accepted"
-              ? "Promoción aceptada"
-              : "Promoción redimida",
-        promotion: item.promotion,
-        promotionRedeemed: status === "redeemed",
-        campaignStage,
-        campaignChannel: "whatsapp",
-        recoveryResult:
-          status === "redeemed"
-            ? "Promoción redimida"
-            : status === "accepted"
-              ? "Promoción aceptada"
-              : "Por cumpleaños",
-        notes: `Protocolo ${row.horizon} · ${item.template}`,
+          row.item.record.clientName ||
+          row.item.profile?.name ||
+          "Cliente sin nombre",
+        phone: row.item.record.phone || row.item.profile?.phone || undefined,
+        stage: campaign?.stage ?? stageForDays(row.item.days),
+        channel: patch.channel ?? campaign?.channel ?? "whatsapp",
+        promotion: patch.promotion ?? campaign?.promotion ?? row.item.promotion,
+        responsible: patch.responsible ?? campaign?.responsible ?? "Cajera",
+        nextActionAt:
+          patch.nextActionAt !== undefined
+            ? patch.nextActionAt
+            : campaign?.nextActionAt
+              ? new Date(campaign.nextActionAt).toISOString()
+              : null,
+        nextActionLabel:
+          patch.nextActionLabel ?? campaign?.nextActionLabel ?? undefined,
+        familyName: patch.familyName ?? campaign?.familyName ?? undefined,
+        familyBirthday:
+          patch.familyBirthday ?? campaign?.familyBirthday ?? undefined,
+        noRedeemReason:
+          patch.noRedeemReason ?? campaign?.noRedeemReason ?? undefined,
       },
       {
         onSuccess: () => {
           setSavedKey(row.key);
-          window.setTimeout(() => setSavedKey(null), 2200);
-          void utils.calls.list.invalidate();
+          window.setTimeout(() => setSavedKey(null), 1800);
         },
       }
     );
   };
 
-  const copyTemplate = async (row: (typeof rows)[number]) => {
+  const registerCall = (
+    row: (typeof rows)[number],
+    status: "contacted" | "accepted" | "redeemed" | "rejected"
+  ) => {
+    const item = row.item;
+    const reason =
+      status === "rejected"
+        ? window.prompt(
+            "Motivo (precio, distancia, no vino, otro):",
+            "No vino"
+          ) || "No especificado"
+        : undefined;
+    createCall.mutate({
+      clientKey: row.key,
+      clientName:
+        item.record.clientName || item.profile?.name || "Cliente sin nombre",
+      phone: item.record.phone || item.profile?.phone || undefined,
+      outcome:
+        status === "contacted"
+          ? "Contactado"
+          : status === "accepted"
+            ? "Promoción aceptada"
+            : status === "redeemed"
+              ? "Promoción redimida"
+              : "No redimido",
+      promotion: promoteFor(row),
+      promotionRedeemed: status === "redeemed",
+      campaignStage: stageForDays(item.days),
+      campaignChannel: "whatsapp",
+      recoveryResult:
+        status === "redeemed"
+          ? "Promoción redimida"
+          : status === "accepted"
+            ? "Promoción aceptada"
+            : status === "rejected"
+              ? `No redimido: ${reason}`
+              : "Por cumpleaños",
+      notes: reason ? `Motivo: ${reason}` : `Mensaje: ${messageFor(row)}`,
+    });
+    if (status === "rejected" && reason) {
+      persist(row, { noRedeemReason: reason });
+    }
+    setSavedKey(row.key);
+    window.setTimeout(() => setSavedKey(null), 1800);
+  };
+
+  const copyMessage = async (row: (typeof rows)[number]) => {
     try {
-      await navigator.clipboard.writeText(row.item.template);
+      await navigator.clipboard.writeText(messageFor(row));
       setCopiedKey(row.key);
       window.setTimeout(() => setCopiedKey(null), 1800);
     } catch {
-      window.prompt("Copia el mensaje:", row.item.template);
+      window.prompt("Copia el mensaje:", messageFor(row));
     }
   };
+
+  const openTemplates = () => {
+    const first = templates.find(item => item.key === "mes");
+    setActiveTemplate("mes");
+    setTemplateDraft(first?.body ?? FALLBACK_TEMPLATES.mes);
+    setTemplatesOpen(true);
+  };
+
+  const switchTemplate = (key: string) => {
+    setActiveTemplate(key);
+    const found = templates.find(item => item.key === key);
+    setTemplateDraft(found?.body ?? FALLBACK_TEMPLATES[key] ?? "");
+  };
+
+  const callRow = callKey ? rowsByKey.get(callKey) : undefined;
+  const historyRow = historyKey ? rowsByKey.get(historyKey) : undefined;
+  const historyRecords = historyRow
+    ? records.filter(item => clientKeyOf(item) === historyRow.key)
+    : [];
+  const historyLogs = historyRow
+    ? logs.filter(log => log.clientKey === historyRow.key)
+    : [];
 
   const chipButton = (key: "todos" | BirthdayHorizonKey, label: string) => (
     <button
@@ -2341,15 +2597,15 @@ function BirthdayWorkspace({
           <b>{counts.todos}</b>
           <span>{pendingCount} sin contactar</span>
         </div>
+        <div className="bw-metric bw-metric-week">
+          <small>Esta semana</small>
+          <b>{weekCount}</b>
+          <span>lunes a domingo</span>
+        </div>
         <div className="bw-metric bw-metric-today">
           <small>Hoy</small>
           <b>{todayCount}</b>
           <span>felicitar y activar</span>
-        </div>
-        <div className="bw-metric bw-metric-week">
-          <small>Próximos 7 días</small>
-          <b>{nextSevenCount}</b>
-          <span>confirmar plan</span>
         </div>
         <div className="bw-metric bw-metric-contact">
           <small>Contactados</small>
@@ -2361,6 +2617,47 @@ function BirthdayWorkspace({
           <b>{redeemedCount}</b>
           <span>beneficio usado</span>
         </div>
+      </div>
+
+      <div className="bw-week-strip" aria-label="Cumpleaños de la semana">
+        {weekDays.map(day => (
+          <div
+            className={`bw-week-day ${day.isToday ? "today" : ""} ${day.count ? "has-events" : ""}`}
+            key={day.iso}
+          >
+            <small>{day.label}</small>
+            <b>{day.day}</b>
+            <span>{day.count ? `${day.count} ●` : "—"}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="bw-funnel">
+        <div className="bw-funnel-step">
+          <small>Base del mes</small>
+          <b>{counts.todos}</b>
+          <span className="bw-bar"><i style={{ width: "100%" }} /></span>
+        </div>
+        <div className="bw-funnel-step">
+          <small>Contactados</small>
+          <b>{contactedCount}</b>
+          <span className="bw-bar"><i style={{ width: `${counts.todos ? Math.round((contactedCount / counts.todos) * 100) : 0}%` }} /></span>
+        </div>
+        <div className="bw-funnel-step">
+          <small>Aceptaron</small>
+          <b>{acceptedCount}</b>
+          <span className="bw-bar"><i style={{ width: `${counts.todos ? Math.round((acceptedCount / counts.todos) * 100) : 0}%` }} /></span>
+        </div>
+        <div className="bw-funnel-step">
+          <small>Redimieron</small>
+          <b>{redeemedCount}</b>
+          <span className="bw-bar"><i style={{ width: `${counts.todos ? Math.round((redeemedCount / counts.todos) * 100) : 0}%` }} /></span>
+        </div>
+        {overdueCount > 0 && (
+          <div className="bw-funnel-alert">
+            {overdueCount} próxima(s) acción(es) vencida(s)
+          </div>
+        )}
       </div>
 
       <div className="bw-filters">
@@ -2391,6 +2688,9 @@ function BirthdayWorkspace({
             Filtrando: {selectedDateText} · Ver todo ✕
           </button>
         )}
+        <button className="bw-templates-button" onClick={openTemplates}>
+          Editar mensajes de WhatsApp
+        </button>
       </div>
 
       {groups.length === 0 ? (
@@ -2416,6 +2716,7 @@ function BirthdayWorkspace({
             <div className="bw-list">
               {group.rows.map(row => {
                 const item = row.item;
+                const campaign = row.campaign;
                 const phone = (
                   item.record.phone ||
                   item.profile?.phone ||
@@ -2426,98 +2727,266 @@ function BirthdayWorkspace({
                     ? `51${phone}`
                     : phone;
                 const whatsappHref = whatsappNumber
-                  ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(item.template)}`
-                  : "";
-                const callHref = phone
-                  ? `tel:+${phone.length === 9 ? "51" : ""}${phone}`
+                  ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageFor(row))}`
                   : "";
                 const date = item.target.toLocaleDateString("es-PE", {
                   day: "2-digit",
                   month: "short",
                 });
+                const expanded = expandedKey === row.key;
+                const nextActionValue = toDateInputValue(campaign?.nextActionAt);
+                const nextActionOverdue =
+                  campaign?.nextActionAt &&
+                  new Date(campaign.nextActionAt) < todayStart &&
+                  row.item.days >= 0;
                 return (
                   <article
-                    className={`bw-card bw-card-${row.horizon}`}
+                    className={`bw-card bw-card-${row.horizon} ${expanded ? "is-expanded" : ""}`}
                     key={row.key}
                   >
-                    <div className="bw-date">
-                      <b>{date.split(" ")[0]}</b>
-                      <small>{date.split(" ")[1]?.replace(".", "")}</small>
+                    <div className="bw-card-top">
+                      <div className="bw-date">
+                        <b>{date.split(" ")[0]}</b>
+                        <small>{date.split(" ")[1]?.replace(".", "")}</small>
+                      </div>
+                      <div className="bw-main">
+                        <div className="bw-title">
+                          <b>
+                            {item.record.clientName || "Cliente sin nombre"}
+                          </b>
+                          {item.profile?.segment && (
+                            <Pill
+                              tone={
+                                item.profile.segment === "Fiel"
+                                  ? "green"
+                                  : "blue"
+                              }
+                            >
+                              {item.profile.segment}
+                            </Pill>
+                          )}
+                          <span className="bw-days">
+                            {daysLabel(item.days)}
+                          </span>
+                          {campaign?.nextActionAt && (
+                            <span
+                              className={`bw-next ${nextActionOverdue ? "overdue" : ""}`}
+                            >
+                              Próxima acción:{" "}
+                              {nextActionOverdue
+                                ? "vencida"
+                                : new Date(campaign.nextActionAt).toLocaleDateString(
+                                    "es-PE",
+                                    { day: "2-digit", month: "short" }
+                                  )}
+                            </span>
+                          )}
+                        </div>
+                        <div className="bw-meta">
+                          {item.record.phone || "Sin teléfono"} ·{" "}
+                          {promoteFor(row)}
+                          {campaign?.responsible
+                            ? ` · ${campaign.responsible}`
+                            : ""}
+                        </div>
+                        <div className="bw-status">
+                          <button
+                            className={row.contacted ? "active" : ""}
+                            disabled={createCall.isPending}
+                            onClick={() => registerCall(row, "contacted")}
+                          >
+                            ✓ Contactado
+                          </button>
+                          <button
+                            className={row.accepted ? "active" : ""}
+                            disabled={createCall.isPending}
+                            onClick={() => registerCall(row, "accepted")}
+                          >
+                            ★ Aceptó
+                          </button>
+                          <button
+                            className={row.redeemed ? "active" : ""}
+                            disabled={createCall.isPending}
+                            onClick={() => registerCall(row, "redeemed")}
+                          >
+                            ● Redimió
+                          </button>
+                          <button
+                            className={campaign?.noRedeemReason ? "warn" : ""}
+                            disabled={createCall.isPending}
+                            onClick={() => registerCall(row, "rejected")}
+                          >
+                            ✕ No redimió
+                          </button>
+                        </div>
+                        {campaign?.noRedeemReason && (
+                          <div className="bw-reason">
+                            Motivo: {campaign.noRedeemReason}
+                          </div>
+                        )}
+                        {savedKey === row.key && (
+                          <div className="bw-saved">✓ Cambios guardados</div>
+                        )}
+                      </div>
+                      <div className="bw-actions">
+                        {whatsappHref ? (
+                          <a
+                            className="bw-action bw-action-whatsapp"
+                            href={whatsappHref}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <MessageSquareText size={13} /> WhatsApp
+                          </a>
+                        ) : (
+                          <span className="bw-action is-disabled">
+                            Sin teléfono
+                          </span>
+                        )}
+                        <button
+                          className="bw-action"
+                          onClick={() => setCallKey(row.key)}
+                        >
+                          <Phone size={13} /> Llamar
+                        </button>
+                        <button
+                          className="bw-action"
+                          onClick={() => setHistoryKey(row.key)}
+                        >
+                          Ver ficha
+                        </button>
+                        <button
+                          className="bw-action bw-action-copy"
+                          onClick={() => copyMessage(row)}
+                        >
+                          {copiedKey === row.key ? "✓ Copiado" : "Copiar"}
+                        </button>
+                        <button
+                          className="bw-action bw-action-edit"
+                          onClick={() =>
+                            setExpandedKey(expanded ? null : row.key)
+                          }
+                          aria-expanded={expanded}
+                        >
+                          {expanded ? "Cerrar" : "Ajustar"}
+                        </button>
+                      </div>
                     </div>
-                    <div className="bw-main">
-                      <div className="bw-title">
-                        <b>{item.record.clientName || "Cliente sin nombre"}</b>
-                        {item.profile?.segment && (
-                          <Pill
-                            tone={
-                              item.profile.segment === "Fiel" ? "green" : "blue"
+                    {expanded && (
+                      <div className="bw-edit">
+                        <label>
+                          <span>Promoción ofrecida</span>
+                          <select
+                            value={promoteFor(row)}
+                            onChange={event =>
+                              persist(row, { promotion: event.target.value })
                             }
                           >
-                            {item.profile.segment}
-                          </Pill>
-                        )}
-                        <span className="bw-days">{daysLabel(item.days)}</span>
+                            {promotions.map(promotion => (
+                              <option
+                                key={promotion.id}
+                                value={promotion.name}
+                              >
+                                {promotion.name}
+                              </option>
+                            ))}
+                            {!promotions.some(
+                              promotion =>
+                                promotion.name === promoteFor(row)
+                            ) && (
+                              <option value={promoteFor(row)}>
+                                {promoteFor(row)}
+                              </option>
+                            )}
+                          </select>
+                        </label>
+                        <label>
+                          <span>Responsable</span>
+                          <input
+                            defaultValue={campaign?.responsible ?? "Cajera"}
+                            key={`resp-${row.key}-${campaign?.responsible ?? ""}`}
+                            onBlur={event =>
+                              persist(row, {
+                                responsible: event.target.value.trim(),
+                              })
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Próxima acción</span>
+                          <input
+                            type="date"
+                            value={nextActionValue}
+                            onChange={event =>
+                              persist(row, {
+                                nextActionAt: dateInputToIso(
+                                  event.target.value
+                                ),
+                              })
+                            }
+                          />
+                          <span className="bw-quick-dates">
+                            {[1, 3, 7, 14].map(days => (
+                              <button
+                                key={days}
+                                type="button"
+                                onClick={() =>
+                                  persist(row, {
+                                    nextActionAt: dateInputToIso(
+                                      offsetDateInput(days)
+                                    ),
+                                  })
+                                }
+                              >
+                                +{days}d
+                              </button>
+                            ))}
+                          </span>
+                        </label>
+                        <label>
+                          <span>Familiar (nombre)</span>
+                          <input
+                            defaultValue={campaign?.familyName ?? ""}
+                            key={`fam-${row.key}-${campaign?.familyName ?? ""}`}
+                            placeholder="Si está en la nota"
+                            onBlur={event =>
+                              persist(row, {
+                                familyName: event.target.value.trim(),
+                              })
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Cumpleaños familiar</span>
+                          <input
+                            type="date"
+                            defaultValue={campaign?.familyBirthday ?? ""}
+                            key={`famb-${row.key}-${campaign?.familyBirthday ?? ""}`}
+                            onChange={event =>
+                              persist(row, {
+                                familyBirthday: event.target.value,
+                              })
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Canal</span>
+                          <select
+                            value={campaign?.channel ?? "whatsapp"}
+                            onChange={event =>
+                              persist(row, {
+                                channel: event.target.value as CampaignChannel,
+                              })
+                            }
+                          >
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="llamada">Llamada</option>
+                            <option value="correo">Correo</option>
+                            <option value="sms">SMS</option>
+                          </select>
+                        </label>
                       </div>
-                      <div className="bw-meta">
-                        {item.record.phone || "Sin teléfono"} ·{" "}
-                        {item.promotion}
-                      </div>
-                      {savedKey === row.key && (
-                        <div className="bw-saved">✓ Seguimiento guardado</div>
-                      )}
-                      <div className="bw-status">
-                        <button
-                          className={row.contacted ? "active" : ""}
-                          disabled={createLog.isPending}
-                          onClick={() => markStatus(row, "contacted")}
-                        >
-                          ✓ Contactado
-                        </button>
-                        <button
-                          className={row.accepted ? "active" : ""}
-                          disabled={createLog.isPending}
-                          onClick={() => markStatus(row, "accepted")}
-                        >
-                          ★ Aceptó
-                        </button>
-                        <button
-                          className={row.redeemed ? "active" : ""}
-                          disabled={createLog.isPending}
-                          onClick={() => markStatus(row, "redeemed")}
-                        >
-                          ● Redimida
-                        </button>
-                      </div>
-                    </div>
-                    <div className="bw-actions">
-                      {whatsappHref ? (
-                        <a
-                          className="bw-action bw-action-whatsapp"
-                          href={whatsappHref}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <MessageSquareText size={13} /> WhatsApp
-                        </a>
-                      ) : (
-                        <span className="bw-action is-disabled">
-                          Sin teléfono
-                        </span>
-                      )}
-                      {callHref && (
-                        <a className="bw-action" href={callHref}>
-                          <Phone size={13} /> Llamar
-                        </a>
-                      )}
-                      <button
-                        className="bw-action bw-action-copy"
-                        onClick={() => copyTemplate(row)}
-                      >
-                        {copiedKey === row.key
-                          ? "✓ Copiado"
-                          : "Copiar mensaje"}
-                      </button>
-                    </div>
+                    )}
                   </article>
                 );
               })}
@@ -2526,15 +2995,199 @@ function BirthdayWorkspace({
         ))
       )}
 
+      {callRow && (
+        <div className="bw-modal-backdrop" onClick={() => setCallKey(null)}>
+          <div className="bw-modal" onClick={event => event.stopPropagation()}>
+            <div className="bw-modal-head">
+              <h3>Llamar a {callRow.item.record.clientName || "cliente"}</h3>
+              <button onClick={() => setCallKey(null)}>×</button>
+            </div>
+            <p className="bw-modal-phone">
+              {callRow.item.record.phone || "Sin teléfono registrado"}
+            </p>
+            {callRow.item.record.phone && (
+              <div className="bw-modal-actions">
+                <a
+                  className="bw-action bw-action-whatsapp"
+                  href={`tel:+${callRow.item.record.phone.replace(/\D/g, "").length === 9 ? "51" : ""}${callRow.item.record.phone.replace(/\D/g, "")}`}
+                >
+                  <Phone size={13} /> Llamar ahora
+                </a>
+                <button
+                  className="bw-action"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(
+                        callRow.item.record.phone || ""
+                      );
+                    } catch {
+                      window.prompt("Número:", callRow.item.record.phone || "");
+                    }
+                  }}
+                >
+                  Copiar número
+                </button>
+              </div>
+            )}
+            <p className="bw-modal-hint">
+              En computadora el enlace de llamada puede no abrir nada: copia el
+              número y márcalo desde el teléfono del restaurante.
+            </p>
+            <div className="bw-modal-register">
+              <b>Registrar resultado</b>
+              <div className="bw-status">
+                <button onClick={() => { registerCall(callRow, "contacted"); setCallKey(null); }}>
+                  ✓ Contactado
+                </button>
+                <button onClick={() => { registerCall(callRow, "accepted"); setCallKey(null); }}>
+                  ★ Aceptó
+                </button>
+                <button onClick={() => { registerCall(callRow, "redeemed"); setCallKey(null); }}>
+                  ● Redimió
+                </button>
+                <button onClick={() => { registerCall(callRow, "rejected"); setCallKey(null); }}>
+                  ✕ No redimió
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {historyRow && (
+        <div className="bw-modal-backdrop" onClick={() => setHistoryKey(null)}>
+          <div className="bw-modal bw-modal-wide" onClick={event => event.stopPropagation()}>
+            <div className="bw-modal-head">
+              <h3>
+                Ficha de {historyRow.item.record.clientName || "cliente"}
+              </h3>
+              <button onClick={() => setHistoryKey(null)}>×</button>
+            </div>
+            <div className="bw-history-grid">
+              <div>
+                <small>Teléfono</small>
+                <b>{historyRow.item.record.phone || "—"}</b>
+              </div>
+              <div>
+                <small>Cumpleaños</small>
+                <b>{historyRow.item.record.birthday || "—"}</b>
+              </div>
+              <div>
+                <small>Segmento</small>
+                <b>{historyRow.item.profile?.segment || "—"}</b>
+              </div>
+              <div>
+                <small>Plato favorito</small>
+                <b>{historyRow.item.profile?.dish || "—"}</b>
+              </div>
+              <div>
+                <small>Promoción</small>
+                <b>{promoteFor(historyRow)}</b>
+              </div>
+              <div>
+                <small>Responsable</small>
+                <b>{historyRow.campaign?.responsible || "Cajera"}</b>
+              </div>
+              <div>
+                <small>Próxima acción</small>
+                <b>{toDateInputValue(historyRow.campaign?.nextActionAt) || "Sin fecha"}</b>
+              </div>
+              <div>
+                <small>Familiares</small>
+                <b>
+                  {historyRow.campaign?.familyName
+                    ? `${historyRow.campaign.familyName}${historyRow.campaign.familyBirthday ? ` · ${historyRow.campaign.familyBirthday}` : ""}`
+                    : "—"}
+                </b>
+              </div>
+            </div>
+            <div className="bw-history-columns">
+              <div>
+                <b>Visitas y encuestas ({historyRecords.length})</b>
+                <ul>
+                  {historyRecords.slice(-8).reverse().map(record => (
+                    <li key={`${record.id}-${record.timestamp}`}>
+                      <span>{record.timestamp}</span>
+                      <span>{record.quality || "Sin calidad"}</span>
+                      <em>{record.comment || record.dish || "Sin comentario"}</em>
+                    </li>
+                  ))}
+                  {!historyRecords.length && <li>Sin visitas registradas.</li>}
+                </ul>
+              </div>
+              <div>
+                <b>Contactos ({historyLogs.length})</b>
+                <ul>
+                  {historyLogs.slice(-8).reverse().map(log => (
+                    <li key={log.id}>
+                      <span>
+                        {new Date(log.callDate).toLocaleDateString("es-PE")}
+                      </span>
+                      <span>{log.outcome}</span>
+                      <em>{log.recoveryResult || log.notes || ""}</em>
+                    </li>
+                  ))}
+                  {!historyLogs.length && <li>Sin contactos registrados.</li>}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {templatesOpen && (
+        <div className="bw-modal-backdrop" onClick={() => setTemplatesOpen(false)}>
+          <div className="bw-modal bw-modal-wide" onClick={event => event.stopPropagation()}>
+            <div className="bw-modal-head">
+              <h3>Mensajes de WhatsApp por etapa</h3>
+              <button onClick={() => setTemplatesOpen(false)}>×</button>
+            </div>
+            <p className="bw-modal-hint">
+              Variables: {"{nombre}"}, {"{fecha}"}, {"{beneficio}"},{" "}
+              {"{plato}"}. Se reemplazan solas al abrir WhatsApp o copiar.
+            </p>
+            <div className="bw-playbook-tabs">
+              {(["mes", "semana", "dia", "seguimiento"] as const).map(key => (
+                <button
+                  key={key}
+                  className={activeTemplate === key ? "active" : ""}
+                  onClick={() => switchTemplate(key)}
+                >
+                  {key === "dia" ? "Día" : key.charAt(0).toUpperCase() + key.slice(1)}
+                </button>
+              ))}
+            </div>
+            <textarea
+              className="bw-template-textarea"
+              value={templateDraft}
+              onChange={event => setTemplateDraft(event.target.value)}
+              rows={7}
+            />
+            <div className="bw-modal-actions">
+              <button
+                className="bw-action bw-action-whatsapp"
+                onClick={() =>
+                  saveTemplate.mutate({
+                    key: activeTemplate as "mes" | "semana" | "dia" | "seguimiento",
+                    body: templateDraft,
+                  })
+                }
+                disabled={saveTemplate.isPending}
+              >
+                {saveTemplate.isPending ? "Guardando…" : "Guardar plantilla"}
+              </button>
+              {templateSaved && <span className="bw-saved">✓ Guardado</span>}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bw-footer">
         <small>
-          Responsable sugerido: <b>cajera</b> en horario de baja demanda. El
-          mensaje de WhatsApp ya incluye nombre, fecha, beneficio y plato
+          Responsable sugerido: <b>cajera</b> en horario de baja demanda.
+          WhatsApp ya lleva el mensaje con nombre, fecha, beneficio y plato
           favorito.
         </small>
-        <button className="secondary-action" onClick={onOpenClients}>
-          Ver clientes en CRM
-        </button>
       </div>
     </section>
   );
@@ -2846,6 +3499,7 @@ function BirthdayPage({
   logs,
   promotions,
   campaigns,
+  templates,
   onNavigate,
 }: {
   records: RecordItem[];
@@ -2853,6 +3507,7 @@ function BirthdayPage({
   logs: CallLog[];
   promotions: PromotionItem[];
   campaigns: BirthdayCampaign[];
+  templates: MessageTemplateItem[];
   onNavigate: (page: Page, filter?: string, focus?: OverviewFocus) => void;
 }) {
   const now = new Date();
@@ -2911,9 +3566,8 @@ function BirthdayPage({
           <Pill tone="orange">🎂 CUMPLEAÑOS</Pill>
           <h2>Agenda y seguimiento</h2>
           <p>
-            Prioriza por día, semana y mes: abre WhatsApp o llama, marca el
-            avance y no dejes pasar un cumpleaños. El protocolo completo está al
-            final de la página.
+            Prioriza por día, semana y mes: abre WhatsApp o llama, registra la
+            promoción, la próxima acción y el avance de cada cliente.
           </p>
         </div>
         <div className="birthday-toolbar">
@@ -2945,15 +3599,6 @@ function BirthdayPage({
         </div>
       </div>
 
-      <BirthdayWorkspace
-        items={items}
-        logs={logs}
-        monthName={monthName}
-        selectedDate={selectedDate}
-        onClearDate={() => setSelectedDate(null)}
-        onOpenClients={() => onNavigate("clients", undefined, "birthdays")}
-      />
-
       {showCalendar && (
         <section className="panel birthday-calendar-panel birthday-calendar-compact">
           <div className="panel-head birthday-calendar-head">
@@ -2961,17 +3606,22 @@ function BirthdayPage({
               <p className="eyebrow">CALENDARIO DEL MES</p>
               <h3>{monthName}</h3>
               <small className="muted">
-                Selecciona un día para filtrar el listado de arriba.
+                Selecciona un día para filtrar el listado de abajo.
               </small>
             </div>
-            {selectedDate && (
-              <button
-                className="birthday-clear-date"
-                onClick={() => setSelectedDate(null)}
-              >
-                Ver todo el mes
-              </button>
-            )}
+            <div className="birthday-calendar-legend">
+              <span className="legend-today">Hoy</span>
+              <span className="legend-birthday">Con cumpleaños</span>
+              <span className="legend-selected">Seleccionado</span>
+              {selectedDate && (
+                <button
+                  className="birthday-clear-date"
+                  onClick={() => setSelectedDate(null)}
+                >
+                  Ver todo el mes
+                </button>
+              )}
+            </div>
           </div>
           <div className="birthday-calendar-weekdays">
             {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map(day => (
@@ -3037,6 +3687,19 @@ function BirthdayPage({
           )}
         </section>
       )}
+
+      <BirthdayWorkspace
+        items={items}
+        records={records}
+        profiles={profiles}
+        logs={logs}
+        promotions={promotions}
+        campaigns={campaigns}
+        templates={templates}
+        monthName={monthName}
+        selectedDate={selectedDate}
+        onClearDate={() => setSelectedDate(null)}
+      />
 
       <BirthdayPlaybook />
     </>
