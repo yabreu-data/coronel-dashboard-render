@@ -1092,7 +1092,7 @@ function verificarCapaLimpia() {
 
   Logger.log('=== Verificación de capa limpia ===');
   Logger.log(JSON.stringify(resumen));
-  if (limpia) {
+  if (limpia && limpia.getLastColumn() > 0) {
     const headers = limpia.getRange(1, 1, 1, limpia.getLastColumn()).getValues()[0].map(String);
     Logger.log('Encuestas_Limpias · columnas: ' + headers.length);
     Logger.log('Contrato: ' + headers.filter(function (h) {
