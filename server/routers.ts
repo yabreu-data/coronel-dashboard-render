@@ -336,6 +336,7 @@ export const appRouter = router({
           assignedTo: values.assignedTo ?? null,
         });
         if (!updated) throw new TRPCError({ code: "NOT_FOUND", message: "Registro de llamada no encontrado" });
+        await db.syncBirthdayProgressFromHistory(updated.clientKey);
         await db.recordAdminAudit({
           entity: "llamada",
           action: "editada",
@@ -353,6 +354,7 @@ export const appRouter = router({
           throw new TRPCError({ code: "FORBIDDEN", message: "Solo un administrador puede eliminar registros de llamadas" });
         }
         const result = await db.deleteCallLog(input.id);
+        if (result.clientKey) await db.syncBirthdayProgressFromHistory(result.clientKey);
         await db.recordAdminAudit({
           entity: "llamada",
           action: "eliminada",

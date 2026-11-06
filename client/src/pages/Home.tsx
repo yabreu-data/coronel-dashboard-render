@@ -6129,6 +6129,7 @@ function CallsHistory({
       await Promise.all([
         utils.calls.list.invalidate(),
         utils.adminAudit.list.invalidate(),
+        utils.birthdayCampaigns.list.invalidate(),
       ]);
       setEditLog(null);
     },
@@ -6138,6 +6139,7 @@ function CallsHistory({
       await Promise.all([
         utils.calls.list.invalidate(),
         utils.adminAudit.list.invalidate(),
+        utils.birthdayCampaigns.list.invalidate(),
       ]);
     },
   });

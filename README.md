@@ -70,6 +70,7 @@ pnpm dev                  # http://localhost:3000
 | `pnpm db:import` | Importa `database/coronel-data.json` a PostgreSQL |
 | `pnpm keepalive:setup` / `status` / `test` / `remove` | Keep-alive de Render vía `pg_cron` + `pg_net` de Supabase |
 | `node scripts/smoke-test.mjs <url>` | Prueba end-to-end contra un servidor desplegado |
+| `node scripts/verify-sheets.mjs <url>` | Verifica la fuente Google Sheets y la pestaña productiva |
 | `node scripts/smoke-access.mjs <url>` | Prueba end-to-end del flujo de altas, aprobación y recuperación |
 
 ## Autenticación
@@ -136,6 +137,8 @@ Para reemplazar el logo por el oficial: guarda el archivo nuevo como `client/pub
 ## Análisis y roadmap
 
 Ver [docs/ANALISIS_SISTEMA_GESTION.md](docs/ANALISIS_SISTEMA_GESTION.md): inventario de módulos, diagnóstico, protocolo de cumpleaños propuesto, pulso de meseros/productos y roadmap por fases.
+
+Fuente de datos y revisión del Apps Script: [docs/FUENTE_DATOS_GOOGLE_SHEETS.md](docs/FUENTE_DATOS_GOOGLE_SHEETS.md).
 
 ## Despliegue
 

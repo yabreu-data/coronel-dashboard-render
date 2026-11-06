@@ -132,8 +132,64 @@ export async function updateCallLog(input: {
 export async function deleteCallLog(id: number) {
   const db = await getDb();
   if (!db) throw new Error("La base de datos no está disponible");
+  const rows = await db.select().from(callLogs).where(eq(callLogs.id, id)).limit(1);
+  const target = rows[0];
+  if (!target) return { success: true as const, clientKey: null as string | null };
   await db.delete(callLogs).where(eq(callLogs.id, id));
-  return { success: true } as const;
+  return { success: true as const, clientKey: target.clientKey };
+}
+
+/**
+ * Sincroniza el estado del cumpleaños con el historial de llamadas.
+ * Se usa al editar o eliminar un registro del historial: el estado del
+ * cliente vuelve a reflejar el contacto más reciente que quede.
+ */
+export async function syncBirthdayProgressFromHistory(clientKey: string) {
+  const db = await getDb();
+  if (!db) return;
+  const campaignRows = await db
+    .select()
+    .from(birthdayCampaigns)
+    .where(eq(birthdayCampaigns.clientKey, clientKey))
+    .limit(1);
+  const campaign = campaignRows[0];
+  if (!campaign) return;
+
+  const logs = await db
+    .select()
+    .from(callLogs)
+    .where(eq(callLogs.clientKey, clientKey))
+    .orderBy(desc(callLogs.callDate), desc(callLogs.id))
+    .limit(50);
+
+  const newest = logs[0];
+  let progressStatus: "pending" | "contacted" | "accepted" | "redeemed" | "rejected" | "noanswer" = "pending";
+  if (newest) {
+    const text = String(newest.outcome || "").toLowerCase();
+    if (text.includes("no contest")) progressStatus = "noanswer";
+    else if (text.includes("no redim")) progressStatus = "rejected";
+    else if (Boolean(newest.promotionRedeemed) || text.includes("redim")) progressStatus = "redeemed";
+    else if (text.includes("acept")) progressStatus = "accepted";
+    else progressStatus = "contacted";
+  }
+
+  const patch: Record<string, unknown> = { progressStatus, updatedAt: new Date() };
+  if (progressStatus === "noanswer" && campaign.nextActionLabel !== "Reintentar llamada") {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(12, 0, 0, 0);
+    patch.nextActionAt = tomorrow;
+    patch.nextActionLabel = "Reintentar llamada";
+  }
+  if (progressStatus !== "noanswer" && campaign.nextActionLabel === "Reintentar llamada") {
+    patch.nextActionAt = null;
+    patch.nextActionLabel = null;
+  }
+
+  await db
+    .update(birthdayCampaigns)
+    .set(patch as Partial<typeof birthdayCampaigns.$inferInsert>)
+    .where(eq(birthdayCampaigns.clientKey, clientKey));
 }
 export async function listBirthdayCampaigns() {
   const db = await getDb();
