@@ -104,6 +104,16 @@ Seguridad adicional: el servidor **no auto-registra** cuentas de Supabase arbitr
 
 Requisito de configuración (ya aplicado en este proyecto): en Supabase → Authentication → URL Configuration deben estar el **Site URL** (`https://coronel-dashboard.onrender.com`) y los **Redirect URLs** (`https://coronel-dashboard.onrender.com/**`, `http://localhost:3000/**`, `http://localhost:5173/**`). Ver [`docs/DEPLOY_RENDER_SUPABASE.md`](docs/DEPLOY_RENDER_SUPABASE.md).
 
+## Capturas
+
+| Inicio de sesión | Splash de carga |
+|---|---|
+| ![Inicio de sesión](docs/screenshots/login.png) | ![Splash](docs/screenshots/splash.png) |
+
+| Login en móvil | Solicitudes pendientes | Aprobación con contraseña temporal |
+|---|---|---|
+| ![Móvil](docs/screenshots/login-mobile.png) | ![Solicitudes](docs/screenshots/admin-solicitudes.png) | ![Aprobado](docs/screenshots/admin-aprobado.png) |
+
 ## Despliegue
 
 Ver [`docs/DEPLOY_RENDER_SUPABASE.md`](docs/DEPLOY_RENDER_SUPABASE.md) y [`docs/MIGRACION_BASE_DATOS.md`](docs/MIGRACION_BASE_DATOS.md).

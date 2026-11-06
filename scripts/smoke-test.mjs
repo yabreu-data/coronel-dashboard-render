@@ -40,6 +40,13 @@ const tempEmail = `smoke-test-${Date.now()}@coronel.local`;
 const tempPassword = `Smoke-${Math.random().toString(36).slice(2)}-Aa1!`;
 let tempUserId = null;
 
+const serviceDb = DATABASE_URL
+  ? new pg.Client({
+      connectionString: DATABASE_URL,
+      ssl: /localhost|127\.0\.0\.1/.test(DATABASE_URL) ? undefined : { rejectUnauthorized: false },
+    })
+  : null;
+
 async function supabaseAdmin(path, options = {}) {
   const response = await fetch(`${SUPABASE_URL}${path}`, {
     ...options,
@@ -54,18 +61,13 @@ async function supabaseAdmin(path, options = {}) {
 }
 
 async function cleanup() {
-  if (DATABASE_URL) {
-    const client = new pg.Client({
-      connectionString: DATABASE_URL,
-      ssl: /localhost|127\.0\.0\.1/.test(DATABASE_URL) ? undefined : { rejectUnauthorized: false },
-    });
-    await client.connect().catch(() => undefined);
-    await client.query(`DELETE FROM public."birthday_campaigns" WHERE "clientKey" LIKE 'SMOKE-TEST%'`).catch(() => undefined);
+  if (serviceDb) {
+    await serviceDb.query(`DELETE FROM public."birthday_campaigns" WHERE "clientKey" LIKE 'SMOKE-TEST%'`).catch(() => undefined);
     if (tempUserId) {
-      await client.query(`DELETE FROM public."session_history" WHERE "openId" = $1`, [tempUserId]).catch(() => undefined);
-      await client.query(`DELETE FROM public."users" WHERE "openId" = $1`, [tempUserId]).catch(() => undefined);
+      await serviceDb.query(`DELETE FROM public."session_history" WHERE "openId" = $1`, [tempUserId]).catch(() => undefined);
+      await serviceDb.query(`DELETE FROM public."users" WHERE "openId" = $1`, [tempUserId]).catch(() => undefined);
     }
-    await client.end().catch(() => undefined);
+    await serviceDb.end().catch(() => undefined);
   }
   if (tempUserId) await supabaseAdmin(`/auth/v1/admin/users/${tempUserId}`, { method: "DELETE" }).catch(() => undefined);
 }
@@ -134,6 +136,20 @@ async function main() {
   }
   tempUserId = createdPayload.id;
   record("Supabase Auth: crear usuario temporal", Boolean(tempUserId), tempEmail);
+
+  // El acceso requiere aprobación: se registra su fila local como aprobada.
+  if (serviceDb) {
+    try {
+      await serviceDb.connect().catch(() => undefined);
+      await serviceDb.query(
+        `INSERT INTO public."users" ("openId", "name", "email", "loginMethod", "role", "active") VALUES ($1, 'Smoke Test', $2, 'supabase', 'user', 1)`,
+        [tempUserId, tempEmail]
+      );
+      record("usuario temporal aprobado en users", true, tempEmail);
+    } catch (error) {
+      record("usuario temporal aprobado en users", false, error instanceof Error ? error.message : String(error));
+    }
+  }
 
   const tokenResponse = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
