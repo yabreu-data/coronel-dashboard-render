@@ -71,6 +71,7 @@ pnpm dev                  # http://localhost:3000
 | `pnpm keepalive:setup` / `status` / `test` / `remove` | Keep-alive de Render vía `pg_cron` + `pg_net` de Supabase |
 | `node scripts/smoke-test.mjs <url>` | Prueba end-to-end contra un servidor desplegado |
 | `node scripts/verify-sheets.mjs <url>` | Verifica la fuente Google Sheets y la pestaña productiva |
+| `python scripts/analyze_data.py` | Perfil de calidad de datos (nulos, duplicados, formatos, edades, productos) |
 | `node scripts/smoke-access.mjs <url>` | Prueba end-to-end del flujo de altas, aprobación y recuperación |
 
 ## Autenticación
@@ -139,6 +140,8 @@ Para reemplazar el logo por el oficial: guarda el archivo nuevo como `client/pub
 Ver [docs/ANALISIS_SISTEMA_GESTION.md](docs/ANALISIS_SISTEMA_GESTION.md): inventario de módulos, diagnóstico, protocolo de cumpleaños propuesto, pulso de meseros/productos y roadmap por fases.
 
 Fuente de datos y revisión del Apps Script: [docs/FUENTE_DATOS_GOOGLE_SHEETS.md](docs/FUENTE_DATOS_GOOGLE_SHEETS.md). Configuración del Apps Script: [integrations/apps-script/README.md](integrations/apps-script/README.md).
+
+Calidad, limpieza y normalización de datos: [docs/ANALISIS_CALIDAD_DATOS.md](docs/ANALISIS_CALIDAD_DATOS.md).
 
 ## Despliegue
 

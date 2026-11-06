@@ -957,6 +957,8 @@ function comentarioLimpio_(valor) {
   const k = clave_(s);
   if (k === 'peabacio muchos ericias hasta la provins' ||
       k === 'inos encantarla celebrario juntos!') return 'Error de lectura';
+  // Placeholder de la interfaz que a veces se cuela como "opinión".
+  if (/^●/.test(s) || k.indexOf('que te parecio nuestro') !== -1) return '';
   return s;
 }
 
@@ -1077,9 +1079,10 @@ function reconstruirEncuestasLimpias_() {
       cumple.tieneAnio, idMesero, nombreMesero, idFuente, fuenteNombre,
       fuenteTipo, texto_(valorCampo_(e, ['ID de Envío'])), platoOriginal,
       productos.join('; '), opinionOriginal, opinion, comentarioValido_(opinion), calidadOriginal,
-      calidad, estado, ahora, id, timestamp, nombre, contacto, cumple.original,
+      calidad, estado, ahora, edad.edad, edad.estado, edad.rango,
+      id, timestamp, nombre, contacto, cumple.original,
       productos.join('; '), opinion, nombreMesero || registrados, calidad, cumple.dia,
-      cumple.mes, cumple.anio, prox.fecha, prox.regla, edad.edad, edad.estado, edad.rango,
+      cumple.mes, cumple.anio, prox.fecha, prox.regla,
       edad.edad, edad.estado, edad.rango
     ];
   });
@@ -1093,8 +1096,19 @@ function reconstruirEncuestasLimpias_() {
   hoja.setFrozenRows(1);
   hoja.getRange(1, 1, 1, ENCABEZADOS_LIMPIOS.length)
     .setBackground('#14532D').setFontColor('#FFFFFF').setFontWeight('bold');
-  hoja.getRange(2, 6, Math.max(1, hoja.getMaxRows() - 1), 1).setNumberFormat('@');
-  hoja.getRange(2, 27, Math.max(1, salida.length), 1).setNumberFormat('@');
+  const totalFilas = Math.max(1, salida.length);
+  // Timestamp con hora (si se deja como fecha simple se pierde la hora).
+  hoja.getRange(2, 2, totalFilas, 1).setNumberFormat('dd/MM/yyyy HH:mm:ss');
+  // Fecha de procesamiento con hora.
+  hoja.getRange(2, 26, totalFilas, 1).setNumberFormat('dd/MM/yyyy HH:mm:ss');
+  // Cumpleaños y sus partes como texto (evita que Sheets las reconvierta).
+  hoja.getRange(2, 3, totalFilas, 1).setNumberFormat('@');
+  hoja.getRange(2, 6, totalFilas, 1).setNumberFormat('@');
+  hoja.getRange(2, 7, totalFilas, 1).setNumberFormat('@');
+  hoja.getRange(2, 8, totalFilas, 3).setNumberFormat('@');
+  // Contrato: birthday y birthdayDay/Month/Year como texto.
+  hoja.getRange(2, 34, totalFilas, 1).setNumberFormat('@');
+  hoja.getRange(2, 39, totalFilas, 3).setNumberFormat('@');
 }
 
 function actualizarEncuestasLimpias() {
