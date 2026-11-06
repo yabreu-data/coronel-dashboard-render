@@ -2180,6 +2180,15 @@ function BirthdayQuickActions({
     source: "",
     birthday: item.record.birthday || "",
   };
+  const contactPhone = (item.record.phone || item.profile?.phone || "").replace(/\D/g, "");
+  const whatsappNumber =
+    contactPhone.length === 9 && contactPhone.startsWith("9") ? `51${contactPhone}` : contactPhone;
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(item.template)}`
+    : "";
+  const callHref = contactPhone
+    ? `tel:+${contactPhone.length === 9 ? "51" : ""}${contactPhone}`
+    : "";
   return (
     <>
       <div className="birthday-followup">
@@ -2215,6 +2224,32 @@ function BirthdayQuickActions({
           >
             ● Redimida
           </button>
+        </div>
+        <div className="birthday-channel-links">
+          {whatsappHref ? (
+            <a
+              className="birthday-channel whatsapp"
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              onClick={event => event.stopPropagation()}
+            >
+              <MessageSquareText size={12} /> WhatsApp con mensaje
+            </a>
+          ) : (
+            <span className="birthday-channel disabled">
+              Sin teléfono para WhatsApp
+            </span>
+          )}
+          {callHref && (
+            <a
+              className="birthday-channel call"
+              href={callHref}
+              onClick={event => event.stopPropagation()}
+            >
+              <Phone size={12} /> Llamar
+            </a>
+          )}
         </div>
         <button
           className="birthday-register-call"
@@ -2892,6 +2927,165 @@ function buildBirthdayMarketing(
   }[];
 }
 
+/**
+ * Guía operativa del protocolo de cumpleaños, organizada por horizonte:
+ * mes (preparación), semana (expectativa y plan), día (confirmación y
+ * activación) y seguimiento (agradecimiento, recuperación y medición).
+ */
+type BirthdayPlaybookStage = {
+  key: string;
+  label: string;
+  when: string;
+  goal: string;
+  channel: string;
+  steps: string[];
+  example: string;
+  avoid: string;
+};
+
+const BIRTHDAY_PLAYBOOK: BirthdayPlaybookStage[] = [
+  {
+    key: "mes",
+    label: "Mes",
+    when: "T-30 a T-21",
+    goal: "Preparar el mes y validar que los datos de contacto sean correctos antes de escribir.",
+    channel: "Interno (revisión en equipo) · sin contacto al cliente todavía",
+    steps: [
+      "Revisar la agenda del mes y detectar cumpleaños con teléfono o fecha incompleta.",
+      "Definir la vigencia del beneficio: día, semana o mes (según lo acordado).",
+      "Asignar un responsable para la campaña (puede rotar; no hay uno fijo).",
+      "Confirmar qué promoción de cumpleaños está activa y su mensaje.",
+    ],
+    example:
+      "Planilla de marzo lista: 14 cumpleaños. Beneficio: postre de cumpleaños, válido la semana del cumpleaños. Responsable: por asignar.",
+    avoid: "No contactar al cliente en esta etapa: primero valida datos y evita ofrecer algo que no está disponible.",
+  },
+  {
+    key: "semana",
+    label: "Semana",
+    when: "T-14 y T-7",
+    goal: "Sembrar la expectativa y confirmar si celebrará en salón o pedirá delivery.",
+    channel: "WhatsApp Business (preferido) o WhatsApp personal · llamada si no responde",
+    steps: [
+      "T-14: enviar un primer mensaje breve, sin pedir nada más que permiso.",
+      "T-7: preguntar salón o delivery, número de personas y horario.",
+      "Registrar la respuesta en el seguimiento (contactado / aceptó / no interesado).",
+      "Si no responde en 48 h, intentar una llamada corta en horario de atención.",
+    ],
+    example:
+      "Hola {nombre} 👋 En Coronel estamos preparando algo especial para tu cumpleaños del {fecha}. ¿Te gustaría que te reservemos un detalle?",
+    avoid: "No enviar más de un mensaje por semana ni repetir promociones que ya enviaron.",
+  },
+  {
+    key: "dia",
+    label: "Día",
+    when: "T-3, T-1 y el día del cumpleaños",
+    goal: "Confirmar la logística y activar la promoción el mismo día.",
+    channel: "WhatsApp + llamada de confirmación",
+    steps: [
+      "T-3: recordar el beneficio y su vigencia; confirmar mesa o pedido.",
+      "T-1: confirmar hora, número de personas y preferencia de plato o torta.",
+      "Día: felicitar, entregar el detalle y registrar si vino o redimió.",
+    ],
+    example:
+      "¡Feliz cumpleaños, {nombre}! 🎉 Hoy te espera tu {beneficio} en Coronel. ¿Te reservamos mesa para celebrar?",
+    avoid: "No olvides decir la vigencia: el cliente debe saber hasta cuándo puede usar el beneficio.",
+  },
+  {
+    key: "seguimiento",
+    label: "Seguimiento",
+    when: "T+1, T+3 y T+7",
+    goal: "Agradecer, recuperar a quien no vino y medir el resultado real.",
+    channel: "WhatsApp y llamada",
+    steps: [
+      "T+1: agradecer la visita y pedir la encuesta (1 minuto).",
+      "T+3: si no vino, ofrecer una segunda oportunidad antes de que venza su beneficio.",
+      "T+7: registrar el resultado (redimido / no redimido) y el motivo.",
+      "Anotar en el comentario del cliente menciones de cumpleaños de familiares.",
+    ],
+    example:
+      "Gracias por celebrar con nosotros, {nombre} 🎂 ¿Nos cuentas cómo fue tu experiencia? Nos ayuda a atenderte mejor la próxima vez.",
+    avoid: "No cerrar la campaña sin registrar el motivo cuando no se redimió: es el dato que permite mejorar.",
+  },
+];
+
+function BirthdayPlaybook() {
+  const [activeStage, setActiveStage] = useState(BIRTHDAY_PLAYBOOK[0].key);
+  const [copied, setCopied] = useState(false);
+  const stage =
+    BIRTHDAY_PLAYBOOK.find(item => item.key === activeStage) ?? BIRTHDAY_PLAYBOOK[0];
+  const copyExample = async () => {
+    try {
+      await navigator.clipboard.writeText(stage.example);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copia el mensaje:", stage.example);
+    }
+  };
+  return (
+    <section className="panel birthday-playbook">
+      <div className="panel-head">
+        <div>
+          <p className="eyebrow">PROTOCOLO DE CUMPLEAÑOS</p>
+          <h3>Qué hacer en cada momento: mes, semana y día</h3>
+          <small className="muted">
+            Guía para el equipo: cuándo contactar, por qué canal, qué decir y qué
+            evitar. Cada cliente tiene su mensaje sugerido en el tablero de
+            abajo.
+          </small>
+        </div>
+        <Pill tone="purple">Guía del equipo</Pill>
+      </div>
+      <div className="birthday-playbook-tabs" role="tablist">
+        {BIRTHDAY_PLAYBOOK.map(item => (
+          <button
+            key={item.key}
+            role="tab"
+            aria-selected={activeStage === item.key}
+            className={activeStage === item.key ? "active" : ""}
+            onClick={() => setActiveStage(item.key)}
+          >
+            <b>{item.label}</b>
+            <small>{item.when}</small>
+          </button>
+        ))}
+      </div>
+      <div className="birthday-playbook-body">
+        <div className="birthday-playbook-col">
+          <p className="eyebrow">OBJETIVO</p>
+          <p>{stage.goal}</p>
+          <p className="eyebrow">CANAL</p>
+          <p>{stage.channel}</p>
+          <p className="eyebrow">NO HACER</p>
+          <p className="birthday-playbook-avoid">{stage.avoid}</p>
+        </div>
+        <div className="birthday-playbook-col">
+          <p className="eyebrow">PASOS</p>
+          <ul className="birthday-playbook-steps">
+            {stage.steps.map(step => (
+              <li key={step}>{step}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="birthday-playbook-col example">
+          <p className="eyebrow">EJEMPLO DE MENSAJE</p>
+          <blockquote>{stage.example}</blockquote>
+          <button className="secondary-action" onClick={copyExample}>
+            {copied ? "✓ Copiado" : "Copiar mensaje"}
+          </button>
+        </div>
+      </div>
+      <p className="birthday-playbook-note">
+        Canales disponibles: WhatsApp Business, WhatsApp personal, llamada y
+        correo. No hay API de WhatsApp: el mensaje se copia o se abre en wa.me.
+        El responsable puede ser cualquier integrante del equipo. Aún no hay meta
+        fija: mide cobertura y redención para definirla con datos reales.
+      </p>
+    </section>
+  );
+}
+
 function BirthdayPage({
   records,
   profiles,
@@ -3088,6 +3282,7 @@ function BirthdayPage({
           </div>
         )}
       </section>
+      <BirthdayPlaybook />
       <BirthdayMarketingPanel
         items={visibleItems}
         todayCount={

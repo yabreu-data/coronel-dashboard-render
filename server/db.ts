@@ -21,8 +21,11 @@ function isLocalConnection(connectionString: string) {
 function buildPool(connectionString: string) {
   return new Pool({
     connectionString,
-    max: 10,
-    idleTimeoutMillis: 30_000,
+    // El pooler de Supabase en modo sesión limita las conexiones del proyecto
+    // (15 en el plan free), por eso mantenemos un pool pequeño y con liberación
+    // rápida de conexiones inactivas.
+    max: 5,
+    idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 15_000,
     ...(isLocalConnection(connectionString) ? {} : { ssl: { rejectUnauthorized: false } }),
   });

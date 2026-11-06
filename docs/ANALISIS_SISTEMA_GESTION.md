@@ -191,15 +191,39 @@ Hoy: Clientes, Voz del cliente y Llamadas son pantallas separadas. Propuesta: **
 
 ---
 
-## 9. Decisiones que necesito de tu cliente
+## 9. Respuestas del cliente y decisiones tomadas
 
-1. **Beneficio de cumpleaños vigente** (¿postre, descuento, combo?) y vigencia (¿solo el día, toda la semana?).
-2. **Canales reales** que usan hoy: WhatsApp personal, WhatsApp Business, llamadas, correo.
-3. **Responsable** de cumpleaños (¿quién contacta?) y horario permitido de mensajes.
-4. **Meta mensual**: ¿cuántos cumpleaños quieren contactar/redimir?
-5. **Familia**: ¿quieren registrar cumpleaños de acompañantes? ¿con qué datos?
-6. **Edición de datos**: ¿corrigen en la hoja de Google o quieren editar dentro de la app?
-7. **Definición de “buena atención”**: ¿calidad “Bueno” de la encuesta es suficiente o quieren añadir tiempo de atención?
+| Tema | Respuesta del restaurante | Decisión de diseño |
+|---|---|---|
+| Vigencia del beneficio | **Día, semana o mes** | La etapa de preparación pide definir la vigencia antes de contactar |
+| Canales | **WhatsApp Business, WhatsApp personal, llamada y correo**; **sin API de WhatsApp** | Enlaces `wa.me` con mensaje precargado + botón “Copiar mensaje” + enlace de llamada |
+| Responsable | **Un empleado, sin uno fijo por ahora** | El protocolo pide asignar responsable por campaña; puede rotar |
+| Meta | **Aún sin meta fija** | Se miden cobertura y redención para fijar la meta con datos reales |
+| Familiares | **Útil si aparecen en los comentarios** | Se anota en el comentario/ficha en v1; campo estructurado en v2 |
+| Buen trato | **“Excelente atención”, “muy amables”, etc.** | Se usan como señales del índice de atención, además de la calidad “Bueno” |
+| Edición de datos | Pendiente | Por ahora la fuente sigue siendo Google Sheets |
+
+## 9.1 Estado de implementación (v1)
+
+Ya implementado en el dashboard:
+
+- **Panel “Protocolo de cumpleaños”** en la pestaña *Cumpleaños*, con horizontes **Mes / Semana / Día / Seguimiento**, objetivo, pasos, canal, mensaje de ejemplo copiable y “no hacer”.
+- **Enlaces de contacto directo por cliente**: WhatsApp con el mensaje ya redactado (`wa.me`) y llamada (`tel:`), más el botón de copiar plantilla y el seguimiento contactado / aceptó / redimida.
+- **Pool de base de datos ajustado** (5 conexiones, liberación rápida) para respetar el límite del pooler de Supabase.
+
+Pendiente para la siguiente iteración (Fase 1 completa):
+
+1. Fecha de **próxima acción** y tablero de vencidas/hoy/mañana.
+2. **Embudo** de cumpleaños (contactados → aceptaron → redimieron).
+3. **Ficha única del cliente** con historial de contacto.
+4. Registro estructurado de **familiares** y motivo de no redención.
+
+## 9.2 Decisiones que faltan definir
+
+1. ¿La vigencia del beneficio será la misma para todos o variará por campaña?
+2. ¿Se registrarán familiares con nombre y fecha (campo nuevo) o solo como nota?
+3. ¿Quién será el responsable por defecto de la campaña y en qué horario se permite escribir?
+4. ¿Quieren definir una meta mensual luego de 1–2 meses de medición?
 
 ---
 

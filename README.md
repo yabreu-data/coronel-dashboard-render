@@ -114,6 +114,10 @@ Requisito de configuración (ya aplicado en este proyecto): en Supabase → Auth
 |---|---|
 | ![Panel](docs/screenshots/dashboard.png) | ![Móvil](docs/screenshots/login-mobile.png) |
 
+| Protocolo de cumpleaños | Tarjeta con canales de contacto |
+|---|---|
+| ![Protocolo](docs/screenshots/birthday-playbook.png) | ![Tarjeta](docs/screenshots/birthday-card.png) |
+
 ## Identidad visual
 
 - `client/public/manus-storage/logo-blanco.png`: logo **blanco con fondo transparente** para fondos oscuros (login, splash, sidebar).
