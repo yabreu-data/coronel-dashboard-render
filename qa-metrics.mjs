@@ -80,8 +80,8 @@ try {
   await go("Equipo");
   await page.screenshot({ path: process.env.SHOT_TEAM, fullPage: true });
   console.log("\n[Equipo]\n" + (await readStats()).join("\n"));
-  const teamRows = await page.locator("table tbody tr").allInnerTexts();
-  console.log("Equipo filas:", teamRows.slice(0, 8).map(text => text.replace(/\s+/g, " ").trim()));
+  const teamRows = await page.locator(".score-row").allInnerTexts();
+  console.log("Scorecard:", teamRows.map(text => text.replace(/\s+/g, " ").trim()));
 
   // Cumpleaños
   await go("Cumpleaños");

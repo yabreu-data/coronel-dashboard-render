@@ -7266,7 +7266,7 @@ function Voice({
         <Stat
           label="FRASES DETECTADAS"
           value={topicPhrases.length}
-          detail="4+ apariciones"
+          detail="2+ apariciones"
           accent="purple"
           icon={Sparkles}
         />
@@ -8365,7 +8365,7 @@ function buildTopicPhrases(comments: RecordItem[]): [string, number][] {
     }
   });
   return Object.entries(counts)
-    .filter(([, count]) => count > 3)
+    .filter(([, count]) => count >= 2)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 12);
 }
@@ -8437,16 +8437,17 @@ function buildRepeatedComments(comments: RecordItem[]) {
 }
 
 const REQUEST_PATTERN =
-  /(quisiera|quiero|deberian|falta|faltan|mejorar|agregar|incluir|poner|mas ofertas|promo|oferta|descuento|bebida|postre|aire|ventilador|musica|tiempo|rapidez|variacion|opciones|salsa|papas|consideracion)/;
+  /(quisiera|quiero|deberian|deberia|falta|faltan|falto|mejorar|mejoren|agregar|incluir|poner|sugiero|sugerencia|recomiendo|recomendaria|seria bueno|estaria bueno|podrian|tener mas|consideracion|papit?as?|mas (sabor|variedad|platos|papas|papitas|ofertas|promociones|bebidas|postres|crocantes|rapidez)|promo|promocion|oferta|descuento|bebida|postre|ventilador|musica|aire|rapidez|tiempo de entrega|demoren|demora|tarda|salsa|huancaina|chimichurri|no tiene (gusto|sabor))/;
 
 function requestTag(comment: string) {
   const text = normalizeText(comment);
-  if (/tiempo|demora|rapidez|puntual|entrega/.test(text)) return "Tiempo";
-  if (/papas|papa/.test(text)) return "Papas";
-  if (/salsa|huancaina|chimichurri|sabor/.test(text)) return "Sabor";
+  if (/tiempo|demora|demoren|rapidez|puntual|entrega/.test(text)) return "Tiempo";
+  if (/papit?as?/.test(text)) return "Papas";
+  if (/salsa|huancaina|chimichurri|sabor|no tiene gusto/.test(text)) return "Sabor";
   if (/variacion|platos|chifa|criollos|opciones/.test(text)) return "Variedad";
-  if (/promo|oferta|descuento|bebida|alcohol/.test(text)) return "Promos";
+  if (/promo|promocion|oferta|descuento|bebida|alcohol|degustacion/.test(text)) return "Promos";
   if (/musica|ambiente|ventilador|aire/.test(text)) return "Ambiente";
+  if (/sugiero|sugerencia|recomiendo|consideracion/.test(text)) return "Sugerencia";
   if (/atencion|amable/.test(text)) return "Atención";
   return "Sugerencia";
 }
