@@ -121,9 +121,10 @@ export default function ResetPassword() {
       <div className="auth-wall-card">
         <img
           className="loading-logo"
-          src="/manus-storage/logo1_5c69b281.png"
+          src="/manus-storage/logo-blanco.png"
           alt="Coronel · Pollos y Parrillas"
         />
+        <span className="auth-brand-caption">Sistema de gestión</span>
         <span className="auth-badge">RECUPERAR CONTRASEÑA</span>
 
         {status === "checking" && (

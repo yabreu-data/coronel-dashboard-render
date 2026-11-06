@@ -681,7 +681,7 @@ export default function Home() {
       <div className="loading-screen">
         <img
           className="loading-logo"
-          src="/manus-storage/logo1_5c69b281.png"
+          src="/manus-storage/logo-blanco.png"
           alt="Coronel"
         />
         <p>Verificando sesión segura…</p>
@@ -693,7 +693,7 @@ export default function Home() {
         <div className="auth-wall-card">
           <img
             className="loading-logo"
-            src="/manus-storage/logo1_5c69b281.png"
+            src="/manus-storage/logo-blanco.png"
             alt="Coronel"
           />
           <Pill tone="blue">ACCESO RESTRINGIDO</Pill>
@@ -717,7 +717,7 @@ export default function Home() {
       <div className="loading-screen">
         <img
           className="loading-logo"
-          src="/manus-storage/logo1_5c69b281.png"
+          src="/manus-storage/logo-blanco.png"
           alt="Coronel"
         />
         <p>Cargando datos desde Google Sheets…</p>
@@ -738,13 +738,10 @@ export default function Home() {
         <div className="brand">
           <img
             className="brand-logo"
-            src="/manus-storage/logo1_5c69b281.png"
-            alt="Coronel Pollos-Parrillas Restaurant"
+            src="/manus-storage/logo-blanco.png"
+            alt="Coronel · Pollos y Parrillas"
           />
-          <div>
-            <b>CORONEL</b>
-            <span>Voz del cliente</span>
-          </div>
+          <span className="brand-tagline">Sistema de gestión</span>
         </div>
         <div className="side-label">REPORTE</div>
         <nav className="grouped-sidebar-nav">

@@ -110,9 +110,20 @@ Requisito de configuración (ya aplicado en este proyecto): en Supabase → Auth
 |---|---|
 | ![Inicio de sesión](docs/screenshots/login.png) | ![Splash](docs/screenshots/splash.png) |
 
-| Login en móvil | Solicitudes pendientes | Aprobación con contraseña temporal |
-|---|---|---|
-| ![Móvil](docs/screenshots/login-mobile.png) | ![Solicitudes](docs/screenshots/admin-solicitudes.png) | ![Aprobado](docs/screenshots/admin-aprobado.png) |
+| Panel principal (marca blanca) | Login en móvil |
+|---|---|
+| ![Panel](docs/screenshots/dashboard.png) | ![Móvil](docs/screenshots/login-mobile.png) |
+
+## Identidad visual
+
+- `client/public/manus-storage/logo-blanco.png`: logo **blanco con fondo transparente** para fondos oscuros (login, splash, sidebar).
+- `client/public/manus-storage/logo1_5c69b281.png`: versión verde original, usada en el reporte imprimible/PDF (fondo blanco).
+
+Para reemplazar el logo por el oficial: guarda el archivo nuevo como `client/public/manus-storage/logo-blanco.png` (PNG con transparencia, arte blanco, mínimo 800 px de ancho). El código no necesita cambios; también puedes pasarme el archivo y lo integro.
+
+## Análisis y roadmap
+
+Ver [docs/ANALISIS_SISTEMA_GESTION.md](docs/ANALISIS_SISTEMA_GESTION.md): inventario de módulos, diagnóstico, protocolo de cumpleaños propuesto, pulso de meseros/productos y roadmap por fases.
 
 ## Despliegue
 

@@ -988,3 +988,94 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
 .auth-wall-card {
   max-width: 100%;
 }
+
+/* ---------------------------------------------------------------------------
+   Identidad visual: logo blanco transparente + "Sistema de gestión"
+--------------------------------------------------------------------------- */
+.loading-logo {
+  display: block;
+  width: 280px;
+  max-width: min(280px, 74vw);
+  height: auto;
+  margin: auto;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.5));
+}
+.auth-wall-card .loading-logo {
+  width: min(280px, 74vw);
+  margin: 0 auto 8px;
+}
+.loading-screen .loading-logo {
+  width: min(260px, 74vw);
+}
+.auth-brand-caption {
+  display: block;
+  margin: 0 0 14px;
+  color: #7dd3fc;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.brand-logo {
+  width: 64px;
+  height: 40px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  object-fit: contain;
+  -webkit-filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.35));
+}
+.brand span {
+  color: #93a8bf;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@media (max-width: 760px) {
+  .loading-logo {
+    width: min(240px, 80vw);
+  }
+  .auth-wall-card .loading-logo {
+    width: min(240px, 80vw);
+  }
+  .brand-logo {
+    width: 52px;
+    height: 34px;
+  }
+}
+
+/* Marca del sidebar: logo blanco completo + "Sistema de gestión" debajo */
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 2px 8px 20px;
+}
+.brand-logo {
+  width: 168px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.brand-tagline {
+  color: #93a8bf;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+@media (max-width: 760px) {
+  .brand-logo {
+    width: 132px;
+  }
+  .brand {
+    padding: 2px 4px 14px;
+  }
+}

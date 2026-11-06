@@ -6,7 +6,7 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Coronel · Dashboard de Satisfacción</title>
+    <title>Coronel · Sistema de Gestión</title>
     <style>
       html,
       body {
@@ -30,35 +30,39 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 18px;
+        gap: 16px;
         padding: 24px;
         text-align: center;
       }
       #boot-splash .boot-logo {
-        width: min(260px, 72vw);
-        background: #fff;
-        border-radius: 18px;
-        padding: 12px 16px;
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+        width: min(320px, 78vw);
       }
       #boot-splash .boot-logo img {
         display: block;
         width: 100%;
         height: auto;
+        filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.55));
+      }
+      #boot-splash .boot-brand {
+        margin: 0;
+        color: #7dd3fc;
+        font: 900 11px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
       }
       #boot-splash .boot-spinner {
-        width: 26px;
-        height: 26px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         border: 3px solid #1f3b57;
         border-top-color: #54d6f5;
         animation: boot-spin 0.9s linear infinite;
       }
-      #boot-splash p {
+      #boot-splash .boot-status {
         margin: 0;
         color: #8fa6bd;
-        font: 800 11px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
-        letter-spacing: 0.14em;
+        font: 800 10px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+        letter-spacing: 0.16em;
         text-transform: uppercase;
       }
       @keyframes boot-spin {
@@ -78,10 +82,11 @@
     <div id="boot-splash" aria-live="polite">
       <div class="boot-inner">
         <div class="boot-logo">
-          <img src="/manus-storage/logo1_5c69b281.png" alt="Coronel" />
+          <img src="/manus-storage/logo-blanco.png" alt="Coronel" />
         </div>
+        <p class="boot-brand">Sistema de gestión</p>
         <div class="boot-spinner"></div>
-        <p>Preparando tu dashboard…</p>
+        <p class="boot-status">Preparando tu dashboard…</p>
       </div>
     </div>
     <div id="root"></div>
