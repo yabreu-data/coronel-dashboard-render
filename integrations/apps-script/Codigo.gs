@@ -935,8 +935,16 @@ function calcularEdad_(cumple, fechaEncuesta) {
   const antesDelCumple = fecha.getMonth() < cumple.mes - 1 ||
     (fecha.getMonth() === cumple.mes - 1 && fecha.getDate() < cumple.dia);
   if (antesDelCumple) edad--;
+  if (nacimiento > fecha) {
+    return { edad: '', estado: 'Revisar', rango: 'Edad a revisar' };
+  }
   if (edad < 0 || edad > 120) {
     return { edad: '', estado: 'No válida', rango: 'Edad no válida' };
+  }
+  // No se descarta el registro, pero se marca para revisión: puede ser un niño
+  // real o un año de nacimiento mal ingresado (por ejemplo, el año actual).
+  if (edad < 12 || edad > 90) {
+    return { edad: edad, estado: 'Revisar', rango: 'Edad a revisar' };
   }
   return { edad: edad, estado: 'Conocida', rango: rangoEdad_(edad) };
 }
@@ -1068,9 +1076,11 @@ function reconstruirEncuestasLimpias_() {
     const prox = proximaFechaCumpleanos_(cumple.dia, cumple.mes, ahora);
     const estado = !id ? 'Advertencia: sin ID Único' : (!fecha ? 'Advertencia: fecha inválida' : 'Válido');
     const registrados = titulo_(valorCampo_(e, ['Registrado Por Original', 'Registrado Por', 'registeredBy']));
+    const esRegistroWeb = normalizarTexto(registrados).indexOf('formulario web') !== -1 ||
+      normalizarTexto(registrados).indexOf('cliente (formulario') !== -1;
     const nombreMesero = texto_(mesero['Nombre'])
       ? titulo_(mesero['Nombre'])
-      : (idMesero ? idMesero : registrados);
+      : (idMesero ? idMesero : (esRegistroWeb ? '' : registrados));
     const fuenteNombre = titulo_(fuente['Nombre']);
     const fuenteTipo = titulo_(fuente['Tipo']);
     return [

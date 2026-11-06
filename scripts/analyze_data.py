@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import io
 import re
 import sys
@@ -17,14 +18,42 @@ SHEET_ID = "1q9WMz_O_J15B0QKv8QF4zYp7uvwGwm-5aTGfTdz6vHU"
 BASE = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv"
 
 
-def fetch(sheet: str, cell_range: str) -> pd.DataFrame:
+def fetch_text(sheet: str, cell_range: str) -> str:
     url = f"{BASE}&sheet={urllib.parse.quote(sheet)}&range={urllib.parse.quote(cell_range)}"
     request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(request, timeout=90) as response:
-        text = response.read().decode("utf-8", errors="replace")
+        return response.read().decode("utf-8", errors="replace")
+
+
+def fetch(sheet: str, cell_range: str) -> pd.DataFrame:
+    text = fetch_text(sheet, cell_range)
     df = pd.read_csv(io.StringIO(text), dtype=str, keep_default_na=False)
     df.columns = [str(c).strip() for c in df.columns]
     return df
+
+
+RAW_HEADERS = [
+    "ID Único", "Timestamp", "ID Cliente", "Nombre del Cliente", "Número de Contacto",
+    "Fecha de Cumpleaños", "ID Mesero", "ID Fuente", "Plato(s) Original(es)",
+    "Opinión del Producto y Mejoras", "Calidad del Producto", "ID de Envío",
+    "Registrado Por Original",
+]
+
+
+def fetch_raw() -> pd.DataFrame:
+    # gviz transpone los rangos grandes (>~42 filas). Se lee columna por columna
+    # y se reconstruye la tabla, así se obtienen las 112 filas reales.
+    columns = {}
+    for letter in "ABCDEFGHIJKLM":
+        text = fetch_text("Encuestas", f"{letter}2:{letter}2000")
+        values = [row[0] if row else "" for row in csv.reader(io.StringIO(text))]
+        columns[letter] = values
+    total = min(len(values) for values in columns.values())
+    data = {
+        header: columns[letter][:total]
+        for header, letter in zip(RAW_HEADERS, "ABCDEFGHIJKLM")
+    }
+    return pd.DataFrame(data)
 
 
 def norm(value: str) -> str:
@@ -75,7 +104,7 @@ def age_at(birthday, survey_date):
 
 
 def main() -> int:
-    raw = fetch("Encuestas", "A1:M2000")
+    raw = fetch_raw()
     clean = fetch("Encuestas_Limpias", "A1:AU2000")
     # OJO: la tabla limpia tiene "Timestamp" (humano) y "timestamp" (contrato).
     # Se usa coincidencia exacta para no confundirlos (pandas es case-sensitive).

@@ -283,6 +283,15 @@ const parseDate = (value: string) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 };
+/* Para cumpleaños sin año ("05/11") se usa el año actual solo para ubicar
+   la próxima fecha; la edad no se calcula con este dato. */
+const parseBirthdayDate = (value: string) => {
+  const short = String(value || "").trim().match(/^(\d{1,2})\/(\d{1,2})$/);
+  if (short) {
+    return new Date(new Date().getFullYear(), Number(short[2]) - 1, Number(short[1]));
+  }
+  return parseDate(value);
+};
 function birthdayRecordsWithin(
   records: RecordItem[],
   fromOffset: number,
@@ -301,7 +310,7 @@ function birthdayRecordsWithin(
   );
   const rows = records
     .map(record => {
-      const birthday = parseDate(record.birthday);
+      const birthday = parseBirthdayDate(record.birthday);
       if (!birthday) return null;
       const candidates = [
         now.getFullYear() - 1,
@@ -2107,7 +2116,7 @@ function countOverduePriorities(
     }).length;
   const birthdayOverdue = birthdays.filter(record => {
     const key = `birthday-${clientKeyOf(record)}`;
-    const birthday = parseDate(record.birthday);
+    const birthday = parseBirthdayDate(record.birthday);
     const defaultDate = birthday
       ? new Date(
           new Date().getFullYear(),
@@ -3321,7 +3330,7 @@ function buildBirthdayMarketing(
   const seen = new Set<string>();
   return records
     .map(record => {
-      const birthday = parseDate(record.birthday);
+      const birthday = parseBirthdayDate(record.birthday);
       if (!birthday) return null;
       const target = new Date(
         viewedMonth.getFullYear(),
@@ -4411,7 +4420,7 @@ function Priorities({
       });
     birthdays.forEach(record => {
       const profile = profileByKey.get(clientKeyOf(record));
-      const birthday = parseDate(record.birthday);
+      const birthday = parseBirthdayDate(record.birthday);
       const deadline = birthday
         ? new Date(
             new Date().getFullYear(),
@@ -7191,6 +7200,8 @@ function Voice({
   positive: number;
 }) {
   const [selected, setSelected] = useState<SentimentHighlight | null>(null);
+  const repeatedComments = useMemo(() => buildRepeatedComments(comments), [comments]);
+  const requestComments = useMemo(() => buildRequestComments(comments), [comments]);
   const wordCard = (
     item: SentimentHighlight,
     tone: "positive" | "negative"
@@ -7256,6 +7267,77 @@ function Voice({
           accent="red"
           icon={AlertTriangle}
         />
+        <Stat
+          label="REPETIDOS"
+          value={repeatedComments.length}
+          detail="frases que se repiten"
+          accent="purple"
+          icon={MessageSquareText}
+        />
+        <Stat
+          label="PEDIDOS"
+          value={requestComments.length}
+          detail="sugerencias detectadas"
+          accent="orange"
+          icon={Sparkles}
+        />
+      </div>
+      <div className="dashboard-grid voice-grid">
+        <section className="panel">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">LO QUE MÁS SE REPITE</p>
+              <h3>Comentarios frecuentes</h3>
+            </div>
+            <Pill tone="blue">{repeatedComments.length}</Pill>
+          </div>
+          <div className="voice-list">
+            {repeatedComments.length ? (
+              repeatedComments.slice(0, 10).map(item => (
+                <div className="voice-list-item" key={item.text}>
+                  <span className="voice-count">×{item.count}</span>
+                  <p>{item.text}</p>
+                </div>
+              ))
+            ) : (
+              <Empty text="Aún no hay comentarios repetidos." />
+            )}
+          </div>
+          <p className="micro-note">
+            Agrupado por texto equivalente; el número indica cuántas veces
+            aparece.
+          </p>
+        </section>
+        <section className="panel">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">LO QUE PIDEN</p>
+              <h3>Pedidos y sugerencias</h3>
+            </div>
+            <Pill tone="orange">{requestComments.length}</Pill>
+          </div>
+          <div className="voice-list">
+            {requestComments.length ? (
+              requestComments.map(record => (
+                <div
+                  className="voice-list-item"
+                  key={`${record.id}-${record.timestamp}`}
+                >
+                  <span className="voice-tag">
+                    {requestTag(record.comment)}
+                  </span>
+                  <p>{record.comment}</p>
+                </div>
+              ))
+            ) : (
+              <Empty text="No se detectaron pedidos en los comentarios." />
+            )}
+          </div>
+          <p className="micro-note">
+            Detectado por palabras clave: tiempo, papas, salsa, variedad,
+            promos, bebidas, ambiente.
+          </p>
+        </section>
       </div>
       <div className="dashboard-grid voice-grid">
         <section className="panel voice-highlight-panel">
@@ -8311,6 +8393,48 @@ function buildNegativeHighlights(comments: RecordItem[]) {
       " "
     )
   );
+}
+
+/* Agrupa comentarios equivalentes (sin mayúsculas/tildes) para mostrar
+   los más repetidos. */
+function buildRepeatedComments(comments: RecordItem[]) {
+  const groups = new Map<string, { text: string; count: number }>();
+  comments.forEach(record => {
+    const text = String(record.comment || "").trim();
+    if (!text || normalizeText(text).includes("error de lectura")) return;
+    const key = normalizeText(text)
+      .replace(/[^a-z0-9ñ ]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!key) return;
+    const current = groups.get(key);
+    if (current) current.count += 1;
+    else groups.set(key, { text, count: 1 });
+  });
+  return Array.from(groups.values())
+    .filter(item => item.count >= 2)
+    .sort((a, b) => b.count - a.count);
+}
+
+const REQUEST_PATTERN =
+  /(quisiera|quiero|deberian|falta|faltan|mejorar|agregar|incluir|poner|mas ofertas|promo|oferta|descuento|bebida|postre|aire|ventilador|musica|tiempo|rapidez|variacion|opciones|salsa|papas|consideracion)/;
+
+function requestTag(comment: string) {
+  const text = normalizeText(comment);
+  if (/tiempo|demora|rapidez|puntual|entrega/.test(text)) return "Tiempo";
+  if (/papas|papa/.test(text)) return "Papas";
+  if (/salsa|huancaina|chimichurri|sabor/.test(text)) return "Sabor";
+  if (/variacion|platos|chifa|criollos|opciones/.test(text)) return "Variedad";
+  if (/promo|oferta|descuento|bebida|alcohol/.test(text)) return "Promos";
+  if (/musica|ambiente|ventilador|aire/.test(text)) return "Ambiente";
+  if (/atencion|amable/.test(text)) return "Atención";
+  return "Sugerencia";
+}
+
+function buildRequestComments(comments: RecordItem[]) {
+  return comments
+    .filter(record => REQUEST_PATTERN.test(normalizeText(record.comment)))
+    .slice(0, 10);
 }
 
 function downloadGenericCsv(
