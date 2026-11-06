@@ -66,6 +66,15 @@ async function bootstrap() {
       </QueryClientProvider>
     </trpc.Provider>
   );
+
+  // Retira el splash inicial (logo + spinner) definido en index.html.
+  const splash = document.getElementById("boot-splash");
+  if (splash) {
+    requestAnimationFrame(() => {
+      splash.classList.add("boot-hidden");
+      window.setTimeout(() => splash.remove(), 400);
+    });
+  }
 }
 
 void bootstrap();

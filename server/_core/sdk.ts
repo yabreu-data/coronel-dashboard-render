@@ -87,6 +87,12 @@ class SDKServer {
 
     let user = await db.getUserByOpenId(sessionUser.id);
     if (!user) {
+      // Solo el administrador configurado se auto-registra. Cualquier otra
+      // cuenta de Supabase Auth debe haber sido aprobada previamente (lo que
+      // crea su fila local con `activateUserFromAuth`).
+      if (sessionUser.id !== ENV.supabaseAdminUserId) {
+        throw ForbiddenError("Tu acceso todavía no fue aprobado por un administrador.");
+      }
       await db.upsertUser({
         openId: sessionUser.id,
         name: sessionUser.name,

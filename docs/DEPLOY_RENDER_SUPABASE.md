@@ -30,10 +30,27 @@ Arquitectura: **Render Web Service (Node)** sirve la SPA compilada y la API tRPC
 
 ## 2. Autenticación (Supabase Auth)
 
-1. **Authentication → Providers → Email**: habilitado (por defecto). Desactiva "Allow new users to sign up" si no quieres registros públicos.
-2. Crea los usuarios en **Authentication → Users** (email + contraseña, con "Auto Confirm User").
-3. Copia el **UUID** del usuario administrador y colócalo en `SUPABASE_ADMIN_USER_ID`. Ese usuario recibirá rol `admin` al iniciar sesión por primera vez.
-4. En **Project Settings → API** copia `Project URL`, `anon public` y `service_role` (esta última solo para scripts).
+1. **Authentication → Providers → Email**: habilitado.
+2. **Authentication → URL Configuration** (obligatorio para recuperación de contraseña):
+   - **Site URL**: `https://coronel-dashboard.onrender.com`
+   - **Redirect URLs**:
+     ```
+     https://coronel-dashboard.onrender.com/**
+     http://localhost:3000/**
+     http://localhost:5173/**
+     ```
+3. **Authentication → Sign In / Providers**: desactiva *Allow new users to sign up*. Las altas se gestionan con el flujo de solicitud + aprobación (el servidor crea el usuario con la service role key).
+4. Copia el **UUID** del usuario administrador y colócalo en `SUPABASE_ADMIN_USER_ID`. Ese usuario recibe rol `admin` al iniciar sesión.
+5. Crea el usuario administrador en **Authentication → Users** (email + contraseña, “Auto Confirm User”). El resto de usuarios se dan de alta desde el panel de administración:
+
+   - El interesado entra a `/login` → **Solicitar acceso** y completa nombre/correo.
+   - Un administrador revisa **Accesos → Altas pendientes de aprobación** y pulsa *Aprobar y crear cuenta* (pide la credencial administrativa).
+   - La app crea el usuario en Supabase Auth y muestra una **contraseña temporal** una sola vez para compartirla.
+   - El usuario entra con esa contraseña y puede cambiarla con **¿Olvidaste tu contraseña?** (correo de recuperación de Supabase).
+
+6. En **Project Settings → API** copia `Project URL`, `anon public` y `service_role` (esta última solo para el servidor/scripts).
+
+> Correos de recuperación: Supabase envía los emails de Auth con su servicio integrado (con límite de frecuencia en el plan free). Para producción conviene configurar SMTP propio en **Authentication → Emails → SMTP Settings**; mientras tanto, un administrador puede generar una **contraseña temporal** desde la pantalla de Accesos.
 
 ## 3. Render
 

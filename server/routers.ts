@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { ENV } from "./_core/env";
 import { systemRouter } from "./_core/systemRouter";
+import * as supabaseAdmin from "./_core/supabaseAdmin";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import * as db from "./db";
@@ -379,6 +380,69 @@ export const appRouter = router({
         return db.updateResponsibleUser(input).then(result =>
           db.recordAdminAudit({ entity: "responsable", action: input.active ? "activado/editado" : "pausado", entityId: String(input.id), details: `${input.name}${input.email ? ` · ${input.email}` : ""}`, changedBy }).then(() => result)
         );
+      }),
+  }),
+  accessRequests: router({
+    create: publicProcedure
+      .input(z.object({ name: z.string().min(2).max(160), email: z.string().email().max(320), message: z.string().max(500).optional() }))
+      .mutation(async ({ input }) => {
+        const email = input.email.trim().toLowerCase();
+        const existingUser = await db.findUserByEmail(email);
+        if (existingUser) {
+          throw new TRPCError({ code: "CONFLICT", message: "Ya existe una cuenta con ese correo. Si olvidaste tu contraseña, usa la opción de recuperación." });
+        }
+        const pending = await db.findPendingAccessRequest(email);
+        if (pending) {
+          throw new TRPCError({ code: "CONFLICT", message: "Ya tienes una solicitud pendiente de aprobación." });
+        }
+        await db.createAccessRequest({ name: input.name.trim(), email, message: input.message?.trim() || null });
+        return { ok: true } as const;
+      }),
+    list: publicProcedure.query(async ({ ctx }) => (ctx.user?.role === "admin" ? db.listAccessRequests() : [])),
+    approve: publicProcedure
+      .input(z.object({ id: z.number().int(), adminPin: z.string().min(1), tempPassword: z.string().min(8).max(64).optional() }))
+      .mutation(async ({ input, ctx }) => {
+        requirePin(input.adminPin);
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Solo un administrador puede aprobar solicitudes" });
+        const request = await db.getAccessRequest(input.id);
+        if (!request) throw new TRPCError({ code: "NOT_FOUND", message: "Solicitud no encontrada" });
+        if (request.status === "approved") throw new TRPCError({ code: "CONFLICT", message: "La solicitud ya fue aprobada" });
+
+        const tempPassword = input.tempPassword || supabaseAdmin.generateTemporaryPassword();
+        const authUser = await supabaseAdmin.ensureAuthUser({ email: request.email, password: tempPassword, name: request.name });
+        await db.activateUserFromAuth({ email: request.email, openId: authUser.id, name: request.name });
+
+        const changedBy = currentActor(ctx, "Administrador");
+        await db.markAccessRequest(request.id, "approved", changedBy);
+        await db.recordAdminAudit({ entity: "acceso", action: "solicitud aprobada", entityId: String(request.id), details: `${request.name} · ${request.email}`, changedBy });
+        return { ok: true, email: request.email, name: request.name, tempPassword } as const;
+      }),
+    reject: publicProcedure
+      .input(z.object({ id: z.number().int(), adminPin: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        requirePin(input.adminPin);
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Solo un administrador puede rechazar solicitudes" });
+        const request = await db.getAccessRequest(input.id);
+        if (!request) throw new TRPCError({ code: "NOT_FOUND", message: "Solicitud no encontrada" });
+        const changedBy = currentActor(ctx, "Administrador");
+        await db.markAccessRequest(request.id, "rejected", changedBy);
+        await db.recordAdminAudit({ entity: "acceso", action: "solicitud rechazada", entityId: String(request.id), details: `${request.name} · ${request.email}`, changedBy });
+        return { ok: true } as const;
+      }),
+  }),
+  adminAuth: router({
+    resetPassword: publicProcedure
+      .input(z.object({ openId: z.string().min(1), adminPin: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        requirePin(input.adminPin);
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Solo un administrador puede restablecer contraseñas" });
+        const target = await db.getUserByOpenId(input.openId);
+        if (!target) throw new TRPCError({ code: "NOT_FOUND", message: "Usuario no encontrado" });
+        const tempPassword = supabaseAdmin.generateTemporaryPassword();
+        await supabaseAdmin.setAuthPasswordByUserId(input.openId, tempPassword);
+        const changedBy = currentActor(ctx, "Administrador");
+        await db.recordAdminAudit({ entity: "acceso", action: "contraseña restablecida", entityId: String(target.id), details: `${target.name ?? target.email ?? target.openId}`, changedBy });
+        return { ok: true, tempPassword, name: target.name, email: target.email } as const;
       }),
   }),
   adminAudit: router({ list: publicProcedure.query(() => db.listAdminAuditLog()) }),

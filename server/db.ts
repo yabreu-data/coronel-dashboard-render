@@ -1,7 +1,7 @@
-import { and, count, desc, eq, gte, like, lte, or } from "drizzle-orm";
+import { and, count, desc, eq, gte, like, lte, ne, or } from "drizzle-orm";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { BirthdayCampaign, InsertBirthdayCampaign, InsertCallLog, InsertPriorityItem, InsertPromotion, InsertResponsibleUser, InsertUser, adminAuditLog, birthdayCampaigns, callLogs, priorityHistory, priorityItems, promotions, responsibleUsers, sessionHistory, teamTargetHistory, teamTargets, users } from "../drizzle/schema";
+import { AccessRequest, BirthdayCampaign, InsertBirthdayCampaign, InsertCallLog, InsertPriorityItem, InsertPromotion, InsertResponsibleUser, InsertUser, accessRequests, adminAuditLog, birthdayCampaigns, callLogs, priorityHistory, priorityItems, promotions, responsibleUsers, sessionHistory, teamTargetHistory, teamTargets, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: NodePgDatabase | null = null;
@@ -176,3 +176,73 @@ export async function listTeamTargetHistory() { const db = await getDb(); if (!d
 export async function saveTeamTargetHistory(input: { surveysPerServer: number; surveysPerDelivery: number; positiveQualityPercent: number; periodLabel: string; changedBy?: string | null }) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.insert(teamTargetHistory).values(input); return listTeamTargetHistory(); }
 export async function listAdminAuditLog() { const db = await getDb(); if (!db) return []; return db.select().from(adminAuditLog).orderBy(desc(adminAuditLog.changedAt)).limit(300); }
 export async function recordAdminAudit(input: { entity: string; action: string; entityId?: string | null; details?: string | null; changedBy: string }) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.insert(adminAuditLog).values(input); return listAdminAuditLog(); }
+
+/* -------------------------------------------------------------------------- */
+/*  Solicitudes de acceso (alta de usuarios con aprobación del administrador)  */
+/* -------------------------------------------------------------------------- */
+
+export async function createAccessRequest(input: { name: string; email: string; message?: string | null }): Promise<AccessRequest> {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  const rows = await db.insert(accessRequests).values({ name: input.name, email: input.email, message: input.message ?? null }).returning();
+  return rows[0];
+}
+
+export async function findUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return rows[0];
+}
+
+export async function findPendingAccessRequest(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(accessRequests).where(and(eq(accessRequests.email, email), eq(accessRequests.status, "pending"))).limit(1);
+  return rows[0];
+}
+
+export async function listAccessRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(accessRequests).orderBy(desc(accessRequests.requestedAt)).limit(200);
+}
+
+export async function getAccessRequest(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(accessRequests).where(eq(accessRequests.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function markAccessRequest(id: number, status: "approved" | "rejected", reviewedBy: string) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  await db.update(accessRequests).set({ status, reviewedBy, reviewedAt: new Date() }).where(eq(accessRequests.id, id));
+}
+
+/** Vincula (o crea) el usuario local con su uuid de Supabase Auth tras aprobar su acceso. */
+export async function activateUserFromAuth(input: { email: string; openId: string; name?: string | null }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible");
+  const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+  if (existing.length) {
+    const target = existing[0];
+    if (target.openId !== input.openId) {
+      // Evita colisión con otra fila local que ya use ese uuid de Supabase.
+      await db.delete(users).where(and(eq(users.openId, input.openId), ne(users.id, target.id)));
+    }
+    const rows = await db
+      .update(users)
+      .set({ openId: input.openId, name: input.name ?? target.name, loginMethod: "supabase", active: 1, updatedAt: new Date() })
+      .where(eq(users.id, target.id))
+      .returning();
+    return rows[0];
+  }
+  const rows = await db
+    .insert(users)
+    .values({ openId: input.openId, name: input.name ?? null, email: input.email, loginMethod: "supabase", active: 1, lastSignedIn: new Date() })
+    .returning();
+  return rows[0];
+}
+

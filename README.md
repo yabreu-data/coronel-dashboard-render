@@ -70,6 +70,7 @@ pnpm dev                  # http://localhost:3000
 | `pnpm db:import` | Importa `database/coronel-data.json` a PostgreSQL |
 | `pnpm keepalive:setup` / `status` / `test` / `remove` | Keep-alive de Render vía `pg_cron` + `pg_net` de Supabase |
 | `node scripts/smoke-test.mjs <url>` | Prueba end-to-end contra un servidor desplegado |
+| `node scripts/smoke-access.mjs <url>` | Prueba end-to-end del flujo de altas, aprobación y recuperación |
 
 ## Autenticación
 
@@ -79,6 +80,29 @@ pnpm dev                  # http://localhost:3000
 4. Si el UUID coincide con `SUPABASE_ADMIN_USER_ID`, el usuario recibe rol `admin` automáticamente; el resto de permisos se administran desde la pantalla de *Accesos*.
 
 Los usuarios se crean desde **Supabase → Authentication → Users** (o con la Admin API). No hay registro público en la aplicación.
+
+## Acceso, altas y recuperación de contraseña
+
+La pantalla `/login` ofrece tres flujos:
+
+| Flujo | Ruta | Descripción |
+|---|---|---|
+| Iniciar sesión | `/login` | Email + contraseña contra Supabase Auth |
+| Recuperar contraseña | `/login?mode=recovery` → `/reset-password` | Supabase envía un enlace al correo; el usuario define una contraseña nueva |
+| Solicitar acceso | `/login?mode=request` | Guarda una solicitud en `access_requests`; **ningún usuario entra hasta que un administrador la apruebe** |
+
+**Aprobación de solicitudes (solo administradores):** en el dashboard, pestaña *Accesos* → panel **“Altas pendientes de aprobación”**. Al aprobar con la credencial administrativa:
+
+1. El servidor crea el usuario en Supabase Auth (`email_confirm: true`).
+2. Genera una **contraseña temporal** (se muestra una sola vez al administrador para copiarla).
+3. Vincula la cuenta local (`users.openId` = uuid de Supabase) y la deja activa.
+4. Registra la acción en auditoría.
+
+Además, desde cada cuenta se puede generar una **contraseña temporal** nueva (botón *Contraseña temporal*), como alternativa si el correo de recuperación no llega.
+
+Seguridad adicional: el servidor **no auto-registra** cuentas de Supabase arbitrarias; si un usuario existe en Supabase Auth pero no tiene fila local aprobada, el login falla con “Tu acceso todavía no fue aprobado”. El registro público de Supabase está desactivado.
+
+Requisito de configuración (ya aplicado en este proyecto): en Supabase → Authentication → URL Configuration deben estar el **Site URL** (`https://coronel-dashboard.onrender.com`) y los **Redirect URLs** (`https://coronel-dashboard.onrender.com/**`, `http://localhost:3000/**`, `http://localhost:5173/**`). Ver [`docs/DEPLOY_RENDER_SUPABASE.md`](docs/DEPLOY_RENDER_SUPABASE.md).
 
 ## Despliegue
 

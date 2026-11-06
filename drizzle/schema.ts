@@ -169,3 +169,23 @@ export const adminAuditLog = pgTable("admin_audit_log", {
   changedAt: timestamp("changedAt").defaultNow().notNull(),
 });
 export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
+
+/**
+ * Solicitudes de acceso al dashboard. Un usuario nuevo completa el formulario
+ * público; un administrador debe aprobarlo para que se cree su cuenta en
+ * Supabase Auth y pueda iniciar sesión.
+ */
+export const accessRequests = pgTable("access_requests", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 160 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  message: text("message"),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).default("pending").notNull(),
+  requestedAt: timestamp("requestedAt").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewedAt"),
+  reviewedBy: varchar("reviewedBy", { length: 160 }),
+});
+
+export type AccessRequest = typeof accessRequests.$inferSelect;
+export type InsertAccessRequest = typeof accessRequests.$inferInsert;
+
