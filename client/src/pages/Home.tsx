@@ -90,6 +90,7 @@ type BirthdayCampaign = {
   phone: string | null;
   stage: "week" | "soon" | "tomorrow" | "today" | "past";
   channel: CampaignChannel;
+  progressStatus: "pending" | "contacted" | "accepted" | "redeemed" | "rejected" | "noanswer";
   promotion: string | null;
   responsible: string | null;
   nextActionAt: Date | string | null;
@@ -2318,19 +2319,12 @@ function BirthdayWorkspace({
         const key = clientKeyOf(item.record);
         const campaign = campaignByKey.get(key);
         const clientLogs = logs.filter(log => log.clientKey === key);
-        const contacted = clientLogs.some(
-          log =>
-            log.outcome === "Contactado" ||
-            log.outcome === "Promoción aceptada" ||
-            log.outcome === "Promoción redimida" ||
-            normalizeText(log.recoveryResult || "").includes("cumple")
-        );
-        const accepted = clientLogs.some(
-          log =>
-            normalizeText(log.outcome).includes("acept") ||
-            normalizeText(log.recoveryResult || "").includes("acept")
-        );
-        const redeemed = clientLogs.some(log => Boolean(log.promotionRedeemed));
+        const progress = campaign?.progressStatus ?? "pending";
+        const contacted =
+          progress === "contacted" || progress === "accepted" || progress === "redeemed";
+        const accepted = progress === "accepted" || progress === "redeemed";
+        const redeemed = progress === "redeemed";
+        const noanswer = progress === "noanswer";
         const attempts = clientLogs.filter(log =>
           normalizeText(log.outcome).includes("no contest")
         ).length;
@@ -2338,10 +2332,12 @@ function BirthdayWorkspace({
           item,
           key,
           campaign,
+          progress,
           horizon: birthdayHorizonOf(item.days),
           contacted,
           accepted,
           redeemed,
+          noanswer,
           attempts,
         };
       }),
@@ -2475,6 +2471,7 @@ function BirthdayWorkspace({
       familyBirthday: string;
       noRedeemReason: string;
       channel: CampaignChannel;
+      progressStatus: "pending" | "contacted" | "accepted" | "redeemed" | "rejected" | "noanswer";
     }>
   ) => {
     const campaign = row.campaign;
@@ -2488,6 +2485,7 @@ function BirthdayWorkspace({
         phone: row.item.record.phone || row.item.profile?.phone || undefined,
         stage: campaign?.stage ?? stageForDays(row.item.days),
         channel: patch.channel ?? campaign?.channel ?? "whatsapp",
+        progressStatus: patch.progressStatus ?? campaign?.progressStatus ?? "pending",
         promotion: patch.promotion ?? campaign?.promotion ?? row.item.promotion,
         responsible: patch.responsible ?? campaign?.responsible ?? "Cajera",
         nextActionAt:
@@ -2518,6 +2516,19 @@ function BirthdayWorkspace({
     status: "contacted" | "accepted" | "redeemed" | "rejected" | "noanswer"
   ) => {
     const item = row.item;
+    // Volver a pulsar el estado activo lo desmarca y regresa a "pendiente".
+    if (row.progress === status) {
+      persist(row, {
+        progressStatus: "pending",
+        ...(status === "noanswer"
+          ? { nextActionAt: null, nextActionLabel: "" }
+          : {}),
+        ...(status === "rejected" ? { noRedeemReason: "" } : {}),
+      });
+      return;
+    }
+    const clearingRetry =
+      status !== "noanswer" && row.campaign?.nextActionLabel === "Reintentar llamada";
     const reason =
       status === "rejected"
         ? window.prompt(
@@ -2562,12 +2573,25 @@ function BirthdayWorkspace({
             : `Mensaje: ${messageFor(row)}`,
     });
     if (status === "rejected" && reason) {
-      persist(row, { noRedeemReason: reason });
-    }
-    if (status === "noanswer") {
       persist(row, {
+        noRedeemReason: reason,
+        progressStatus: "rejected",
+        ...(clearingRetry
+          ? { nextActionAt: null, nextActionLabel: "" }
+          : {}),
+      });
+    } else if (status === "noanswer") {
+      persist(row, {
+        progressStatus: "noanswer",
         nextActionAt: dateInputToIso(offsetDateInput(1)),
         nextActionLabel: "Reintentar llamada",
+      });
+    } else {
+      persist(row, {
+        progressStatus: status,
+        ...(clearingRetry
+          ? { nextActionAt: null, nextActionLabel: "" }
+          : {}),
       });
     }
     setSavedKey(row.key);
@@ -2856,7 +2880,7 @@ function BirthdayWorkspace({
                             ✕ No redimió
                           </button>
                           <button
-                            className={row.attempts > 0 ? "warn" : ""}
+                            className={row.noanswer ? "warn active" : ""}
                             disabled={createCall.isPending}
                             onClick={() => registerCall(row, "noanswer")}
                           >
@@ -3591,23 +3615,6 @@ function BirthdayPage({
     [items]
   );
   const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const weekStrip = useMemo(() => {
-    const base = new Date();
-    const start = new Date(base.getFullYear(), base.getMonth(), base.getDate());
-    const offset = start.getDay() === 0 ? -6 : 1 - start.getDay();
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(start);
-      date.setDate(date.getDate() + offset + index);
-      const iso = toDateInputValue(date);
-      return {
-        iso,
-        label: date.toLocaleDateString("es-PE", { weekday: "short" }),
-        day: date.getDate(),
-        isToday: iso === toDateInputValue(start),
-        count: items.filter(item => toDateInputValue(item.target) === iso).length,
-      };
-    });
-  }, [items]);
   const selectedItems = selectedDate ? (itemsByDate[selectedDate] ?? []) : [];
   const calendarCells = Array.from(
     { length: firstWeekday + daysInMonth },
@@ -3685,21 +3692,6 @@ function BirthdayPage({
                   Ver todo el mes
                 </button>
               )}
-            </div>
-          </div>
-          <div className="birthday-week-inline">
-            <p className="eyebrow">ESTA SEMANA</p>
-            <div className="bw-week-strip" aria-label="Cumpleaños de la semana">
-              {weekStrip.map(day => (
-                <div
-                  className={`bw-week-day ${day.isToday ? "today" : ""} ${day.count ? "has-events" : ""}`}
-                  key={day.iso}
-                >
-                  <small>{day.label}</small>
-                  <b>{day.day}</b>
-                  <span>{day.count ? `${day.count} ●` : "—"}</span>
-                </div>
-              ))}
             </div>
           </div>
           <div className="birthday-calendar-weekdays">

@@ -74,6 +74,7 @@ export const birthdayCampaigns = pgTable("birthday_campaigns", {
   phone: varchar("phone", { length: 40 }),
   stage: text("stage", { enum: ["week", "soon", "tomorrow", "today", "past"] }).notNull().default("week"),
   channel: text("channel", { enum: ["llamada", "whatsapp", "correo", "sms"] }).notNull().default("llamada"),
+  progressStatus: text("progressStatus", { enum: ["pending", "contacted", "accepted", "redeemed", "rejected", "noanswer"] }).notNull().default("pending"),
   promotion: varchar("promotion", { length: 180 }),
   responsible: varchar("responsible", { length: 160 }),
   nextActionAt: timestamp("nextActionAt"),

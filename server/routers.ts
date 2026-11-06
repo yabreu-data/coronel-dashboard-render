@@ -224,6 +224,7 @@ const birthdayCampaignInput = z.object({
   phone: z.string().optional(),
   stage: z.enum(["week", "soon", "tomorrow", "today", "past"]),
   channel: z.enum(["llamada", "whatsapp", "correo", "sms"]),
+  progressStatus: z.enum(["pending", "contacted", "accepted", "redeemed", "rejected", "noanswer"]).optional(),
   promotion: z.string().max(180).optional(),
   responsible: z.string().max(160).optional(),
   nextActionAt: z.string().datetime().nullable().optional(),

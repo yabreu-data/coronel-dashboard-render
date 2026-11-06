@@ -116,6 +116,7 @@ export async function saveBirthdayCampaign(input: InsertBirthdayCampaign) {
         phone: input.phone ?? null,
         stage: input.stage,
         channel: input.channel,
+        progressStatus: input.progressStatus ?? "pending",
         promotion: input.promotion ?? null,
         responsible: input.responsible ?? null,
         nextActionAt: input.nextActionAt ?? null,
