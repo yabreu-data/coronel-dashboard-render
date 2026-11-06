@@ -195,11 +195,11 @@ Hoy: Clientes, Voz del cliente y Llamadas son pantallas separadas. Propuesta: **
 
 | Tema | Respuesta del restaurante | Decisión de diseño |
 |---|---|---|
-| Vigencia del beneficio | **Día, semana o mes** | La etapa de preparación pide definir la vigencia antes de contactar |
+| Vigencia del beneficio | **Día, semana o mes; puede variar por campaña** | La etapa de preparación exige definir la vigencia de cada campaña |
 | Canales | **WhatsApp Business, WhatsApp personal, llamada y correo**; **sin API de WhatsApp** | Enlaces `wa.me` con mensaje precargado + botón “Copiar mensaje” + enlace de llamada |
-| Responsable | **Un empleado, sin uno fijo por ahora** | El protocolo pide asignar responsable por campaña; puede rotar |
+| Responsable | **La cajera, en horario de baja demanda** | Aparece como responsable sugerido en el protocolo y en la pestaña |
 | Meta | **Aún sin meta fija** | Se miden cobertura y redención para fijar la meta con datos reales |
-| Familiares | **Útil si aparecen en los comentarios** | Se anota en el comentario/ficha en v1; campo estructurado en v2 |
+| Familiares | **Nombre y fecha, si están en la nota** | Se registran desde el comentario; campo estructurado en la ficha (v2) |
 | Buen trato | **“Excelente atención”, “muy amables”, etc.** | Se usan como señales del índice de atención, además de la calidad “Bueno” |
 | Edición de datos | Pendiente | Por ahora la fuente sigue siendo Google Sheets |
 
@@ -207,8 +207,10 @@ Hoy: Clientes, Voz del cliente y Llamadas son pantallas separadas. Propuesta: **
 
 Ya implementado en el dashboard:
 
-- **Panel “Protocolo de cumpleaños”** en la pestaña *Cumpleaños*, con horizontes **Mes / Semana / Día / Seguimiento**, objetivo, pasos, canal, mensaje de ejemplo copiable y “no hacer”.
+- **Pestaña Cumpleaños rediseñada** para trabajar en segundos: métricas del mes (total, hoy, próximos 7 días, contactados, redimidos), filtros por etapa, búsqueda, toggle “solo sin contactar”, tarjetas compactas con fecha y acciones, y calendario opcional.
+- **Protocolo de cumpleaños** colapsable dentro de la pestaña, con horizontes **Mes / Semana / Día / Seguimiento**, objetivo, pasos, canal, mensaje de ejemplo copiable y “no hacer”.
 - **Enlaces de contacto directo por cliente**: WhatsApp con el mensaje ya redactado (`wa.me`) y llamada (`tel:`), más el botón de copiar plantilla y el seguimiento contactado / aceptó / redimida.
+- **Responsable sugerido**: cajera en horario de baja demanda, visible en el protocolo y en la pestaña.
 - **Pool de base de datos ajustado** (5 conexiones, liberación rápida) para respetar el límite del pooler de Supabase.
 
 Pendiente para la siguiente iteración (Fase 1 completa):
@@ -216,14 +218,14 @@ Pendiente para la siguiente iteración (Fase 1 completa):
 1. Fecha de **próxima acción** y tablero de vencidas/hoy/mañana.
 2. **Embudo** de cumpleaños (contactados → aceptaron → redimieron).
 3. **Ficha única del cliente** con historial de contacto.
-4. Registro estructurado de **familiares** y motivo de no redención.
+4. Registro estructurado de **familiares** (nombre y fecha) y motivo de no redención.
+5. Configurar la **vigencia por campaña** desde la app (hoy se define al preparar la campaña).
 
 ## 9.2 Decisiones que faltan definir
 
-1. ¿La vigencia del beneficio será la misma para todos o variará por campaña?
-2. ¿Se registrarán familiares con nombre y fecha (campo nuevo) o solo como nota?
-3. ¿Quién será el responsable por defecto de la campaña y en qué horario se permite escribir?
-4. ¿Quieren definir una meta mensual luego de 1–2 meses de medición?
+1. ¿La vigencia por campaña se registra en la app (campo) o se sigue definiendo en la hoja de Google?
+2. ¿Los familiares se guardan como campo estructurado (nombre + fecha) en la ficha del cliente?
+3. ¿Cuál es el horario exacto de baja demanda de la cajera y qué política de mensajes se aplica?
 
 ---
 

@@ -114,9 +114,9 @@ Requisito de configuración (ya aplicado en este proyecto): en Supabase → Auth
 |---|---|
 | ![Panel](docs/screenshots/dashboard.png) | ![Móvil](docs/screenshots/login-mobile.png) |
 
-| Protocolo de cumpleaños | Tarjeta con canales de contacto |
+| Pestaña Cumpleaños (rediseñada) | Protocolo del equipo |
 |---|---|
-| ![Protocolo](docs/screenshots/birthday-playbook.png) | ![Tarjeta](docs/screenshots/birthday-card.png) |
+| ![Cumpleaños](docs/screenshots/birthday.png) | ![Protocolo](docs/screenshots/birthday-protocol.png) |
 
 ## Identidad visual
 

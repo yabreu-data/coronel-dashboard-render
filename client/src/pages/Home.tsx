@@ -2105,698 +2105,441 @@ function countOverduePriorities(
   return riskOverdue + birthdayOverdue;
 }
 
-function BirthdayQuickActions({
-  item,
-  logs,
-  promotion,
-  channel,
-  stage,
-}: {
-  item: {
-    record: RecordItem;
-    profile?: ClientProfile;
-    days: number;
-    template: string;
-  };
-  logs: CallLog[];
+type BirthdayHorizonKey = "mes" | "semana" | "dia" | "seguimiento";
+type BirthdayMarketingItem = {
+  record: RecordItem;
+  target: Date;
+  days: number;
+  plan: { label: string; text: string; tone: string };
+  profile?: ClientProfile;
   promotion: string;
-  channel: CampaignChannel;
-  stage: CampaignStage;
-}) {
-  const utils = trpc.useUtils();
-  const create = trpc.calls.create.useMutation({
-    onSuccess: async () => {
-      await utils.calls.list.invalidate();
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 2600);
-    },
-  });
-  const [saved, setSaved] = useState(false);
-  const [showCallForm, setShowCallForm] = useState(false);
-  const key = clientKeyOf(item.record);
-  const clientLogs = logs.filter(log => log.clientKey === key);
-  const contacted = clientLogs.some(
-    log =>
-      log.outcome === "Contactado" ||
-      normalizeText(log.recoveryResult || "").includes("cumple")
-  );
-  const accepted = clientLogs.some(
-    log =>
-      normalizeText(log.outcome).includes("acept") ||
-      normalizeText(log.recoveryResult || "").includes("acept")
-  );
-  const redeemed = clientLogs.some(log => Boolean(log.promotionRedeemed));
-  const saveStatus = (status: "contacted" | "accepted" | "redeemed") => {
-    const outcome =
-      status === "contacted" ? "Contactado" : "Promoción aceptada";
-    create.mutate({
-      clientKey: key,
-      clientName:
-        item.record.clientName || item.profile?.name || "Cliente sin nombre",
-      phone: item.record.phone || item.profile?.phone,
-      outcome,
-      promotion,
-      promotionRedeemed: status === "redeemed",
-      campaignStage: stage,
-      campaignChannel: channel,
-      recoveryResult:
-        status === "redeemed"
-          ? "Promoción redimida"
-          : status === "accepted"
-            ? "Promoción aceptada"
-            : "Por cumpleaños",
-      notes: `Canal: ${channel}. ${item.template}`,
-    });
-  };
-  const profile: ClientProfile = item.profile ?? {
-    key,
-    name: item.record.clientName || "Cliente sin nombre",
-    phone: item.record.phone || "",
-    count: 1,
-    quality: item.record.quality || "",
-    comment: item.record.comment || "",
-    dish: item.record.dish || "",
-    segment: "Nuevo",
-    source: "",
-    birthday: item.record.birthday || "",
-  };
-  const contactPhone = (item.record.phone || item.profile?.phone || "").replace(/\D/g, "");
-  const whatsappNumber =
-    contactPhone.length === 9 && contactPhone.startsWith("9") ? `51${contactPhone}` : contactPhone;
-  const whatsappHref = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(item.template)}`
-    : "";
-  const callHref = contactPhone
-    ? `tel:+${contactPhone.length === 9 ? "51" : ""}${contactPhone}`
-    : "";
-  return (
-    <>
-      <div className="birthday-followup">
-        <span className="birthday-followup-label">Seguimiento</span>
-        <div className="birthday-status-buttons">
-          <button
-            className={contacted ? "is-complete" : ""}
-            disabled={create.isPending}
-            onClick={event => {
-              event.stopPropagation();
-              saveStatus("contacted");
-            }}
-          >
-            ✓ Contactado
-          </button>
-          <button
-            className={accepted ? "is-complete" : ""}
-            disabled={create.isPending}
-            onClick={event => {
-              event.stopPropagation();
-              saveStatus("accepted");
-            }}
-          >
-            ★ Aceptó promoción
-          </button>
-          <button
-            className={redeemed ? "is-complete redeemed" : ""}
-            disabled={create.isPending}
-            onClick={event => {
-              event.stopPropagation();
-              saveStatus("redeemed");
-            }}
-          >
-            ● Redimida
-          </button>
-        </div>
-        <div className="birthday-channel-links">
-          {whatsappHref ? (
-            <a
-              className="birthday-channel whatsapp"
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              onClick={event => event.stopPropagation()}
-            >
-              <MessageSquareText size={12} /> WhatsApp con mensaje
-            </a>
-          ) : (
-            <span className="birthday-channel disabled">
-              Sin teléfono para WhatsApp
-            </span>
-          )}
-          {callHref && (
-            <a
-              className="birthday-channel call"
-              href={callHref}
-              onClick={event => event.stopPropagation()}
-            >
-              <Phone size={12} /> Llamar
-            </a>
-          )}
-        </div>
-        <button
-          className="birthday-register-call"
-          onMouseDown={event => event.stopPropagation()}
-          onClick={event => {
-            event.preventDefault();
-            event.stopPropagation();
-            setShowCallForm(true);
-          }}
-        >
-          <Phone size={12} /> Abrir ficha completa
-        </button>
-        {saved && (
-          <small className="birthday-save-confirmation">
-            ✓ Seguimiento guardado
-          </small>
-        )}
-      </div>
-      {showCallForm && (
-        <CallLogForm
-          profile={profile}
-          logs={logs}
-          initialPromotion={promotion}
-          campaignStage={stage}
-          campaignChannel={channel}
-          onClose={() => setShowCallForm(false)}
-        />
-      )}
-    </>
-  );
+  template: string;
+};
+
+const BIRTHDAY_HORIZONS: {
+  key: BirthdayHorizonKey;
+  label: string;
+  when: string;
+  hint: string;
+}[] = [
+  { key: "dia", label: "Día", when: "T-3 al día", hint: "Confirmar y activar" },
+  {
+    key: "semana",
+    label: "Semana",
+    when: "T-14 y T-7",
+    hint: "Sembrar expectativa y reservar",
+  },
+  {
+    key: "mes",
+    label: "Mes",
+    when: "T-30 a T-21",
+    hint: "Validar datos y planificar",
+  },
+  {
+    key: "seguimiento",
+    label: "Seguimiento",
+    when: "T+1 a T+7",
+    hint: "Agradecer, recuperar y medir",
+  },
+];
+
+function birthdayHorizonOf(days: number): BirthdayHorizonKey {
+  if (days < 0) return "seguimiento";
+  if (days <= 3) return "dia";
+  if (days <= 7) return "semana";
+  return "mes";
 }
-function BirthdayMarketingPanel({
+
+function daysLabel(days: number) {
+  if (days === 0) return "¡Hoy!";
+  if (days === 1) return "Mañana";
+  if (days > 1) return `Faltan ${days} días`;
+  return `Hace ${Math.abs(days)} día${Math.abs(days) === 1 ? "" : "s"}`;
+}
+
+function BirthdayWorkspace({
   items,
-  todayCount,
   logs,
-  promotions,
-  campaigns,
+  monthName,
+  selectedDate,
+  onClearDate,
   onOpenClients,
 }: {
-  items: {
-    record: RecordItem;
-    target: Date;
-    days: number;
-    plan: { label: string; text: string; tone: string };
-    profile?: ClientProfile;
-    promotion: string;
-    template: string;
-  }[];
-  todayCount: number;
+  items: BirthdayMarketingItem[];
   logs: CallLog[];
-  promotions: PromotionItem[];
-  campaigns: BirthdayCampaign[];
+  monthName: string;
+  selectedDate: string | null;
+  onClearDate: () => void;
   onOpenClients: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const [openColumns, setOpenColumns] = useState<Record<string, boolean>>({
-    week: true,
-    soon: true,
-    tomorrow: true,
-    today: true,
-    past: false,
-  });
-  const [manualStages, setManualStages] = useState<Record<string, string>>({});
-  const [channels, setChannels] = useState<Record<string, CampaignChannel>>({});
-  const [selectedContact, setSelectedContact] = useState<string | null>(null);
-  const [draggedKey, setDraggedKey] = useState<string | null>(null);
-  const [metricCampaign, setMetricCampaign] = useState("Todas");
   const utils = trpc.useUtils();
-  const saveCampaign = trpc.birthdayCampaigns.save.useMutation({
-    onSuccess: () => utils.birthdayCampaigns.list.invalidate(),
+  const createLog = trpc.calls.create.useMutation({
+    onSuccess: async () => {
+      await utils.calls.list.invalidate();
+    },
   });
-  useEffect(() => {
-    try {
-      setManualStages(
-        JSON.parse(localStorage.getItem("coronel.birthdayStages") || "{}")
-      );
-      setChannels(
-        JSON.parse(localStorage.getItem("coronel.birthdayChannels") || "{}")
-      );
-    } catch {
-      /* configuración local no disponible */
+  const [filter, setFilter] = useState<"todos" | BirthdayHorizonKey>("todos");
+  const [query, setQuery] = useState("");
+  const [onlyPending, setOnlyPending] = useState(false);
+  const [savedKey, setSavedKey] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const rows = useMemo(
+    () =>
+      items.map(item => {
+        const key = clientKeyOf(item.record);
+        const clientLogs = logs.filter(log => log.clientKey === key);
+        const contacted = clientLogs.some(
+          log =>
+            log.outcome === "Contactado" ||
+            normalizeText(log.recoveryResult || "").includes("cumple")
+        );
+        const accepted = clientLogs.some(
+          log =>
+            normalizeText(log.outcome).includes("acept") ||
+            normalizeText(log.recoveryResult || "").includes("acept")
+        );
+        const redeemed = clientLogs.some(log => Boolean(log.promotionRedeemed));
+        return {
+          item,
+          key,
+          horizon: birthdayHorizonOf(item.days),
+          contacted,
+          accepted,
+          redeemed,
+        };
+      }),
+    [items, logs]
+  );
+
+  const counts = useMemo(
+    () => ({
+      todos: rows.length,
+      dia: rows.filter(row => row.horizon === "dia").length,
+      semana: rows.filter(row => row.horizon === "semana").length,
+      mes: rows.filter(row => row.horizon === "mes").length,
+      seguimiento: rows.filter(row => row.horizon === "seguimiento").length,
+    }),
+    [rows]
+  );
+
+  const todayCount = rows.filter(row => row.item.days === 0).length;
+  const nextSevenCount = rows.filter(
+    row => row.item.days >= 0 && row.item.days <= 7
+  ).length;
+  const contactedCount = rows.filter(row => row.contacted).length;
+  const redeemedCount = rows.filter(row => row.redeemed).length;
+  const pendingCount = rows.filter(row => !row.contacted).length;
+
+  const filteredRows = rows.filter(row => {
+    if (filter !== "todos" && row.horizon !== filter) return false;
+    if (onlyPending && row.contacted) return false;
+    if (selectedDate) {
+      const target = row.item.target;
+      const key = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, "0")}-${String(target.getDate()).padStart(2, "0")}`;
+      if (key !== selectedDate) return false;
     }
-  }, []);
-  useEffect(() => {
-    if (!campaigns.length) return;
-    setManualStages(current => ({
-      ...current,
-      ...Object.fromEntries(
-        campaigns.map(campaign => [campaign.clientKey, campaign.stage])
-      ),
-    }));
-    setChannels(current => ({
-      ...current,
-      ...Object.fromEntries(
-        campaigns.map(campaign => [campaign.clientKey, campaign.channel])
-      ),
-    }));
-  }, [campaigns]);
-  useEffect(() => {
-    localStorage.setItem(
-      "coronel.birthdayStages",
-      JSON.stringify(manualStages)
-    );
-  }, [manualStages]);
-  useEffect(() => {
-    localStorage.setItem("coronel.birthdayChannels", JSON.stringify(channels));
-  }, [channels]);
-  const monthName = new Intl.DateTimeFormat("es-PE", { month: "long" })
-    .format(new Date())
-    .replace(/^./, value => value.toUpperCase());
-  const campaignItems = items.filter(item => item.days <= 7);
-  const automaticStage = (item: (typeof campaignItems)[number]) =>
-    item.days < 0
-      ? "past"
-      : item.days === 0
-        ? "today"
-        : item.days === 1
-          ? "tomorrow"
-          : item.days <= 3
-            ? "soon"
-            : "week";
-  const stageFor = (item: (typeof campaignItems)[number]) => {
-    const automatic = automaticStage(item);
-    const manual = manualStages[clientKeyOf(item.record)];
-    if (
-      item.days < 0 ||
-      item.days === 0 ||
-      (item.days <= 1 && (manual === "week" || manual === "soon")) ||
-      (item.days <= 3 && manual === "week")
-    )
-      return automatic;
-    return manual || automatic;
-  };
-  const recommendedChannel = (
-    item: (typeof campaignItems)[number]
-  ): CampaignChannel =>
-    normalizeText(
-      `${item.profile?.source || ""} ${item.record.comment}`
-    ).includes("web") ||
-    normalizeText(
-      `${item.profile?.source || ""} ${item.record.comment}`
-    ).includes("delivery")
-      ? "whatsapp"
-      : "llamada";
-  const channelFor = (item: (typeof campaignItems)[number]) =>
-    channels[clientKeyOf(item.record)] || recommendedChannel(item);
-  const persistCampaign = (
-    item: (typeof campaignItems)[number],
-    stage: string,
-    channel: CampaignChannel
+    const search = normalizeText(query.trim());
+    if (search) {
+      const haystack = normalizeText(
+        `${row.item.record.clientName} ${row.item.record.phone} ${row.item.promotion}`
+      );
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const groups = BIRTHDAY_HORIZONS.map(horizon => ({
+    ...horizon,
+    rows: filteredRows
+      .filter(row => row.horizon === horizon.key)
+      .sort((a, b) => a.item.days - b.item.days),
+  })).filter(group => group.rows.length > 0);
+
+  const selectedDateText = selectedDate
+    ? new Date(`${selectedDate}T00:00:00`).toLocaleDateString("es-PE", {
+        day: "numeric",
+        month: "long",
+      })
+    : "";
+
+  const markStatus = (
+    row: (typeof rows)[number],
+    status: "contacted" | "accepted" | "redeemed"
   ) => {
-    const key = clientKeyOf(item.record);
-    setManualStages(current => ({ ...current, [key]: stage }));
-    setChannels(current => ({ ...current, [key]: channel }));
-    saveCampaign.mutate({
-      clientKey: key,
-      clientName:
-        item.record.clientName || item.profile?.name || "Cliente sin nombre",
-      phone: item.record.phone || item.profile?.phone || undefined,
-      stage: stage as BirthdayCampaign["stage"],
-      channel,
-    });
-  };
-  const setStage = (item: (typeof campaignItems)[number], stage: string) =>
-    persistCampaign(item, stage, channelFor(item));
-  const columns = [
-    {
-      key: "week",
-      label: "7–4 días",
-      hint: "Activar",
-      items: campaignItems.filter(item => stageFor(item) === "week"),
-    },
-    {
-      key: "soon",
-      label: "3–2 días",
-      hint: "Preparar",
-      items: campaignItems.filter(item => stageFor(item) === "soon"),
-    },
-    {
-      key: "tomorrow",
-      label: "1 día",
-      hint: "Último aviso",
-      items: campaignItems.filter(item => stageFor(item) === "tomorrow"),
-    },
-    {
-      key: "today",
-      label: "Hoy",
-      hint: "Felicitar",
-      items: campaignItems.filter(item => stageFor(item) === "today"),
-    },
-    {
-      key: "past",
-      label: "Después",
-      hint: "Seguimiento",
-      items: campaignItems.filter(item => stageFor(item) === "past"),
-    },
-  ];
-  const campaignMetrics = useMemo(
-    () =>
-      getBirthdayCampaignMetrics(
-        promotions.filter(item => item.active).map(item => item.name),
-        logs
-      ),
-    [logs, promotions]
-  );
-  const monthlyMetrics = useMemo(
-    () =>
-      getBirthdayCampaignMonthlyMetrics(
-        logs,
-        metricCampaign === "Todas" ? undefined : metricCampaign
-      ),
-    [logs, metricCampaign]
-  );
-  const monthlyMax = Math.max(
-    1,
-    ...monthlyMetrics.map(metric =>
-      Math.max(metric.offered, metric.accepted, metric.redeemed)
-    )
-  );
-  const card = (item: (typeof campaignItems)[number]) => {
-    const key = clientKeyOf(item.record);
-    const channel = channelFor(item);
-    const stage = stageFor(item) as CampaignStage;
-    const selected = selectedContact === key;
-    return (
-      <article
-        className={`birthday-pipeline-card ${item.plan.tone} ${stage} ${selected ? "selected-contact" : ""}`}
-        key={key}
-        draggable
-        onDragStart={() => setDraggedKey(key)}
-        onDragEnd={() => setDraggedKey(null)}
-        onClick={() => setSelectedContact(key)}
-      >
-        <div className="birthday-pipeline-card-head">
-          <span
-            className={`birthday-signal ${item.plan.tone}`}
-            aria-label={`Estado: ${item.plan.label}`}
-          />
-          <div>
-            <b>{item.record.clientName || "Cliente sin nombre"}</b>
-            <small>
-              {item.days === 0
-                ? "Cumple hoy"
-                : item.days < 0
-                  ? `Cumplió hace ${Math.abs(item.days)} día(s)`
-                  : `Cumple en ${item.days} día(s)`}
-            </small>
-          </div>
-          <button
-            className={`contact-select-button ${selected ? "active" : ""}`}
-            onClick={event => {
-              event.stopPropagation();
-              setSelectedContact(key);
-            }}
-          >
-            {selected ? "Seleccionado" : "Seleccionar"}
-          </button>
-        </div>
-        <div className="birthday-pipeline-meta">
-          <span>{item.profile?.segment || "Nuevo"}</span>
-          <span>
-            {item.record.phone || item.profile?.phone || "Sin teléfono"}
-          </span>
-        </div>
-        <div className="birthday-pipeline-action">
-          <strong>Qué hacer ahora</strong>
-          <p>{item.plan.text}</p>
-        </div>
-        <div className="birthday-pipeline-message">
-          <strong>Plantilla personalizada</strong>
-          <p>{item.template}</p>
-          <button
-            className="copy-template-button"
-            onClick={event => {
-              event.stopPropagation();
-              navigator.clipboard?.writeText(item.template);
-            }}
-          >
-            Copiar plantilla
-          </button>
-        </div>
-        <div className="birthday-pipeline-offer">
-          <b>Oferta recomendada</b>
-          <span>{item.promotion}</span>
-        </div>
-        <label
-          className="birthday-channel-select"
-          onClick={event => event.stopPropagation()}
-        >
-          <span>Canal</span>
-          <select
-            value={channel}
-            onChange={event =>
-              persistCampaign(
-                item,
-                stage,
-                event.target.value as CampaignChannel
-              )
-            }
-          >
-            <option value="llamada">☎ Llamada</option>
-            <option value="whatsapp">◉ WhatsApp</option>
-            <option value="correo">✉ Correo</option>
-            <option value="sms">▣ SMS</option>
-          </select>
-        </label>
-        <BirthdayQuickActions
-          item={item}
-          logs={logs}
-          promotion={item.promotion}
-          channel={channel}
-          stage={stage}
-        />
-      </article>
+    const item = row.item;
+    const campaignStage: CampaignStage =
+      item.days < 0
+        ? "past"
+        : item.days === 0
+          ? "today"
+          : item.days === 1
+            ? "tomorrow"
+            : item.days <= 3
+              ? "soon"
+              : "week";
+    createLog.mutate(
+      {
+        clientKey: row.key,
+        clientName:
+          item.record.clientName || item.profile?.name || "Cliente sin nombre",
+        phone: item.record.phone || item.profile?.phone || undefined,
+        outcome:
+          status === "contacted"
+            ? "Contactado"
+            : status === "accepted"
+              ? "Promoción aceptada"
+              : "Promoción redimida",
+        promotion: item.promotion,
+        promotionRedeemed: status === "redeemed",
+        campaignStage,
+        campaignChannel: "whatsapp",
+        recoveryResult:
+          status === "redeemed"
+            ? "Promoción redimida"
+            : status === "accepted"
+              ? "Promoción aceptada"
+              : "Por cumpleaños",
+        notes: `Protocolo ${row.horizon} · ${item.template}`,
+      },
+      {
+        onSuccess: () => {
+          setSavedKey(row.key);
+          window.setTimeout(() => setSavedKey(null), 2200);
+          void utils.calls.list.invalidate();
+        },
+      }
     );
   };
-  return (
-    <section
-      className={`panel birthday-marketing-panel ${open ? "is-open" : "is-collapsed"}`}
+
+  const copyTemplate = async (row: (typeof rows)[number]) => {
+    try {
+      await navigator.clipboard.writeText(row.item.template);
+      setCopiedKey(row.key);
+      window.setTimeout(() => setCopiedKey(null), 1800);
+    } catch {
+      window.prompt("Copia el mensaje:", row.item.template);
+    }
+  };
+
+  const chipButton = (key: "todos" | BirthdayHorizonKey, label: string) => (
+    <button
+      key={key}
+      className={`bw-chip ${filter === key ? "active" : ""} bw-chip-${key}`}
+      onClick={() => setFilter(key)}
+      aria-pressed={filter === key}
     >
-      <button
-        className="birthday-marketing-toggle"
-        onClick={() => setOpen(value => !value)}
-        aria-expanded={open}
-      >
-        <span className="birthday-marketing-title">
-          <span className="birthday-marketing-icon">🎂</span>
-          <span>
-            <p className="eyebrow">PIPELINE CRM DE CUMPLEAÑOS</p>
-            <strong>Cumpleaños de {monthName}</strong>
-            <small>
-              {todayCount ? `${todayCount} hoy · ` : ""}
-              {items.length} en el mes · {campaignItems.length} en campaña (7
-              días)
-            </small>
-          </span>
-        </span>
-        <span className="birthday-marketing-action">
-          {open ? "Ocultar pipeline" : "Abrir pipeline CRM"}
-          <ChevronDown size={18} className={open ? "rotate" : ""} />
-        </span>
-      </button>
-      {open && (
-        <div className="birthday-marketing-content">
-          <div className="birthday-marketing-note">
-            <Sparkles size={16} />
-            <span>
-              <b>Campaña activa desde 7 días antes</b>
-              <small>
-                Selecciona un contacto, elige el canal y arrastra la tarjeta si
-                necesitas ajustar la etapa. La automatización seguirá sugiriendo
-                la etapa según la fecha.
-              </small>
-            </span>
-          </div>
-          {selectedContact && (
-            <div className="selected-contact-banner">
-              <UserRoundCheck size={16} />
-              <b>Contacto seleccionado:</b>{" "}
-              {campaignItems.find(
-                item => clientKeyOf(item.record) === selectedContact
-              )?.record.clientName || "Cliente"}
-              <button onClick={() => setSelectedContact(null)}>
-                Quitar selección
-              </button>
-            </div>
-          )}
-          <div className="birthday-pipeline-board">
-            {columns.map(column => (
-              <section
-                className={`birthday-pipeline-column ${column.key}`}
-                key={column.key}
-                onDragOver={event => event.preventDefault()}
-                onDrop={() => {
-                  const item = campaignItems.find(
-                    candidate => clientKeyOf(candidate.record) === draggedKey
-                  );
-                  if (item) setStage(item, column.key);
-                  setDraggedKey(null);
-                }}
-              >
-                <button
-                  className="birthday-pipeline-column-toggle"
-                  onClick={() =>
-                    setOpenColumns(current => ({
-                      ...current,
-                      [column.key]: !current[column.key],
-                    }))
-                  }
-                >
-                  <span className="birthday-stage-light" />
-                  <span>
-                    <b>{column.label}</b>
-                    <small>{column.hint}</small>
-                  </span>
-                  <strong>{column.items.length}</strong>
-                  <ChevronDown
-                    size={15}
-                    className={openColumns[column.key] ? "rotate" : ""}
-                  />
-                </button>
-                {openColumns[column.key] &&
-                  (column.items.length ? (
-                    column.items.map(card)
-                  ) : (
-                    <small className="birthday-pipeline-empty">
-                      Suelta aquí una tarjeta o no hay clientes
-                    </small>
-                  ))}
-              </section>
-            ))}
-          </div>
-          <section className="birthday-campaign-metrics">
-            <div className="birthday-campaign-metrics-head">
-              <div>
-                <p className="eyebrow">RENDIMIENTO DE CAMPAÑAS</p>
-                <h4>Aceptación y redención por promoción</h4>
-              </div>
-              <span>
-                {campaignMetrics.reduce(
-                  (sum, metric) => sum + metric.offered,
-                  0
-                )}{" "}
-                ofertas registradas
-              </span>
-            </div>
-            {campaignMetrics.length ? (
-              <div className="birthday-campaign-metrics-list">
-                {campaignMetrics.map(metric => (
-                  <div
-                    className="birthday-campaign-metric-row"
-                    key={metric.name}
-                  >
-                    <div className="birthday-campaign-metric-name">
-                      <b>{metric.name}</b>
-                      <small>
-                        {metric.offered
-                          ? `${metric.offered} oferta(s)`
-                          : "Sin registros todavía"}
-                      </small>
-                    </div>
-                    <div className="birthday-metric-stat">
-                      <strong>{metric.accepted}</strong>
-                      <span>Aceptadas</span>
-                      <i>
-                        <em style={{ width: `${metric.acceptanceRate}%` }} />
-                      </i>
-                      <small>{metric.acceptanceRate}%</small>
-                    </div>
-                    <div className="birthday-metric-stat redeemed">
-                      <strong>{metric.redeemed}</strong>
-                      <span>Redimidas</span>
-                      <i>
-                        <em style={{ width: `${metric.redemptionRate}%` }} />
-                      </i>
-                      <small>{metric.redemptionRate}%</small>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Empty text="Aún no hay promociones registradas para medir." />
-            )}
-          </section>
-          <section className="birthday-monthly-chart">
-            <div className="birthday-campaign-metrics-head">
-              <div>
-                <p className="eyebrow">TENDENCIA MENSUAL</p>
-                <h4>Aceptación vs. redención</h4>
-              </div>
-              <select
-                value={metricCampaign}
-                onChange={event => setMetricCampaign(event.target.value)}
-              >
-                <option value="Todas">Todas las campañas</option>
-                {promotions
-                  .filter(item => item.active)
-                  .map(item => (
-                    <option key={item.name} value={item.name}>
-                      {item.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            {monthlyMetrics.length ? (
-              <>
-                <div className="birthday-chart-legend">
-                  <span>
-                    <i className="chart-dot offered" />
-                    Ofertas
-                  </span>
-                  <span>
-                    <i className="chart-dot accepted" />
-                    Aceptadas
-                  </span>
-                  <span>
-                    <i className="chart-dot redeemed" />
-                    Redimidas
-                  </span>
-                </div>
-                <div className="birthday-monthly-bars">
-                  {monthlyMetrics.map(metric => (
-                    <div className="birthday-month-bar" key={metric.month}>
-                      <div className="birthday-month-bar-stack">
-                        <i
-                          className="offered"
-                          style={{
-                            height: `${(metric.offered / monthlyMax) * 100}%`,
-                          }}
-                          title={`${metric.offered} ofertas`}
-                        />
-                        <i
-                          className="accepted"
-                          style={{
-                            height: `${(metric.accepted / monthlyMax) * 100}%`,
-                          }}
-                          title={`${metric.accepted} aceptadas`}
-                        />
-                        <i
-                          className="redeemed"
-                          style={{
-                            height: `${(metric.redeemed / monthlyMax) * 100}%`,
-                          }}
-                          title={`${metric.redeemed} redimidas`}
-                        />
-                      </div>
-                      <b>{metric.label}</b>
-                      <small>
-                        {metric.offered} · {metric.accepted} · {metric.redeemed}
-                      </small>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <Empty text="Aún no hay llamadas con fecha para comparar meses." />
-            )}
-          </section>
-          <button className="birthday-marketing-cta" onClick={onOpenClients}>
-            <Cake size={15} /> Abrir ficha completa y registrar llamada{" "}
-            <ChevronRight size={15} />
-          </button>
+      {label} <b>{counts[key]}</b>
+    </button>
+  );
+
+  return (
+    <section className="panel bw-panel">
+      <div className="bw-metrics">
+        <div className="bw-metric bw-metric-total">
+          <small>Cumpleaños en {monthName}</small>
+          <b>{counts.todos}</b>
+          <span>{pendingCount} sin contactar</span>
         </div>
+        <div className="bw-metric bw-metric-today">
+          <small>Hoy</small>
+          <b>{todayCount}</b>
+          <span>felicitar y activar</span>
+        </div>
+        <div className="bw-metric bw-metric-week">
+          <small>Próximos 7 días</small>
+          <b>{nextSevenCount}</b>
+          <span>confirmar plan</span>
+        </div>
+        <div className="bw-metric bw-metric-contact">
+          <small>Contactados</small>
+          <b>{contactedCount}</b>
+          <span>de {counts.todos} del mes</span>
+        </div>
+        <div className="bw-metric bw-metric-redeem">
+          <small>Redimidos</small>
+          <b>{redeemedCount}</b>
+          <span>beneficio usado</span>
+        </div>
+      </div>
+
+      <div className="bw-filters">
+        <div className="bw-chips">
+          {chipButton("todos", "Todos")}
+          {chipButton("dia", "Día")}
+          {chipButton("semana", "Semana")}
+          {chipButton("mes", "Mes")}
+          {chipButton("seguimiento", "Seguimiento")}
+        </div>
+        <label className="bw-search">
+          <Search size={14} />
+          <input
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            placeholder="Buscar cliente, teléfono o promoción…"
+          />
+        </label>
+        <button
+          className={`bw-pending-toggle ${onlyPending ? "active" : ""}`}
+          onClick={() => setOnlyPending(value => !value)}
+          aria-pressed={onlyPending}
+        >
+          Solo sin contactar
+        </button>
+        {selectedDate && (
+          <button className="bw-clear-date" onClick={onClearDate}>
+            Filtrando: {selectedDateText} · Ver todo ✕
+          </button>
+        )}
+      </div>
+
+      {groups.length === 0 ? (
+        <div className="bw-empty">
+          <Cake size={22} />
+          <b>No hay cumpleaños para este filtro</b>
+          <small>
+            Cambia de etapa, limpia la búsqueda o revisa otro mes del
+            calendario.
+          </small>
+        </div>
+      ) : (
+        groups.map(group => (
+          <div className={`bw-group bw-group-${group.key}`} key={group.key}>
+            <div className="bw-group-head">
+              <span className={`bw-dot bw-dot-${group.key}`} />
+              <b>{group.label}</b>
+              <small>
+                {group.when} · {group.hint}
+              </small>
+              <span className="bw-group-count">{group.rows.length}</span>
+            </div>
+            <div className="bw-list">
+              {group.rows.map(row => {
+                const item = row.item;
+                const phone = (
+                  item.record.phone ||
+                  item.profile?.phone ||
+                  ""
+                ).replace(/\D/g, "");
+                const whatsappNumber =
+                  phone.length === 9 && phone.startsWith("9")
+                    ? `51${phone}`
+                    : phone;
+                const whatsappHref = whatsappNumber
+                  ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(item.template)}`
+                  : "";
+                const callHref = phone
+                  ? `tel:+${phone.length === 9 ? "51" : ""}${phone}`
+                  : "";
+                const date = item.target.toLocaleDateString("es-PE", {
+                  day: "2-digit",
+                  month: "short",
+                });
+                return (
+                  <article
+                    className={`bw-card bw-card-${row.horizon}`}
+                    key={row.key}
+                  >
+                    <div className="bw-date">
+                      <b>{date.split(" ")[0]}</b>
+                      <small>{date.split(" ")[1]?.replace(".", "")}</small>
+                    </div>
+                    <div className="bw-main">
+                      <div className="bw-title">
+                        <b>{item.record.clientName || "Cliente sin nombre"}</b>
+                        {item.profile?.segment && (
+                          <Pill
+                            tone={
+                              item.profile.segment === "Fiel" ? "green" : "blue"
+                            }
+                          >
+                            {item.profile.segment}
+                          </Pill>
+                        )}
+                        <span className="bw-days">{daysLabel(item.days)}</span>
+                      </div>
+                      <div className="bw-meta">
+                        {item.record.phone || "Sin teléfono"} ·{" "}
+                        {item.promotion}
+                      </div>
+                      {savedKey === row.key && (
+                        <div className="bw-saved">✓ Seguimiento guardado</div>
+                      )}
+                      <div className="bw-status">
+                        <button
+                          className={row.contacted ? "active" : ""}
+                          disabled={createLog.isPending}
+                          onClick={() => markStatus(row, "contacted")}
+                        >
+                          ✓ Contactado
+                        </button>
+                        <button
+                          className={row.accepted ? "active" : ""}
+                          disabled={createLog.isPending}
+                          onClick={() => markStatus(row, "accepted")}
+                        >
+                          ★ Aceptó
+                        </button>
+                        <button
+                          className={row.redeemed ? "active" : ""}
+                          disabled={createLog.isPending}
+                          onClick={() => markStatus(row, "redeemed")}
+                        >
+                          ● Redimida
+                        </button>
+                      </div>
+                    </div>
+                    <div className="bw-actions">
+                      {whatsappHref ? (
+                        <a
+                          className="bw-action bw-action-whatsapp"
+                          href={whatsappHref}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <MessageSquareText size={13} /> WhatsApp
+                        </a>
+                      ) : (
+                        <span className="bw-action is-disabled">
+                          Sin teléfono
+                        </span>
+                      )}
+                      {callHref && (
+                        <a className="bw-action" href={callHref}>
+                          <Phone size={13} /> Llamar
+                        </a>
+                      )}
+                      <button
+                        className="bw-action bw-action-copy"
+                        onClick={() => copyTemplate(row)}
+                      >
+                        {copiedKey === row.key
+                          ? "✓ Copiado"
+                          : "Copiar mensaje"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        ))
       )}
+
+      <div className="bw-footer">
+        <small>
+          Responsable sugerido: <b>cajera</b> en horario de baja demanda. El
+          mensaje de WhatsApp ya incluye nombre, fecha, beneficio y plato
+          favorito.
+        </small>
+        <button className="secondary-action" onClick={onOpenClients}>
+          Ver clientes en CRM
+        </button>
+      </div>
     </section>
   );
 }
+
 function buildBirthdayMarketing(
   records: RecordItem[],
   profiles: ClientProfile[],
@@ -2952,12 +2695,12 @@ const BIRTHDAY_PLAYBOOK: BirthdayPlaybookStage[] = [
     channel: "Interno (revisión en equipo) · sin contacto al cliente todavía",
     steps: [
       "Revisar la agenda del mes y detectar cumpleaños con teléfono o fecha incompleta.",
-      "Definir la vigencia del beneficio: día, semana o mes (según lo acordado).",
-      "Asignar un responsable para la campaña (puede rotar; no hay uno fijo).",
+      "Definir la vigencia del beneficio: día, semana o mes (puede variar por campaña).",
+      "Asignar un responsable para la campaña (la cajera en horario de baja demanda).",
       "Confirmar qué promoción de cumpleaños está activa y su mensaje.",
     ],
     example:
-      "Planilla de marzo lista: 14 cumpleaños. Beneficio: postre de cumpleaños, válido la semana del cumpleaños. Responsable: por asignar.",
+      "Planilla de marzo lista: 14 cumpleaños. Beneficio: postre de cumpleaños, válido la semana del cumpleaños. Responsable: cajera (turno tarde).",
     avoid: "No contactar al cliente en esta etapa: primero valida datos y evita ofrecer algo que no está disponible.",
   },
   {
@@ -3001,7 +2744,7 @@ const BIRTHDAY_PLAYBOOK: BirthdayPlaybookStage[] = [
       "T+1: agradecer la visita y pedir la encuesta (1 minuto).",
       "T+3: si no vino, ofrecer una segunda oportunidad antes de que venza su beneficio.",
       "T+7: registrar el resultado (redimido / no redimido) y el motivo.",
-      "Anotar en el comentario del cliente menciones de cumpleaños de familiares.",
+      "Anotar en el comentario del cliente menciones de cumpleaños de familiares (nombre y fecha).",
     ],
     example:
       "Gracias por celebrar con nosotros, {nombre} 🎂 ¿Nos cuentas cómo fue tu experiencia? Nos ayuda a atenderte mejor la próxima vez.",
@@ -3012,6 +2755,7 @@ const BIRTHDAY_PLAYBOOK: BirthdayPlaybookStage[] = [
 function BirthdayPlaybook() {
   const [activeStage, setActiveStage] = useState(BIRTHDAY_PLAYBOOK[0].key);
   const [copied, setCopied] = useState(false);
+  const [open, setOpen] = useState(false);
   const stage =
     BIRTHDAY_PLAYBOOK.find(item => item.key === activeStage) ?? BIRTHDAY_PLAYBOOK[0];
   const copyExample = async () => {
@@ -3024,64 +2768,74 @@ function BirthdayPlaybook() {
     }
   };
   return (
-    <section className="panel birthday-playbook">
-      <div className="panel-head">
+    <section className={`panel birthday-playbook ${open ? "is-open" : "is-collapsed"}`}>
+      <div className="panel-head birthday-playbook-head">
         <div>
           <p className="eyebrow">PROTOCOLO DE CUMPLEAÑOS</p>
           <h3>Qué hacer en cada momento: mes, semana y día</h3>
           <small className="muted">
             Guía para el equipo: cuándo contactar, por qué canal, qué decir y qué
-            evitar. Cada cliente tiene su mensaje sugerido en el tablero de
-            abajo.
+            evitar. Responsable: cajera en horario de baja demanda.
           </small>
         </div>
-        <Pill tone="purple">Guía del equipo</Pill>
+        <button
+          className="secondary-action"
+          onClick={() => setOpen(value => !value)}
+          aria-expanded={open}
+        >
+          {open ? "Ocultar protocolo" : "Ver protocolo del equipo"}
+        </button>
       </div>
-      <div className="birthday-playbook-tabs" role="tablist">
-        {BIRTHDAY_PLAYBOOK.map(item => (
-          <button
-            key={item.key}
-            role="tab"
-            aria-selected={activeStage === item.key}
-            className={activeStage === item.key ? "active" : ""}
-            onClick={() => setActiveStage(item.key)}
-          >
-            <b>{item.label}</b>
-            <small>{item.when}</small>
-          </button>
-        ))}
-      </div>
-      <div className="birthday-playbook-body">
-        <div className="birthday-playbook-col">
-          <p className="eyebrow">OBJETIVO</p>
-          <p>{stage.goal}</p>
-          <p className="eyebrow">CANAL</p>
-          <p>{stage.channel}</p>
-          <p className="eyebrow">NO HACER</p>
-          <p className="birthday-playbook-avoid">{stage.avoid}</p>
-        </div>
-        <div className="birthday-playbook-col">
-          <p className="eyebrow">PASOS</p>
-          <ul className="birthday-playbook-steps">
-            {stage.steps.map(step => (
-              <li key={step}>{step}</li>
+      {open && (
+        <>
+          <div className="birthday-playbook-tabs" role="tablist">
+            {BIRTHDAY_PLAYBOOK.map(item => (
+              <button
+                key={item.key}
+                role="tab"
+                aria-selected={activeStage === item.key}
+                className={activeStage === item.key ? "active" : ""}
+                onClick={() => setActiveStage(item.key)}
+              >
+                <b>{item.label}</b>
+                <small>{item.when}</small>
+              </button>
             ))}
-          </ul>
-        </div>
-        <div className="birthday-playbook-col example">
-          <p className="eyebrow">EJEMPLO DE MENSAJE</p>
-          <blockquote>{stage.example}</blockquote>
-          <button className="secondary-action" onClick={copyExample}>
-            {copied ? "✓ Copiado" : "Copiar mensaje"}
-          </button>
-        </div>
-      </div>
-      <p className="birthday-playbook-note">
-        Canales disponibles: WhatsApp Business, WhatsApp personal, llamada y
-        correo. No hay API de WhatsApp: el mensaje se copia o se abre en wa.me.
-        El responsable puede ser cualquier integrante del equipo. Aún no hay meta
-        fija: mide cobertura y redención para definirla con datos reales.
-      </p>
+          </div>
+          <div className="birthday-playbook-body">
+            <div className="birthday-playbook-col">
+              <p className="eyebrow">OBJETIVO</p>
+              <p>{stage.goal}</p>
+              <p className="eyebrow">CANAL</p>
+              <p>{stage.channel}</p>
+              <p className="eyebrow">NO HACER</p>
+              <p className="birthday-playbook-avoid">{stage.avoid}</p>
+            </div>
+            <div className="birthday-playbook-col">
+              <p className="eyebrow">PASOS</p>
+              <ul className="birthday-playbook-steps">
+                {stage.steps.map(step => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="birthday-playbook-col example">
+              <p className="eyebrow">EJEMPLO DE MENSAJE</p>
+              <blockquote>{stage.example}</blockquote>
+              <button className="secondary-action" onClick={copyExample}>
+                {copied ? "✓ Copiado" : "Copiar mensaje"}
+              </button>
+            </div>
+          </div>
+          <p className="birthday-playbook-note">
+            Canales disponibles: WhatsApp Business, WhatsApp personal, llamada y
+            correo. No hay API de WhatsApp: el mensaje se copia o se abre en
+            wa.me. La vigencia del beneficio puede ser día, semana o mes según la
+            campaña. Aún no hay meta fija: mide cobertura y redención para
+            definirla con datos reales.
+          </p>
+        </>
+      )}
     </section>
   );
 }
@@ -3106,6 +2860,7 @@ function BirthdayPage({
     () => new Date(now.getFullYear(), now.getMonth(), 1)
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
   const items = useMemo(
     () => buildBirthdayMarketing(records, profiles, promotions, calendarMonth),
     [records, profiles, promotions, calendarMonth]
@@ -3122,11 +2877,11 @@ function BirthdayPage({
   const firstWeekday = (calendarMonth.getDay() + 6) % 7;
   const dateKey = (day: number) =>
     `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-  const itemDateKey = (item: (typeof items)[number]) =>
+  const itemDateKey = (item: BirthdayMarketingItem) =>
     `${item.target.getFullYear()}-${String(item.target.getMonth() + 1).padStart(2, "0")}-${String(item.target.getDate()).padStart(2, "0")}`;
   const itemsByDate = useMemo(
     () =>
-      items.reduce<Record<string, typeof items>>((acc, item) => {
+      items.reduce<Record<string, BirthdayMarketingItem[]>>((acc, item) => {
         const key = itemDateKey(item);
         (acc[key] ??= []).push(item);
         return acc;
@@ -3135,8 +2890,6 @@ function BirthdayPage({
   );
   const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const selectedItems = selectedDate ? (itemsByDate[selectedDate] ?? []) : [];
-  const visibleItems = selectedDate ? selectedItems : items;
-  const todayCount = items.filter(item => item.days === 0).length;
   const calendarCells = Array.from(
     { length: firstWeekday + daysInMonth },
     (_, index) => (index < firstWeekday ? null : index - firstWeekday + 1)
@@ -3149,157 +2902,147 @@ function BirthdayPage({
   };
   const goToday = () => {
     setCalendarMonth(new Date(now.getFullYear(), now.getMonth(), 1));
-    setSelectedDate(todayKey);
+    setSelectedDate(null);
   };
-  const isCurrentMonth =
-    calendarMonth.getFullYear() === now.getFullYear() &&
-    calendarMonth.getMonth() === now.getMonth();
   return (
     <>
       <div className="page-intro birthday-page-intro">
         <div>
-          <Pill tone="orange">🎂 CAMPAÑAS DE CUMPLEAÑOS</Pill>
-          <h2>Agenda de cumpleaños</h2>
+          <Pill tone="orange">🎂 CUMPLEAÑOS</Pill>
+          <h2>Agenda y seguimiento</h2>
           <p>
-            Todo lo necesario para preparar, contactar y dar seguimiento a cada
-            cliente, sin saturar el Centro de acción.
+            Prioriza por día, semana y mes: abre WhatsApp o llama, marca el
+            avance y no dejes pasar un cumpleaños. El protocolo completo está al
+            final de la página.
           </p>
         </div>
-        <div className="intro-note">
-          <Cake size={18} />
-          <span>
-            <b>
-              {items.length} cliente(s) en {monthName}
-            </b>
-            <small>
-              {isCurrentMonth && todayCount
-                ? `${todayCount} cumple(n) hoy`
-                : isCurrentMonth
-                  ? "Sin cumpleaños hoy"
-                  : "Consulta y planifica próximos meses"}{" "}
-              · pipeline de 7 días
-            </small>
-          </span>
+        <div className="birthday-toolbar">
+          <button
+            className="birthday-toolbar-arrow"
+            onClick={() => changeMonth(-1)}
+            aria-label="Mes anterior"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <b className="birthday-toolbar-month">{monthName}</b>
+          <button
+            className="birthday-toolbar-arrow"
+            onClick={() => changeMonth(1)}
+            aria-label="Mes siguiente"
+          >
+            <ChevronRight size={16} />
+          </button>
+          <button className="birthday-toolbar-action" onClick={goToday}>
+            Hoy
+          </button>
+          <button
+            className={`birthday-toolbar-action ${showCalendar ? "active" : ""}`}
+            onClick={() => setShowCalendar(value => !value)}
+            aria-pressed={showCalendar}
+          >
+            {showCalendar ? "Ocultar calendario" : "Ver calendario"}
+          </button>
         </div>
       </div>
-      <section className="panel birthday-calendar-panel">
-        <div className="panel-head birthday-calendar-head">
-          <div>
-            <p className="eyebrow">CALENDARIO DE CUMPLEAÑOS</p>
-            <h3>{monthName}</h3>
-            <small className="muted">
-              Las fechas doradas tienen cumpleaños. Selecciona una para filtrar
-              el pipeline.
-            </small>
-          </div>
-          <div className="birthday-month-navigation">
-            <button
-              className="birthday-month-button"
-              onClick={() => changeMonth(-1)}
-              aria-label="Mes anterior"
-            >
-              <ChevronLeft size={17} />
-            </button>
-            <button className="birthday-today-button" onClick={goToday}>
-              Hoy
-            </button>
-            <button
-              className="birthday-month-button"
-              onClick={() => changeMonth(1)}
-              aria-label="Mes siguiente"
-            >
-              <ChevronRight size={17} />
-            </button>
+
+      <BirthdayWorkspace
+        items={items}
+        logs={logs}
+        monthName={monthName}
+        selectedDate={selectedDate}
+        onClearDate={() => setSelectedDate(null)}
+        onOpenClients={() => onNavigate("clients", undefined, "birthdays")}
+      />
+
+      {showCalendar && (
+        <section className="panel birthday-calendar-panel birthday-calendar-compact">
+          <div className="panel-head birthday-calendar-head">
+            <div>
+              <p className="eyebrow">CALENDARIO DEL MES</p>
+              <h3>{monthName}</h3>
+              <small className="muted">
+                Selecciona un día para filtrar el listado de arriba.
+              </small>
+            </div>
             {selectedDate && (
               <button
                 className="birthday-clear-date"
                 onClick={() => setSelectedDate(null)}
               >
-                Ver todo
+                Ver todo el mes
               </button>
             )}
           </div>
-        </div>
-        <div className="birthday-calendar-weekdays">
-          {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map(day => (
-            <span key={day}>{day}</span>
-          ))}
-        </div>
-        <div className="birthday-calendar-grid">
-          {calendarCells.map((day, index) => {
-            if (!day)
-              return (
-                <span
-                  className="birthday-calendar-empty"
-                  key={`empty-${index}`}
-                />
-              );
-            const key = dateKey(day);
-            const dayItems = itemsByDate[key] ?? [];
-            const isToday = key === todayKey;
-            const isSelected = key === selectedDate;
-            return (
-              <button
-                key={key}
-                className={`birthday-calendar-day ${isToday ? "today" : ""} ${isSelected ? "selected" : ""} ${dayItems.length ? "has-birthdays" : ""}`}
-                onClick={() => setSelectedDate(isSelected ? null : key)}
-                aria-label={`${day} de ${monthName}${dayItems.length ? `, ${dayItems.length} cumpleaños` : ""}`}
-                aria-pressed={isSelected}
-              >
-                <strong>{day}</strong>
-                {dayItems.length > 0 && (
-                  <span className="birthday-calendar-dot" />
-                )}
-                {dayItems.length > 0 && (
-                  <small>
-                    {dayItems.length}{" "}
-                    {dayItems.length === 1 ? "cumple" : "cumples"}
-                  </small>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        {selectedDate && (
-          <div className="birthday-selected-day">
-            <Cake size={16} />
-            <span>
-              <b>
-                {selectedItems.length
-                  ? `${selectedItems.length} cumpleaños el ${Number(selectedDate.slice(-2))} de ${monthName}`
-                  : `Sin cumpleaños el ${Number(selectedDate.slice(-2))} de ${monthName}`}
-              </b>
-              <small>
-                {selectedItems.length
-                  ? selectedItems
-                      .map(
-                        item => item.record.clientName || "Cliente sin nombre"
-                      )
-                      .join(" · ")
-                  : "Selecciona otra fecha para revisar la agenda."}
-              </small>
-            </span>
+          <div className="birthday-calendar-weekdays">
+            {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map(day => (
+              <span key={day}>{day}</span>
+            ))}
           </div>
-        )}
-      </section>
+          <div className="birthday-calendar-grid">
+            {calendarCells.map((day, index) => {
+              if (!day)
+                return (
+                  <span
+                    className="birthday-calendar-empty"
+                    key={`empty-${index}`}
+                  />
+                );
+              const key = dateKey(day);
+              const dayItems = itemsByDate[key] ?? [];
+              const isToday = key === todayKey;
+              const isSelected = selectedDate === key;
+              return (
+                <button
+                  key={key}
+                  className={`birthday-calendar-day ${isToday ? "today" : ""} ${isSelected ? "selected" : ""} ${dayItems.length ? "has-birthdays" : ""}`}
+                  onClick={() => setSelectedDate(isSelected ? null : key)}
+                  aria-label={`${day} de ${monthName}${dayItems.length ? `, ${dayItems.length} cumpleaños` : ""}`}
+                  aria-pressed={isSelected}
+                >
+                  <strong>{day}</strong>
+                  {dayItems.length > 0 && (
+                    <span className="birthday-calendar-dot" />
+                  )}
+                  {dayItems.length > 0 && (
+                    <small>
+                      {dayItems.length}{" "}
+                      {dayItems.length === 1 ? "cumple" : "cumples"}
+                    </small>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {selectedDate && (
+            <div className="birthday-selected-day">
+              <Cake size={16} />
+              <span>
+                <b>
+                  {selectedItems.length
+                    ? `${selectedItems.length} cumpleaños el ${Number(selectedDate.slice(-2))} de ${monthName}`
+                    : `Sin cumpleaños el ${Number(selectedDate.slice(-2))} de ${monthName}`}
+                </b>
+                <small>
+                  {selectedItems.length
+                    ? selectedItems
+                        .map(
+                          item =>
+                            item.record.clientName || "Cliente sin nombre"
+                        )
+                        .join(" · ")
+                    : "Selecciona otra fecha para revisar la agenda."}
+                </small>
+              </span>
+            </div>
+          )}
+        </section>
+      )}
+
       <BirthdayPlaybook />
-      <BirthdayMarketingPanel
-        items={visibleItems}
-        todayCount={
-          isCurrentMonth
-            ? selectedDate
-              ? selectedItems.filter(item => item.days === 0).length
-              : todayCount
-            : 0
-        }
-        logs={logs}
-        promotions={promotions}
-        campaigns={campaigns}
-        onOpenClients={() => onNavigate("clients", undefined, "birthdays")}
-      />
     </>
   );
 }
+
 function Overview({
   records,
   positive,

@@ -1258,3 +1258,101 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
   height: 1px;
   background: linear-gradient(90deg, #54d6f5, rgba(84, 214, 245, 0));
 }
+
+/* ---------------------------------------------------------------------------
+   Cumpleaños · rediseño accionable
+--------------------------------------------------------------------------- */
+.birthday-page-intro { align-items: flex-start; }
+.birthday-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.birthday-toolbar-arrow { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #35516d; border-radius: 9px; background: #10243a; color: #dff6ff; cursor: pointer; }
+.birthday-toolbar-month { min-width: 150px; text-align: center; color: #fff; font-size: 13px; text-transform: capitalize; }
+.birthday-toolbar-action { border: 1px solid #35516d; border-radius: 9px; padding: 8px 12px; background: #10243a; color: #dff6ff; font-size: 12px; font-weight: 800; cursor: pointer; }
+.birthday-toolbar-action.active { border-color: #54d6f5; background: #54d6f5; color: #071525; }
+
+.bw-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.bw-metric { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid #24405c; border-radius: 13px; background: #0b1a2c; }
+.bw-metric small { color: #8fa6bd; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.bw-metric b { color: #fff; font-size: 24px; line-height: 1.1; }
+.bw-metric span { color: #a9bdd2; font-size: 10.5px; }
+.bw-metric-today { border-color: #7a3f4a; background: linear-gradient(135deg, #1a1220, #0b1a2c); }
+.bw-metric-today b { color: #ff8f9c; }
+.bw-metric-week { border-color: #6d5a32; }
+.bw-metric-week b { color: #ffc45e; }
+.bw-metric-contact { border-color: #2b5f6b; }
+.bw-metric-contact b { color: #6fd3f7; }
+.bw-metric-redeem { border-color: #2b6b52; }
+.bw-metric-redeem b { color: #59d9a5; }
+
+.bw-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 0 4px; border-top: 1px solid #1d3550; }
+.bw-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.bw-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #35516d; border-radius: 999px; padding: 6px 11px; background: #0f2136; color: #b9cee2; font-size: 11px; font-weight: 800; cursor: pointer; }
+.bw-chip b { padding: 0 5px; border-radius: 999px; background: #1a3550; color: #eaf3fb; font-size: 10px; }
+.bw-chip.active { border-color: #54d6f5; background: #123a53; color: #8be7ff; }
+.bw-chip-dia.active { border-color: #ff7b8a; background: #2a1620; color: #ffd7db; }
+.bw-chip-semana.active { border-color: #ffc45e; background: #2a2314; color: #ffe4b0; }
+.bw-chip-mes.active { border-color: #6ea8ff; background: #14233a; color: #cfe0ff; }
+.bw-chip-seguimiento.active { border-color: #59d9a5; background: #102a22; color: #c9f8e3; }
+.bw-search { display: inline-flex; align-items: center; gap: 6px; flex: 1; min-width: 190px; padding: 0 10px; border: 1px solid #2a5270; border-radius: 9px; background: #0b1a2c; color: #8fa6bd; }
+.bw-search input { flex: 1; min-width: 0; padding: 8px 0; border: 0; background: transparent; color: #f1f6fc; font-size: 12px; outline: none; }
+.bw-pending-toggle { border: 1px solid #35516d; border-radius: 9px; padding: 7px 10px; background: #0f2136; color: #b9cee2; font-size: 11px; font-weight: 800; cursor: pointer; }
+.bw-pending-toggle.active { border-color: #ffc45e; background: #2a2314; color: #ffe4b0; }
+.bw-clear-date { border: 1px dashed #54d6f5; border-radius: 9px; padding: 7px 10px; background: transparent; color: #8be7ff; font-size: 11px; font-weight: 800; cursor: pointer; }
+
+.bw-group { margin-top: 14px; }
+.bw-group-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.bw-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.bw-dot-dia { background: #ff7b8a; }
+.bw-dot-semana { background: #ffc45e; }
+.bw-dot-mes { background: #6ea8ff; }
+.bw-dot-seguimiento { background: #59d9a5; }
+.bw-group-head b { color: #fff; font-size: 13px; }
+.bw-group-head small { color: #8fa6bd; font-size: 11px; }
+.bw-group-count { margin-left: auto; border: 1px solid #2a5270; border-radius: 999px; padding: 2px 8px; background: #10243a; color: #cfe4f5; font-size: 10px; font-weight: 900; }
+.bw-list { display: flex; flex-direction: column; gap: 8px; }
+.bw-card { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 13px; border: 1px solid #24405c; border-left: 4px solid #6ea8ff; border-radius: 13px; background: #0b1a2c; }
+.bw-card-dia { border-left-color: #ff7b8a; }
+.bw-card-semana { border-left-color: #ffc45e; }
+.bw-card-mes { border-left-color: #6ea8ff; }
+.bw-card-seguimiento { border-left-color: #59d9a5; }
+.bw-date { padding: 6px 4px; border: 1px solid #24405c; border-radius: 10px; background: #10243a; text-align: center; }
+.bw-date b { display: block; color: #fff; font-size: 18px; line-height: 1; }
+.bw-date small { display: block; margin-top: 3px; color: #9fb6cb; font-size: 9px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+.bw-main { min-width: 0; }
+.bw-title { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.bw-title > b { color: #fff; font-size: 13px; }
+.bw-days { color: #8be7ff; font-size: 10.5px; font-weight: 900; }
+.bw-meta { margin-top: 3px; overflow: hidden; color: #a9bdd2; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.bw-status { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.bw-status button { border: 1px solid #35516d; border-radius: 7px; padding: 4px 8px; background: #0f2136; color: #b9cee2; font-size: 10px; font-weight: 800; cursor: pointer; }
+.bw-status button.active { border-color: #2b9b78; background: #0f2f2a; color: #bff8dd; }
+.bw-status button:disabled { opacity: 0.6; cursor: wait; }
+.bw-saved { margin-top: 4px; color: #59d9a5; font-size: 10.5px; font-weight: 800; }
+.bw-actions { display: flex; flex-direction: column; gap: 5px; min-width: 132px; }
+.bw-action { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 6px 9px; border: 1px solid #35516d; border-radius: 8px; background: #10243a; color: #e4eef8; font-size: 11px; font-weight: 800; text-decoration: none; cursor: pointer; }
+.bw-action-whatsapp { border-color: #2b9b78; background: #0f2f2a; color: #bff8dd; }
+.bw-action-copy { color: #cfe4f5; }
+.bw-action.is-disabled { opacity: 0.5; cursor: default; }
+.bw-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 28px 16px; color: #8fa6bd; text-align: center; }
+.bw-empty b { color: #fff; font-size: 14px; }
+.bw-empty small { font-size: 12px; }
+.bw-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #1d3550; }
+.bw-footer small { color: #8fa6bd; font-size: 11px; line-height: 1.5; }
+
+.birthday-playbook.is-collapsed .panel-head { margin-bottom: 0; }
+.birthday-playbook-head { align-items: flex-start; }
+.birthday-calendar-compact { margin-top: 14px; }
+.birthday-calendar-compact .birthday-calendar-grid { max-width: 720px; }
+
+@media (max-width: 1100px) {
+  .bw-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .bw-metrics { grid-template-columns: 1fr 1fr; }
+  .bw-card { grid-template-columns: 52px minmax(0, 1fr); }
+  .bw-actions { grid-column: 1 / -1; flex-direction: row; min-width: 0; }
+  .bw-actions .bw-action { flex: 1; }
+  .bw-footer { flex-direction: column; align-items: stretch; }
+  .bw-search { min-width: 100%; }
+  .birthday-toolbar { width: 100%; }
+  .birthday-toolbar-month { flex: 1; }
+}
