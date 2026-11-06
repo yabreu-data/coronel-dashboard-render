@@ -2647,19 +2647,6 @@ function BirthdayWorkspace({
         </div>
       </div>
 
-      <div className="bw-week-strip" aria-label="Cumpleaños de la semana">
-        {weekDays.map(day => (
-          <div
-            className={`bw-week-day ${day.isToday ? "today" : ""} ${day.count ? "has-events" : ""}`}
-            key={day.iso}
-          >
-            <small>{day.label}</small>
-            <b>{day.day}</b>
-            <span>{day.count ? `${day.count} ●` : "—"}</span>
-          </div>
-        ))}
-      </div>
-
       <div className="bw-funnel">
         <div className="bw-funnel-step">
           <small>Base del mes</small>
@@ -3604,6 +3591,23 @@ function BirthdayPage({
     [items]
   );
   const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const weekStrip = useMemo(() => {
+    const base = new Date();
+    const start = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    const offset = start.getDay() === 0 ? -6 : 1 - start.getDay();
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(date.getDate() + offset + index);
+      const iso = toDateInputValue(date);
+      return {
+        iso,
+        label: date.toLocaleDateString("es-PE", { weekday: "short" }),
+        day: date.getDate(),
+        isToday: iso === toDateInputValue(start),
+        count: items.filter(item => toDateInputValue(item.target) === iso).length,
+      };
+    });
+  }, [items]);
   const selectedItems = selectedDate ? (itemsByDate[selectedDate] ?? []) : [];
   const calendarCells = Array.from(
     { length: firstWeekday + daysInMonth },
@@ -3681,6 +3685,21 @@ function BirthdayPage({
                   Ver todo el mes
                 </button>
               )}
+            </div>
+          </div>
+          <div className="birthday-week-inline">
+            <p className="eyebrow">ESTA SEMANA</p>
+            <div className="bw-week-strip" aria-label="Cumpleaños de la semana">
+              {weekStrip.map(day => (
+                <div
+                  className={`bw-week-day ${day.isToday ? "today" : ""} ${day.count ? "has-events" : ""}`}
+                  key={day.iso}
+                >
+                  <small>{day.label}</small>
+                  <b>{day.day}</b>
+                  <span>{day.count ? `${day.count} ●` : "—"}</span>
+                </div>
+              ))}
             </div>
           </div>
           <div className="birthday-calendar-weekdays">

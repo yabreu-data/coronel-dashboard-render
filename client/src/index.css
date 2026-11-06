@@ -1475,3 +1475,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
 .bw-attempts { color: #ffb3ba; font-size: 10px; font-weight: 800; }
 .bw-funnel-alert { cursor: pointer; text-align: left; font-size: 11px; }
 .bw-funnel-alert:hover { filter: brightness(1.1); }
+
+/* La tira semanal vive dentro del calendario */
+.birthday-week-inline { margin: 14px 0 4px; }
+.birthday-week-inline .eyebrow { margin-bottom: 6px; }
