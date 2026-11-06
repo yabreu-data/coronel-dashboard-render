@@ -90,6 +90,14 @@ async function main() {
     hasSurveyHeaders(fallback.firstRow),
     (fallback.firstRow ?? []).slice(0, 8).join(" | ")
   );
+  if (!configuredLooksMissing) {
+    const cleanHeaders = configured.firstRow?.map(value => String(value).trim()) ?? [];
+    record(
+      "la pestaña limpia tiene columnas de control",
+      cleanHeaders.includes("Estado Registro") && cleanHeaders.includes("Opinión Limpia"),
+      cleanHeaders.filter(value => ["Estado Registro", "Comentario Válido", "Opinión Limpia", "Calidad Limpia"].includes(value)).join(", ")
+    );
+  }
 
   const client = createTRPCClient({
     links: [httpBatchLink({ url: `${BASE}/api/trpc`, transformer: superjson })],
@@ -98,8 +106,21 @@ async function main() {
     const started = Date.now();
     const data = await client.survey.latest.query();
     const ms = Date.now() - started;
-    const expectedSource = configuredLooksMissing ? FALLBACK_TAB : CONFIGURED_TAB;
     record("el dashboard entrega datos de la hoja", data.records.length > 0, `${data.records.length} encuestas · ${data.serverCatalog.length} meseros · ${ms} ms`);
+    const expectedFallback = configuredLooksMissing;
+    record(
+      "coherencia fuente/fallback del dashboard",
+      data.fallbackUsed === expectedFallback,
+      `fallbackUsed=${data.fallbackUsed} (esperado: ${expectedFallback})`
+    );
+    if (expectedFallback) {
+      record(
+        "aviso de datos sin depurar presente",
+        Boolean(data.warning),
+        data.warning ? "sí" : "no"
+      );
+    }
+    const expectedSource = configuredLooksMissing ? FALLBACK_TAB : CONFIGURED_TAB;
     record(
       "fuente efectiva usada por el dashboard",
       data.source.includes(expectedSource),

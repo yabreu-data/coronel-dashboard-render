@@ -119,3 +119,7 @@ database/*.sql
 database/*.json
 drizzle/migrations/
 
+
+# Secretos locales de integraciones (nunca publicar)
+integrations/apps-script/*.local.md
+integrations/apps-script/SECRETOS*

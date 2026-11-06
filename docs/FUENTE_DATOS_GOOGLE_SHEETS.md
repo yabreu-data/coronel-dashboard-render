@@ -2,6 +2,16 @@
 
 > Fecha de verificación: 2026-11-06. Objetivo: confirmar que el dashboard lee bien la fuente y responder si el Apps Script pegado es correcto para la hoja de datos.
 
+## 0. Política: análisis solo con datos limpios
+
+- La fuente de análisis es **`Encuestas_Limpias`** (pestaña generada por el Apps Script). Ahí los comentarios, la calidad y los productos están normalizados y las filas inválidas quedan marcadas.
+- El dashboard **descarta** las filas con `Estado Registro = Advertencia…` o comentario `Error de lectura` (`SURVEY_CLEAN_FILTER=true`).
+- Si la pestaña limpia **no existe**, el dashboard muestra un **aviso visible** (“⚠ Fuente limpia no disponible”) y usa `Encuestas` temporalmente para no quedar caído. Nunca oculta el origen de los datos.
+- Para **prohibir** ese respaldo y detener el dashboard (modo estricto): `ALLOW_SHEET_FALLBACK=false`.
+- En cuanto la pestaña limpia exista, el aviso desaparece solo y todos los indicadores se calculan sobre datos depurados.
+
+Pasos para configurar el Apps Script con las credenciales: [integrations/apps-script/README.md](../integrations/apps-script/README.md).
+
 ## 1. Cómo lee el dashboard la hoja
 
 El dashboard **no usa Apps Script**: lee la hoja pública por HTTP con el endpoint *gviz* de Google Sheets.
@@ -33,13 +43,17 @@ node scripts/verify-sheets.mjs https://coronel-dashboard.onrender.com
 | Fuente efectiva usada | ✅ `Google Sheets · Encuestas` (fallback automático) |
 | Campos de registros | ✅ id, timestamp, cliente, calidad, cumpleaños, mesero |
 
-**Conclusión:** la conexión a la fuente es correcta y el dashboard está mostrando datos reales. La pestaña “limpia” que construye el Apps Script (`Encuestas_Limpias`) **no está creada todavía**, por eso el backend usa `Encuestas`.
+**Conclusión:** la conexión a la fuente es correcta y el dashboard muestra datos reales. La pestaña “limpia” que construye el Apps Script (`Encuestas_Limpias`) **todavía no está creada**, por eso el backend usa `Encuestas` con el aviso de “datos sin depurar”.
 
-### Opciones para dejar la fuente “ordenada”
+### Cómo activar la fuente limpia (una sola vez)
 
-1. **Activar la capa limpia** (recomendado si quieren separar captura de consumo): desplegar el Apps Script, ejecutar `actualizarEncuestasLimpias` una vez e instalar el trigger de 15 min. El dashboard la detecta sola (o con `GOOGLE_SHEET_TAB=Encuestas_Limpias`).
-2. **Apuntar directo a `Encuestas`**: cambiar `GOOGLE_SHEET_TAB=Encuestas` en Render. Se evita el sondeo de fallback y la dependencia del script.
-3. **Dejarlo como está**: funciona, pero cada refresco hace una petición extra para detectar que la pestaña no existe.
+1. Configurar `Código.gs` con token, OCR key y PIN (ver [integrations/apps-script/README.md](../integrations/apps-script/README.md)).
+2. Guardar → **Implementar → Nueva versión**.
+3. En el Sheet: **Datos → Actualizar Encuestas_Limpias**.
+4. **Datos → Instalar actualización cada 15 minutos**.
+5. Ejecutar `node scripts/verify-sheets.mjs` y confirmar `Encuestas_Limpias` + `fallbackUsed=false`.
+
+Mientras tanto, el dashboard funciona con `Encuestas` y el aviso correspondiente. Cuando la pestaña exista, se activa automáticamente.
 
 ## 3. ¿Es correcto el Apps Script pegado?
 

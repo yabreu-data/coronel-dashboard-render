@@ -138,7 +138,7 @@ Para reemplazar el logo por el oficial: guarda el archivo nuevo como `client/pub
 
 Ver [docs/ANALISIS_SISTEMA_GESTION.md](docs/ANALISIS_SISTEMA_GESTION.md): inventario de módulos, diagnóstico, protocolo de cumpleaños propuesto, pulso de meseros/productos y roadmap por fases.
 
-Fuente de datos y revisión del Apps Script: [docs/FUENTE_DATOS_GOOGLE_SHEETS.md](docs/FUENTE_DATOS_GOOGLE_SHEETS.md).
+Fuente de datos y revisión del Apps Script: [docs/FUENTE_DATOS_GOOGLE_SHEETS.md](docs/FUENTE_DATOS_GOOGLE_SHEETS.md). Configuración del Apps Script: [integrations/apps-script/README.md](integrations/apps-script/README.md).
 
 ## Despliegue
 

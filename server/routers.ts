@@ -17,6 +17,12 @@ const FALLBACK_SURVEY_SHEET = "Encuestas";
 const DEFAULT_SURVEY_SHEET = "Encuestas_Limpias";
 const SERVERS_SHEET = "Meseros";
 const SURVEY_CACHE_TTL_MS = 60_000;
+/* La capa limpia es la fuente de análisis. Si no está disponible, por defecto
+   se muestra `Encuestas` con un aviso explícito; con ALLOW_SHEET_FALLBACK=false
+   el dashboard se detiene en lugar de mostrar datos sin depurar. */
+const ALLOW_SHEET_FALLBACK = (process.env.ALLOW_SHEET_FALLBACK ?? "true") !== "false";
+/* Descarta filas marcadas como inválidas por la capa limpia. */
+const CLEAN_SHEET_FILTER = (process.env.SURVEY_CLEAN_FILTER ?? "true") !== "false";
 
 const SURVEY_ID_HEADERS = ["ID Único", "id", "ID de Envío"];
 const SURVEY_TIMESTAMP_HEADERS = ["Timestamp", "timestamp"];
@@ -41,6 +47,14 @@ function hasSurveyHeaders(headers: string[]) {
     normalized.some(value => SURVEY_ID_HEADERS.includes(value)) &&
     normalized.some(value => SURVEY_TIMESTAMP_HEADERS.includes(value))
   );
+}
+
+function normalizeCell(value: string) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 /** Sondea solo la fila de encabezados: evita escanear toda la hoja cuando la pestaña no sirve. */
@@ -138,17 +152,28 @@ async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
 
   const mapped = matrix
     .filter(row => row.some(Boolean))
-    .map((row, index) => ({
-      id: getFirstCell(row, headers, ["ID Único", "id", "ID de Envío"]) || `fila-${index + 1}`,
-      timestamp: getFirstCell(row, headers, ["Timestamp", "timestamp"]),
-      clientName: getFirstCell(row, headers, ["Nombre Cliente", "clientName", "Nombre del Cliente"]),
-      phone: getFirstCell(row, headers, ["Número Contacto", "phone", "Número de Contacto"]),
-      birthday: getFirstCell(row, headers, ["Cumpleaños Original", "birthday", "Fecha de Cumpleaños"]),
-      dish: getFirstCell(row, headers, ["Productos Normalizados", "dish", "Plato(s ) Original(es)", "Plato(s) Original(es)"]),
-      comment: getFirstCell(row, headers, ["Opinión Limpia", "comment", "Opinión del Producto y Mejoras"]),
-      registeredBy: getFirstCell(row, headers, ["Mesero", "registeredBy", "Registrado Por", "Registrado Por Original", "ID Mesero"]),
-      quality: getFirstCell(row, headers, ["Calidad Limpia", "quality", "Calidad del Producto"]),
-    }));
+    .map((row, index) => {
+      const status = getCell(row, headers, "Estado Registro");
+      const comment = getFirstCell(row, headers, ["Opinión Limpia", "comment", "Opinión del Producto y Mejoras"]);
+      const cleanSource = sheet !== FALLBACK_SURVEY_SHEET && CLEAN_SHEET_FILTER;
+      const dirty =
+        cleanSource &&
+        (normalizeCell(status).includes("advertencia") ||
+          normalizeCell(comment).includes("error de lectura"));
+      if (dirty) return null;
+      return {
+        id: getFirstCell(row, headers, ["ID Único", "id", "ID de Envío"]) || `fila-${index + 1}`,
+        timestamp: getFirstCell(row, headers, ["Timestamp", "timestamp"]),
+        clientName: getFirstCell(row, headers, ["Nombre Cliente", "clientName", "Nombre del Cliente"]),
+        phone: getFirstCell(row, headers, ["Número Contacto", "phone", "Número de Contacto"]),
+        birthday: getFirstCell(row, headers, ["Cumpleaños Original", "birthday", "Fecha de Cumpleaños"]),
+        dish: getFirstCell(row, headers, ["Productos Normalizados", "dish", "Plato(s ) Original(es)", "Plato(s) Original(es)"]),
+        comment,
+        registeredBy: getFirstCell(row, headers, ["Mesero", "registeredBy", "Registrado Por", "Registrado Por Original", "ID Mesero"]),
+        quality: getFirstCell(row, headers, ["Calidad Limpia", "quality", "Calidad del Producto"]),
+      };
+    })
+    .filter((record): record is SurveyRecord => record !== null);
 
   const seen = new Set<string>();
   return mapped.filter(record => {
@@ -191,20 +216,18 @@ async function getSurveyPayload(sheet: string) {
   try {
     let resolvedSheet = sheet;
     // Si la pestaña configurada no existe o no tiene encabezados de encuestas,
-    // se usa la pestaña de respaldo sin recorrer toda la hoja.
+    // se usa la pestaña de respaldo (con aviso) o se detiene si el fallback está deshabilitado.
     if (sheet !== FALLBACK_SURVEY_SHEET && !(await sheetHasSurveyStructure(sheet))) {
+      if (!ALLOW_SHEET_FALLBACK) {
+        throw new Error(
+          `La fuente limpia "${sheet}" no está disponible (pestaña inexistente o sin encabezados). ` +
+            `Ejecuta "Datos → Actualizar Encuestas_Limpias" en el Google Sheet o define ALLOW_SHEET_FALLBACK=true para mostrar datos sin depurar.`
+        );
+      }
       resolvedSheet = FALLBACK_SURVEY_SHEET;
     }
 
-    let value = await load(resolvedSheet);
-    if (!value.records.length && resolvedSheet !== FALLBACK_SURVEY_SHEET) {
-      const fallback = await load(FALLBACK_SURVEY_SHEET).catch(() => null);
-      if (fallback?.records.length) {
-        value = fallback;
-        resolvedSheet = FALLBACK_SURVEY_SHEET;
-      }
-    }
-
+    const value = await load(resolvedSheet);
     surveyCache.set(cacheKey, { at: Date.now(), sheet: resolvedSheet, value });
     return { ...value, sheet: resolvedSheet, cached: false };
   } catch (error) {
@@ -284,11 +307,16 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const requested = input?.tab === "original" ? FALLBACK_SURVEY_SHEET : getConfiguredSurveySheet();
         const payload = await getSurveyPayload(requested);
+        const fallbackUsed = requested !== FALLBACK_SURVEY_SHEET && payload.sheet === FALLBACK_SURVEY_SHEET;
         return {
           records: payload.records,
           serverCatalog: payload.serverCatalog,
           fetchedAt: new Date().toISOString(),
           source: `Google Sheets · ${payload.sheet}`,
+          fallbackUsed,
+          warning: fallbackUsed
+            ? `La pestaña "${requested}" no está disponible: se muestran datos SIN DEPURAR de "${FALLBACK_SURVEY_SHEET}". Ejecuta "Datos → Actualizar Encuestas_Limpias" en el Google Sheet para activar la fuente limpia.`
+            : null,
         };
       }),
   }),
