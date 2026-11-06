@@ -1457,3 +1457,21 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
 .birthday-page-intro { flex-wrap: wrap; gap: 14px; }
 .birthday-toolbar { justify-content: flex-end; }
 .bw-footer { justify-content: flex-start; }
+
+/* Próxima acción visible + reintentos */
+.bw-next {
+  border: 1px solid #35516d;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #0f2136;
+  color: #ffc45e;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.bw-next.overdue { border-color: #b25d68; background: #2a1620; color: #ffd7db; }
+.bw-next.empty { border-style: dashed; border-color: #2a5270; background: transparent; color: #8be7ff; }
+.bw-next:hover { filter: brightness(1.12); }
+.bw-attempts { color: #ffb3ba; font-size: 10px; font-weight: 800; }
+.bw-funnel-alert { cursor: pointer; text-align: left; font-size: 11px; }
+.bw-funnel-alert:hover { filter: brightness(1.1); }

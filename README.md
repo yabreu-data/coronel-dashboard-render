@@ -122,6 +122,10 @@ Requisito de configuración (ya aplicado en este proyecto): en Supabase → Auth
 |---|---|
 | ![Edición](docs/screenshots/birthday-edit.png) | ![Plantillas](docs/screenshots/birthday-templates.png) |
 
+| Próxima acción vencida y reintentos | — |
+|---|---|
+| ![Reintento](docs/screenshots/birthday-retry.png) | |
+
 ## Identidad visual
 
 - `client/public/manus-storage/logo-blanco.png`: logo **blanco con fondo transparente** para fondos oscuros (login, splash, sidebar).

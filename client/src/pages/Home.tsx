@@ -2123,6 +2123,7 @@ function countOverduePriorities(
 }
 
 type BirthdayHorizonKey = "mes" | "semana" | "dia" | "seguimiento";
+type BirthdayFilter = "todos" | BirthdayHorizonKey | "vencidas" | "reintentar";
 type BirthdayMarketingItem = {
   record: RecordItem;
   target: Date;
@@ -2280,7 +2281,7 @@ function BirthdayWorkspace({
       window.setTimeout(() => setTemplateSaved(false), 2200);
     },
   });
-  const [filter, setFilter] = useState<"todos" | BirthdayHorizonKey>("todos");
+  const [filter, setFilter] = useState<BirthdayFilter>("todos");
   const [query, setQuery] = useState("");
   const [onlyPending, setOnlyPending] = useState(false);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
@@ -2330,6 +2331,9 @@ function BirthdayWorkspace({
             normalizeText(log.recoveryResult || "").includes("acept")
         );
         const redeemed = clientLogs.some(log => Boolean(log.promotionRedeemed));
+        const attempts = clientLogs.filter(log =>
+          normalizeText(log.outcome).includes("no contest")
+        ).length;
         return {
           item,
           key,
@@ -2338,6 +2342,7 @@ function BirthdayWorkspace({
           contacted,
           accepted,
           redeemed,
+          attempts,
         };
       }),
     [items, logs, campaignByKey]
@@ -2348,6 +2353,15 @@ function BirthdayWorkspace({
     [rows]
   );
 
+  const nextActionDateOf = (campaign?: BirthdayCampaign) =>
+    campaign?.nextActionAt ? new Date(campaign.nextActionAt) : null;
+  const isOverdueRow = (row: (typeof rows)[number]) => {
+    const next = nextActionDateOf(row.campaign);
+    return Boolean(next && next < todayStart && !row.redeemed && row.item.days >= 0);
+  };
+  const isRetryRow = (row: (typeof rows)[number]) =>
+    row.attempts > 0 && !row.redeemed;
+
   const counts = useMemo(
     () => ({
       todos: rows.length,
@@ -2355,6 +2369,8 @@ function BirthdayWorkspace({
       semana: rows.filter(row => row.horizon === "semana").length,
       mes: rows.filter(row => row.horizon === "mes").length,
       seguimiento: rows.filter(row => row.horizon === "seguimiento").length,
+      vencidas: rows.filter(isOverdueRow).length,
+      reintentar: rows.filter(isRetryRow).length,
     }),
     [rows]
   );
@@ -2386,19 +2402,16 @@ function BirthdayWorkspace({
   }, [rows, todayStart]);
   const weekCount = weekDays.reduce((total, day) => total + day.count, 0);
 
-  const overdueCount = rows.filter(row => {
-    const next = row.campaign?.nextActionAt;
-    if (!next) return false;
-    const nextDate = new Date(next);
-    return (
-      nextDate < todayStart &&
-      !row.redeemed &&
-      row.item.days >= 0
-    );
-  }).length;
+  const overdueCount = counts.vencidas;
 
   const filteredRows = rows.filter(row => {
-    if (filter !== "todos" && row.horizon !== filter) return false;
+    if (filter === "vencidas") {
+      if (!isOverdueRow(row)) return false;
+    } else if (filter === "reintentar") {
+      if (!isRetryRow(row)) return false;
+    } else if (filter !== "todos" && row.horizon !== filter) {
+      return false;
+    }
     if (onlyPending && row.contacted) return false;
     if (selectedDate) {
       if (toDateInputValue(row.item.target) !== selectedDate) return false;
@@ -2502,7 +2515,7 @@ function BirthdayWorkspace({
 
   const registerCall = (
     row: (typeof rows)[number],
-    status: "contacted" | "accepted" | "redeemed" | "rejected"
+    status: "contacted" | "accepted" | "redeemed" | "rejected" | "noanswer"
   ) => {
     const item = row.item;
     const reason =
@@ -2524,7 +2537,9 @@ function BirthdayWorkspace({
             ? "Promoción aceptada"
             : status === "redeemed"
               ? "Promoción redimida"
-              : "No redimido",
+              : status === "rejected"
+                ? "No redimido"
+                : "No contestó",
       promotion: promoteFor(row),
       promotionRedeemed: status === "redeemed",
       campaignStage: stageForDays(item.days),
@@ -2536,11 +2551,24 @@ function BirthdayWorkspace({
             ? "Promoción aceptada"
             : status === "rejected"
               ? `No redimido: ${reason}`
-              : "Por cumpleaños",
-      notes: reason ? `Motivo: ${reason}` : `Mensaje: ${messageFor(row)}`,
+              : status === "noanswer"
+                ? "No contestó"
+                : "Por cumpleaños",
+      notes:
+        status === "noanswer"
+          ? "No contestó · reintentar seguimiento"
+          : reason
+            ? `Motivo: ${reason}`
+            : `Mensaje: ${messageFor(row)}`,
     });
     if (status === "rejected" && reason) {
       persist(row, { noRedeemReason: reason });
+    }
+    if (status === "noanswer") {
+      persist(row, {
+        nextActionAt: dateInputToIso(offsetDateInput(1)),
+        nextActionLabel: "Reintentar llamada",
+      });
     }
     setSavedKey(row.key);
     window.setTimeout(() => setSavedKey(null), 1800);
@@ -2578,7 +2606,7 @@ function BirthdayWorkspace({
     ? logs.filter(log => log.clientKey === historyRow.key)
     : [];
 
-  const chipButton = (key: "todos" | BirthdayHorizonKey, label: string) => (
+  const chipButton = (key: BirthdayFilter, label: string) => (
     <button
       key={key}
       className={`bw-chip ${filter === key ? "active" : ""} bw-chip-${key}`}
@@ -2654,9 +2682,12 @@ function BirthdayWorkspace({
           <span className="bw-bar"><i style={{ width: `${counts.todos ? Math.round((redeemedCount / counts.todos) * 100) : 0}%` }} /></span>
         </div>
         {overdueCount > 0 && (
-          <div className="bw-funnel-alert">
-            {overdueCount} próxima(s) acción(es) vencida(s)
-          </div>
+          <button
+            className="bw-funnel-alert"
+            onClick={() => setFilter("vencidas")}
+          >
+            ⚠ {overdueCount} próxima(s) acción(es) vencida(s) · ver cuáles
+          </button>
         )}
       </div>
 
@@ -2667,6 +2698,9 @@ function BirthdayWorkspace({
           {chipButton("semana", "Semana")}
           {chipButton("mes", "Mes")}
           {chipButton("seguimiento", "Seguimiento")}
+          {counts.vencidas > 0 && chipButton("vencidas", "Vencidas")}
+          {counts.reintentar > 0 &&
+            chipButton("reintentar", "Reintentar")}
         </div>
         <label className="bw-search">
           <Search size={14} />
@@ -2768,17 +2802,33 @@ function BirthdayWorkspace({
                           <span className="bw-days">
                             {daysLabel(item.days)}
                           </span>
-                          {campaign?.nextActionAt && (
-                            <span
+                          {campaign?.nextActionAt ? (
+                            <button
                               className={`bw-next ${nextActionOverdue ? "overdue" : ""}`}
+                              onClick={() => setExpandedKey(row.key)}
+                              title="Editar próxima acción"
                             >
-                              Próxima acción:{" "}
-                              {nextActionOverdue
-                                ? "vencida"
-                                : new Date(campaign.nextActionAt).toLocaleDateString(
-                                    "es-PE",
-                                    { day: "2-digit", month: "short" }
-                                  )}
+                              ⏰{" "}
+                              {campaign.nextActionLabel ||
+                                "Próxima acción"}
+                              :{" "}
+                              {new Date(campaign.nextActionAt).toLocaleDateString(
+                                "es-PE",
+                                { day: "2-digit", month: "short" }
+                              )}
+                              {nextActionOverdue ? " · vencida" : ""}
+                            </button>
+                          ) : (
+                            <button
+                              className="bw-next empty"
+                              onClick={() => setExpandedKey(row.key)}
+                            >
+                              + Programar próxima acción
+                            </button>
+                          )}
+                          {row.attempts > 0 && (
+                            <span className="bw-attempts">
+                              Intentos: {row.attempts}
                             </span>
                           )}
                         </div>
@@ -2817,6 +2867,13 @@ function BirthdayWorkspace({
                             onClick={() => registerCall(row, "rejected")}
                           >
                             ✕ No redimió
+                          </button>
+                          <button
+                            className={row.attempts > 0 ? "warn" : ""}
+                            disabled={createCall.isPending}
+                            onClick={() => registerCall(row, "noanswer")}
+                          >
+                            ☎ No contestó
                           </button>
                         </div>
                         {campaign?.noRedeemReason && (
@@ -3047,6 +3104,9 @@ function BirthdayWorkspace({
                 </button>
                 <button onClick={() => { registerCall(callRow, "rejected"); setCallKey(null); }}>
                   ✕ No redimió
+                </button>
+                <button onClick={() => { registerCall(callRow, "noanswer"); setCallKey(null); }}>
+                  ☎ No contestó · reintentar mañana
                 </button>
               </div>
             </div>
