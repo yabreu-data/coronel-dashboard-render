@@ -4889,8 +4889,19 @@ function Priorities({
     }>
   ) => {
     const next = { ...stateFor(item), ...patch };
-    setDrafts(current => ({ ...current, [item.key]: next }));
     setPendingSave({ item, patch: next });
+    setPinDraft("");
+    setPinError("");
+  };
+  const cancelSave = () => {
+    if (pendingSave) {
+      setDrafts(current => {
+        const next = { ...current };
+        delete next[pendingSave.item.key];
+        return next;
+      });
+    }
+    setPendingSave(null);
     setPinDraft("");
     setPinError("");
   };
@@ -4901,6 +4912,7 @@ function Priorities({
       return;
     }
     const { item, patch } = pendingSave;
+    setDrafts(current => ({ ...current, [item.key]: patch }));
     saveMutation.mutate({
       priorityKey: item.key,
       status: patch.status,
@@ -5283,7 +5295,7 @@ function Priorities({
       {pendingSave && (
         <div
           className="priority-pin-backdrop"
-          onClick={() => setPendingSave(null)}
+          onClick={cancelSave}
         >
           <div
             className="priority-pin-modal"
@@ -5314,7 +5326,7 @@ function Priorities({
               }}
               onKeyDown={event => {
                 if (event.key === "Enter") confirmSave();
-                if (event.key === "Escape") setPendingSave(null);
+                if (event.key === "Escape") cancelSave();
               }}
               placeholder="PIN"
               aria-label="PIN de administrador"
@@ -5323,7 +5335,7 @@ function Priorities({
             <div className="priority-pin-actions">
               <button
                 className="btn-borde"
-                onClick={() => setPendingSave(null)}
+                onClick={cancelSave}
               >
                 Cancelar
               </button>
