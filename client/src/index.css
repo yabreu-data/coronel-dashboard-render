@@ -2035,3 +2035,7 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
 .target-bar-row { color: #173b2b !important; }
 .target-bar-track i { background: linear-gradient(90deg, #1d4a31, #2f6b4f) !important; }
 .chart-month-select { background: #ffffff !important; color: #173b2b !important; border-color: #cfe4d8 !important; }
+
+/* Especificidad del estado vencido */
+.priority-list .priority-item.is-overdue:not(.is-done) .priority-meta,
+.priority-list .priority-item.priority-top .priority-meta { color: #b52e22 !important; }
