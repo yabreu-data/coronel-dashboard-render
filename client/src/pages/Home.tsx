@@ -359,6 +359,15 @@ const formatDate = (value: string | Date | null | undefined) => {
       }).format(date)
     : "—";
 };
+const formatBirthday = (value: string) => {
+  const date = parseBirthdayDate(value);
+  return date
+    ? new Intl.DateTimeFormat("es-PE", {
+        day: "2-digit",
+        month: "short",
+      }).format(date)
+    : "—";
+};
 const formatDateTime = (value: string | Date | null | undefined) => {
   if (!value) return "—";
   const date = value instanceof Date ? value : new Date(value);
@@ -1120,6 +1129,7 @@ export default function Home() {
                   positiveHighlights={positiveHighlights}
                   negativeHighlights={negativeHighlights}
                   positive={positive}
+                  positiveCount={answered.length}
                 />
               )}
               {page === "team" && (
@@ -4463,7 +4473,7 @@ function Priorities({
         icon: "🎂",
         label: "CONTACTAR",
         title: profile?.name || record.clientName || "Cliente sin nombre",
-        detail: `${record.phone || profile?.phone || "Sin teléfono"} · Cumpleaños ${formatDate(record.birthday)}`,
+        detail: `${record.phone || profile?.phone || "Sin teléfono"} · Cumpleaños ${formatBirthday(record.birthday)}`,
         defaultDueDate: toDateInput(deadline),
         defaultResponsible: "Equipo de fidelización",
         action: "Llamar y ofrecer promoción",
@@ -5110,7 +5120,7 @@ function Clients({
           {displayBirthdays.length ? (
             displayBirthdays.map(r => (
               <div className="birthday-row" key={r.id}>
-                <span className="birthday-date">{formatDate(r.birthday)}</span>
+                <span className="birthday-date">{formatBirthday(r.birthday)}</span>
                 <span>
                   <b>{r.clientName || "Cliente sin nombre"}</b>
                   <small>{r.phone || "Sin teléfono"}</small>
@@ -5351,7 +5361,7 @@ function Clients({
           {displayBirthdays.length ? (
             displayBirthdays.map(r => (
               <div className="birthday-row" key={r.id}>
-                <span className="birthday-date">{formatDate(r.birthday)}</span>
+                <span className="birthday-date">{formatBirthday(r.birthday)}</span>
                 <span>
                   <b>{r.clientName || "Cliente sin nombre"}</b>
                   <small>{r.phone || "Sin teléfono"}</small>
@@ -5428,7 +5438,7 @@ function Clients({
               <tbody>
                 {lastWeekBirthdays.map(r => (
                   <tr key={`past-${r.id}`}>
-                    <td>{formatDate(r.birthday)}</td>
+                    <td>{formatBirthday(r.birthday)}</td>
                     <td>
                       <b>{r.clientName || "Cliente sin nombre"}</b>
                     </td>
@@ -7220,6 +7230,7 @@ function Voice({
   positiveHighlights,
   negativeHighlights,
   positive,
+  positiveCount,
 }: {
   comments: RecordItem[];
   reviewCount: number;
@@ -7227,6 +7238,7 @@ function Voice({
   positiveHighlights: SentimentHighlight[];
   negativeHighlights: SentimentHighlight[];
   positive: number;
+  positiveCount: number;
 }) {
   const [selected, setSelected] = useState<SentimentHighlight | null>(null);
   const repeatedComments = useMemo(() => buildRepeatedComments(comments), [comments]);
@@ -7267,7 +7279,7 @@ function Voice({
             llevan al comentario completo.
           </p>
         </div>
-        <QualityFace percent={positive} count={comments.length} />
+        <QualityFace percent={positive} count={positiveCount} />
       </div>
       <div className="stats-grid">
         <Stat

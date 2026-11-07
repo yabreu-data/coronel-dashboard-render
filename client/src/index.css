@@ -1537,3 +1537,12 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
   .sync-status { font-size: 11px; }
   .source-selector select { max-width: 160px; }
 }
+
+/* Evitar que el detalle de los KPI se recorte */
+.stats-grid { align-items: stretch; }
+.stat-card { height: 100%; }
+.stat-card .muted { white-space: normal; line-height: 1.35; overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .topbar .muted { display: none; }
+  .topbar { padding-top: 16px; }
+}
