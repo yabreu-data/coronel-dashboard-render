@@ -852,7 +852,14 @@ export default function Home() {
           src="/manus-storage/logo-coronel.png"
           alt="Coronel"
         />
-        <p>Verificando sesión segura…</p>
+        <span className="loading-kicker">Pollos y Parrillas</span>
+        <h2>Un momento…</h2>
+        <p>Estamos verificando tu acceso con cuidado.</p>
+        <div className="loading-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
     );
   if (!user)
@@ -888,7 +895,14 @@ export default function Home() {
           src="/manus-storage/logo-coronel.png"
           alt="Coronel"
         />
-        <p>Cargando tus datos…</p>
+        <span className="loading-kicker">Pollos y Parrillas</span>
+        <h2>Preparando tu día</h2>
+        <p>Cada cliente cuenta. En un momento tendrás todo listo.</p>
+        <div className="loading-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
     );
   if (error)
