@@ -32,6 +32,16 @@ try {
     await page.waitForTimeout(500);
     await page.screenshot({ path: `${OUT}/priorities-redesign-edit.png`, fullPage: true });
   }
+  const status = page.locator('.priority-status').first();
+  if (await status.count()) {
+    await status.click();
+    await page.waitForTimeout(400);
+    await page.locator('.priority-pin-modal input').fill('0000');
+    await page.locator('.priority-pin-modal .btn-rojo').click();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${OUT}/priorities-redesign-pin.png`, fullPage: true });
+    await page.locator('.priority-pin-modal .btn-borde').click();
+  }
   const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true });
   const mp = await mobile.newPage();
   await mp.goto(`${BASE}/login`, { waitUntil: "networkidle" });

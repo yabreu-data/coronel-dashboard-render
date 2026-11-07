@@ -4988,9 +4988,14 @@ function Priorities({
           <div className="priorities-command-actions">
             <button
               className="btn-rojo"
-              onClick={() => setStatusFilter("Vencidas")}
+              onClick={() =>
+                setStatusFilter(overdueCount ? "Vencidas" : "Pendientes")
+              }
             >
-              <Clock3 size={15} /> Atender {overdueCount} vencidas
+              <Clock3 size={15} />{" "}
+              {overdueCount
+                ? `Atender ${overdueCount} vencidas`
+                : "Revisar pendientes"}
             </button>
             <button
               className="btn-borde"
@@ -5000,7 +5005,7 @@ function Priorities({
             </button>
           </div>
           <div className="priorities-command-kpis">
-            <span><b>{overdueCount}</b> vencidas</span>
+            <span className="priority-kpi-danger"><b>{overdueCount}</b> vencidas</span>
             <span><b>{pendingOnlyCount}</b> pendientes</span>
             <span><b>{followupCount}</b> en seguimiento</span>
             <span><b>{attendedCount}</b> atendidas</span>

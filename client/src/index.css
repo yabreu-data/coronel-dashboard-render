@@ -2417,3 +2417,10 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
   .priority-expanded { margin-left: 11px; }
   .priority-status { font-size: 9px; }
 }
+
+.priorities-command-kpis b { color: #1d4a31 !important; }
+.priorities-command-kpis .priority-kpi-danger b { color: #b52e22 !important; }
+@media (max-width: 760px) {
+  .priority-tabs { flex-wrap: wrap !important; overflow: visible !important; }
+  .priorities-rule-card { display: none !important; }
+}
