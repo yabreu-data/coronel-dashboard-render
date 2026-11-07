@@ -735,7 +735,7 @@ export default function Home() {
       <div className="loading-screen">
         <img
           className="loading-logo"
-          src="/manus-storage/logo1_5c69b281.png"
+          src="/manus-storage/logo-coronel.png"
           alt="Coronel"
         />
         <p>Verificando sesión segura…</p>
@@ -747,7 +747,7 @@ export default function Home() {
         <div className="auth-wall-card">
           <img
             className="loading-logo"
-            src="/manus-storage/logo1_5c69b281.png"
+            src="/manus-storage/logo-coronel.png"
             alt="Coronel"
           />
           <Pill tone="blue">ACCESO RESTRINGIDO</Pill>
@@ -771,7 +771,7 @@ export default function Home() {
       <div className="loading-screen">
         <img
           className="loading-logo"
-          src="/manus-storage/logo1_5c69b281.png"
+          src="/manus-storage/logo-coronel.png"
           alt="Coronel"
         />
         <p>Cargando datos desde Google Sheets…</p>
@@ -792,7 +792,7 @@ export default function Home() {
         <div className="brand">
           <img
             className="brand-logo"
-            src="/manus-storage/logo1_5c69b281.png"
+            src="/manus-storage/logo-coronel.png"
             alt="Coronel · Pollos y Parrillas"
           />
           <span className="brand-tagline">Sistema de gestión</span>
@@ -1001,7 +1001,7 @@ export default function Home() {
           )}
         </div>
         <div className="print-report-header">
-          <img src="/manus-storage/logo1_5c69b281.png" alt="Coronel" />
+          <img src="/manus-storage/logo-coronel.png" alt="Coronel" />
           <div>
             <strong>CORONEL · REPORTE ANALÍTICO</strong>
             <span id="print-report-filters">
@@ -1974,7 +1974,7 @@ function PdfPreviewModal({
           </aside>
           <div className="pdf-preview-sheet">
             <div className="pdf-preview-brand">
-              <img src="/manus-storage/logo1_5c69b281.png" alt="Coronel" />
+              <img src="/manus-storage/logo-coronel.png" alt="Coronel" />
               <div>
                 <b>CORONEL · REPORTE DE SATISFACCIÓN</b>
                 <small>
@@ -3061,30 +3061,37 @@ function BirthdayWorkspace({
                         >
                           <Phone size={13} /> Llamar
                         </button>
-                        <button
-                          className="bw-action"
-                          onClick={() => {
-                            setHistoryKey(row.key);
-                            setHistorySection("summary");
-                          }}
-                        >
-                          Ver ficha
-                        </button>
-                        <button
-                          className="bw-action bw-action-copy"
-                          onClick={() => copyMessage(row)}
-                        >
-                          {copiedKey === row.key ? "✓ Copiado" : "Copiar"}
-                        </button>
-                        <button
-                          className="bw-action bw-action-edit"
-                          onClick={() =>
-                            setExpandedKey(expanded ? null : row.key)
-                          }
-                          aria-expanded={expanded}
-                        >
-                          {expanded ? "Cerrar" : "Ajustar"}
-                        </button>
+                        <details className="bw-more">
+                          <summary className="bw-action">⋯ Más</summary>
+                          <div className="bw-more-menu">
+                            <button
+                              className="bw-action"
+                              onClick={() => {
+                                setHistoryKey(row.key);
+                                setHistorySection("summary");
+                              }}
+                            >
+                              Ver ficha
+                            </button>
+                            <button
+                              className="bw-action bw-action-copy"
+                              onClick={() => copyMessage(row)}
+                            >
+                              {copiedKey === row.key
+                                ? "✓ Copiado"
+                                : "Copiar"}
+                            </button>
+                            <button
+                              className="bw-action bw-action-edit"
+                              onClick={() =>
+                                setExpandedKey(expanded ? null : row.key)
+                              }
+                              aria-expanded={expanded}
+                            >
+                              {expanded ? "Cerrar" : "Ajustar"}
+                            </button>
+                          </div>
+                        </details>
                       </div>
                     </div>
                     {expanded && (

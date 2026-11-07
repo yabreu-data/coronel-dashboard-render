@@ -1808,3 +1808,20 @@ td b { color: #173b2b !important; }
   .filter-bar .filter-group, .filter-bar .export-group { width: 100% !important; display: flex !important; gap: 8px !important; }
   .filter-bar .export-group button { flex: 1 !important; }
 }
+
+/* Contraste final: listas, equipo, login y navegación */
+.birthday-row b { color: #173b2b !important; }
+.birthday-row small { color: #5c7a6b !important; }
+.birthday-date { color: #1d4a31 !important; font-weight: 800; }
+.small-action { background: #fff1ef !important; color: #b52e22 !important; border: 1px solid #efb8b1 !important; }
+.small-action:hover { background: #ffe4df !important; }
+.intro-note, .intro-note p, .team-callout span, .period-comparison p, .period-comparison small, .targets-panel p, .targets-panel small { color: #5c7a6b !important; }
+.team-callout b, .period-comparison b, .targets-panel b, .period-comparison h3, .targets-panel h3 { color: #173b2b !important; }
+.auth-wall-card p, .auth-wall-card .muted, .auth-wall-card small { color: #5c7a6b !important; }
+.account-status { color: #5c7a6b !important; }
+.account-status strong { color: #173b2b !important; }
+.reset-button { background: #fff1ef !important; color: #b52e22 !important; border: 1px solid #efb8b1 !important; border-radius: 8px !important; }
+.bw-more { position: relative; }
+.bw-more summary { list-style: none; cursor: pointer; }
+.bw-more summary::-webkit-details-marker { display: none; }
+.bw-more-menu { display: flex; flex-direction: column; gap: 5px; margin-top: 5px; }
