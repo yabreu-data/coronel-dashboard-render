@@ -96,3 +96,13 @@ pastel. Los estados vacíos incluyen una acción concreta.
 - Fondo verde grisáceo claro (`#f3f6f2`), no blanco frío.
 - Botones, tabs e inputs con radios de 8–10 px.
 - Más espacio interior y jerarquía tipográfica Lora + Manrope.
+
+## Dirección premium cálida
+
+- Fondo marfil `#f5f1e8`, superficies `#fffdf8`.
+- Sidebar verde bosque con estado activo salvia y línea vertical.
+- Terracota `#c4513b` para la acción principal.
+- Tarjetas con borde cálido de 1 px y sombra muy baja.
+- Formularios con foco salvia y radio de 8 px.
+- Movimiento CSS de 180–300 ms, con `prefers-reduced-motion`.
+- Sin librerías de UI adicionales.
