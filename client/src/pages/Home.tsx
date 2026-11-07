@@ -6813,10 +6813,22 @@ function PromotionsAdmin({
             <p className="eyebrow">PROMOCIONES DISPONIBLES</p>
             <h3>Lo que puedes ofrecer</h3>
           </div>
-          <Pill tone="purple">
-            {promotions.filter(item => item.active).length} activas de{" "}
-            {promotions.length}
-          </Pill>
+          <div className="promotion-head-actions">
+            <button
+              className="secondary-action"
+              onClick={() =>
+                document
+                  .getElementById("promotion-create")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+            >
+              + Nueva promoción
+            </button>
+            <Pill tone="purple">
+              {promotions.filter(item => item.active).length} activas de{" "}
+              {promotions.length}
+            </Pill>
+          </div>
         </div>
         <div className="admin-promotion-list">
           {promotions.map(item => {
@@ -6905,7 +6917,7 @@ function PromotionsAdmin({
           </div>
         )}
       </section>
-      <section className="panel admin-add-panel">
+      <section className="panel admin-add-panel" id="promotion-create">
         <div className="panel-head">
           <div>
             <p className="eyebrow">NUEVA PROMOCIÓN</p>

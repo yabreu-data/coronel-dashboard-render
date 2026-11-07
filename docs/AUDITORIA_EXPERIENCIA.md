@@ -106,3 +106,8 @@ Motivo: “Responsables” y “Administración” son abstractos; “Encargados
 - [Encargados](screenshots/audit/responsibles.png)
 - [Mi cuenta](screenshots/audit/profile.png)
 - [Cuentas y accesos](screenshots/audit/administracion.png)
+
+### Móvil
+- [Mi cuenta](screenshots/audit/mobile-profile.png)
+- [Promociones](screenshots/audit/mobile-promotions.png)
+- [Encargados](screenshots/audit/mobile-responsibles.png)

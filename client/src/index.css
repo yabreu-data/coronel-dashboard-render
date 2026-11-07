@@ -3290,3 +3290,10 @@ button[class*="bg-transparent"][class*="border"]:hover { background: #eef5ef !im
   .profile-tabs { overflow-x: auto; }
   .profile-tabs button { white-space: nowrap; flex: 0 0 auto; }
 }
+
+.promotion-head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.promotion-head-actions .secondary-action { min-height: 32px; }
+@media (max-width: 760px) {
+  .promotion-head-actions { width: 100%; justify-content: space-between; }
+  .promotion-head-actions .secondary-action { flex: 1; justify-content: center; }
+}
