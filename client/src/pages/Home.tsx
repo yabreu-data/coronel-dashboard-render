@@ -4056,7 +4056,9 @@ function Overview({
     weekday: "long",
     day: "numeric",
     month: "long",
-  }).format(new Date());
+  })
+    .format(new Date())
+    .toUpperCase();
   const weeklyVolume = useMemo(() => {
     const today = new Date();
     return Array.from({ length: 7 }, (_, index) => {
@@ -4145,6 +4147,10 @@ function Overview({
             <span><i className="dot green" />Bueno {good}</span>
             <span><i className="dot yellow" />Regular {regular}</span>
             <span><i className="dot red" />Malo {bad}</span>
+          </div>
+          <div className="weekly-caption">
+            <span>ÚLTIMOS 7 DÍAS</span>
+            <b>{weeklyVolume.reduce((sum, day) => sum + day.count, 0)} encuestas</b>
           </div>
           {weeklyVolume.some(day => day.count > 0) ? (
             <div className="weekly-trend" aria-label="Encuestas de los últimos 7 días">
@@ -4302,6 +4308,9 @@ function Overview({
           {!risks.length && (
             <Empty text="No hay clientes en riesgo con el filtro actual." />
           )}
+          <button className="panel-link" onClick={() => onNavigate("clients")}>
+            Ver todos los clientes <ChevronRight size={15} />
+          </button>
         </section>
         <section className="panel">
           <div className="panel-head">
@@ -4342,6 +4351,9 @@ function Overview({
           {!nextBirthdays.length && (
             <Empty text="No hay cumpleaños próximos." />
           )}
+          <button className="panel-link" onClick={() => onNavigate("birthdays")}>
+            Abrir agenda de cumpleaños <ChevronRight size={15} />
+          </button>
         </section>
       </div>
       {!onboardingHidden && (
