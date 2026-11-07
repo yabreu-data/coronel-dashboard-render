@@ -81,3 +81,17 @@ verde profundo manda en sidebar, títulos y acciones principales.
 
 Ninguna nueva. Se usan los componentes, Tailwind, Lucide y fuentes ya
 instalados. Todo el refresh vive en `client/src/index.css`.
+
+## Carga de la app
+
+- Splash inicial en marfil cálido, sin sombra en el logo.
+- Bienvenida: “Bienvenido a Coronel”.
+- Mensaje: “Cada cliente cuenta. Estamos preparando tu día con todo en orden.”
+- Indicador de tres puntos ocre, sin spinner técnico.
+- Estados internos: “Un momento…” y “Preparando tu día”.
+- Respeta `prefers-reduced-motion`.
+
+Capturas:
+
+- [Splash escritorio](screenshots/ux/loading-splash.png)
+- [Splash móvil](screenshots/ux/loading-splash-mobile.png)
