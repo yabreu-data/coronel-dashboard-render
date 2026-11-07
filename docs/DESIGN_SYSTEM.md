@@ -6,7 +6,7 @@ Base visual del dashboard después de la migración a tema claro.
 
 | Token | Valor | Uso |
 |---|---|---|
-| `--canvas` | `#f2f7f4` | Fondo general |
+| `--canvas` | `#f3f6f2` | Fondo general moderno |
 | `--surface` | `#ffffff` | Tarjetas, tablas, formularios |
 | `--sage` | `#acd3b6` | Acento, sidebar activo, bordes suaves |
 | `--green-900` | `#1d4a31` | Navegación, títulos, botones secundarios |
@@ -15,7 +15,7 @@ Base visual del dashboard después de la migración a tema claro.
 | `--red-50` | `#fff1ef` | Fondo de alertas |
 | `--ink` | `#173b2b` | Texto principal |
 | `--muted` | `#4f6f5e` | Texto secundario |
-| `--line` | `#d7e8dd` | Bordes |
+| `--line` | `#e2e9e1` | Bordes |
 
 Reglas:
 
@@ -87,3 +87,12 @@ pastel. Los estados vacíos incluyen una acción concreta.
 2. Topbar blanco: título, estado de datos y acciones.
 3. Contenido: fondo verde claro, tarjetas blancas, paneles secundarios salvia.
 4. Alertas: rojo pálido solo para lo que requiere acción.
+
+## Refresh moderno
+
+- Topbar sticky con vidrio suave y borde inferior.
+- Sidebar verde bosque fijo, navegación activa en salvia.
+- Tarjetas blancas de 16–20 px, sombra suave y menos bordes duros.
+- Fondo verde grisáceo claro (`#f3f6f2`), no blanco frío.
+- Botones, tabs e inputs con radios de 8–10 px.
+- Más espacio interior y jerarquía tipográfica Lora + Manrope.
