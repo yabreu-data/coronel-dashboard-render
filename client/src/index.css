@@ -2146,3 +2146,9 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
 .compact-onboarding { margin-top: 14px; padding: 14px 16px; }
 .compact-onboarding .onboarding-steps > button { padding: 9px 10px; }
 .compact-onboarding .onboarding-head h3 { font-size: 15px; }
+
+.pulse-bar { background: rgba(255,255,255,.18) !important; }
+.pulse-bar span { background: #acd3b6 !important; }
+.pulse-bar i { background: #ffca62 !important; }
+.weekly-bar-track i { background: #acd3b6 !important; }
+.weekly-empty { margin: 14px 0 4px; padding: 10px 0 0; border-top: 1px solid rgba(255,255,255,.14); color: #cfe6d8; font-size: 10.5px; }

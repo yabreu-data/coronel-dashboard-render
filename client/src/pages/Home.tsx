@@ -4046,8 +4046,12 @@ function Overview({
   const missingQuality = Math.max(0, records.length - answeredCount);
   const badClients = profiles.filter(p => clean(p.quality) === "malo").length;
   const todayBirthdayCount = birthdayMarketing.filter(item => item.days === 0).length;
-  const nextBirthdays = birthdayMarketing.slice(0, 3);
-  const firstName = (userName || "equipo").split(" ")[0];
+  const nextBirthdays = birthdayMarketing
+    .filter(item => item.days >= 0 && item.days <= 7)
+    .slice(0, 3);
+  const firstName = (userName || "equipo")
+    .split(" ")[0]
+    .split("@")[0];
   const todayLabel = new Intl.DateTimeFormat("es-PE", {
     weekday: "long",
     day: "numeric",
@@ -4142,20 +4146,28 @@ function Overview({
             <span><i className="dot yellow" />Regular {regular}</span>
             <span><i className="dot red" />Malo {bad}</span>
           </div>
-          <div className="weekly-trend" aria-label="Encuestas de los últimos 7 días">
-            {weeklyVolume.map((day, index) => (
-              <div className="weekly-day" key={`${day.label}-${index}`}>
-                <span className="weekly-bar-track">
-                  <i
-                    style={{
-                      height: `${Math.max((day.count / maxWeeklyVolume) * 100, 6)}%`,
-                    }}
-                  />
-                </span>
-                <small>{day.label}</small>
-              </div>
-            ))}
-          </div>
+          {weeklyVolume.some(day => day.count > 0) ? (
+            <div className="weekly-trend" aria-label="Encuestas de los últimos 7 días">
+              {weeklyVolume.map((day, index) => (
+                <div
+                  className="weekly-day"
+                  key={`${day.label}-${index}`}
+                  title={`${day.count} encuestas`}
+                >
+                  <span className="weekly-bar-track">
+                    <i
+                      style={{
+                        height: `${Math.max((day.count / maxWeeklyVolume) * 100, 6)}%`,
+                      }}
+                    />
+                  </span>
+                  <small>{day.label}</small>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="weekly-empty">Sin encuestas en los últimos 7 días.</p>
+          )}
           <div className="pulse-foot">
             <span>{records.length} encuestas en el período</span>
             <button onClick={() => onNavigate("voice")}>
@@ -4171,7 +4183,11 @@ function Overview({
               <p className="eyebrow">PLAN DE HOY</p>
               <h3>Lo que no puede esperar</h3>
             </div>
-            <span className="today-open-count">{priorityCount} abiertas</span>
+            <span className="today-open-count">
+              {overdueCount
+                ? `${overdueCount} vencidas`
+                : "Sin vencidas"}
+            </span>
           </div>
           <div className="today-list">
             <TodayTask
