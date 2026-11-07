@@ -2234,3 +2234,6 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
   .birthday-funnel-compact { padding: 10px 11px; }
   .birthday-funnel-compact .birthday-stage:nth-child(n+3) { margin-top: 2px; }
 }
+
+.birthday-calendar-day.today strong, .birthday-calendar-day.today small { color: #1d4a31 !important; }
+.bw-card-seguimiento .bw-days { color: #8a5a12 !important; }
