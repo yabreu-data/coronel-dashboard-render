@@ -6961,10 +6961,7 @@ function CallsHistory({
             próxima acción. El buscador superior también filtra esta vista.
           </p>
         </div>
-        <div className="calls-page-actions">
-          <button className="btn-rojo" onClick={() => onRegisterCall()}>
-            <Phone size={15} /> Registrar llamada
-          </button>
+        <div className="calls-page-note">
           <small>
             {plural(visible.length, "registro visible", "registros visibles")} de{" "}
             {logs.length} guardados

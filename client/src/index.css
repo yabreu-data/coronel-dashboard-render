@@ -2672,3 +2672,20 @@ td { font-size: 13px !important; }
   .calls-agenda-row { gap: 7px; }
   .calls-agenda-action { min-height: 34px; }
 }
+
+/* Formulario de llamada en tema claro */
+.call-modal { background: #fffdf8 !important; color: #20372a !important; border-color: #e3ddcc !important; }
+.call-modal h3, .call-modal .muted, .call-modal .eyebrow, .call-modal label,
+.call-modal .modal-head, .call-modal .call-history-modal-head, .call-modal .call-history-in-modal { color: #20372a !important; }
+.call-modal .modal-head { border-color: #e3ddcc !important; }
+.call-modal input, .call-modal select, .call-modal textarea {
+  background: #ffffff !important; color: #20372a !important; border-color: #cfe4d8 !important;
+}
+.call-modal input::placeholder, .call-modal textarea::placeholder { color: #7b8a77 !important; opacity: 1; }
+.call-modal .modal-actions button:first-child { background: #ffffff !important; color: #1d4a31 !important; border: 1px solid #cfe4d8 !important; }
+.call-modal .modal-actions button:last-child { background: #d93a2b !important; color: #ffffff !important; border: 1px solid #d93a2b !important; }
+.call-modal .call-phone-link { color: #1d4a31 !important; }
+.call-modal .icon-button { background: #eaf6ef !important; color: #1d4a31 !important; border-color: #cfe4d8 !important; }
+.calls-page-note { text-align: right; color: #5d6d5c; font-size: 10.5px; }
+.calls-page-note small { color: #5d6d5c; font-size: 10.5px; }
+@media (max-width: 760px) { .calls-page-note { text-align: left; margin-top: 6px; } }
