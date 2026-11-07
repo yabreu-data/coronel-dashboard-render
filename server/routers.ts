@@ -304,7 +304,7 @@ async function getSurveyPayload(sheet: string) {
 /*  Validación de entrada                                                     */
 /* -------------------------------------------------------------------------- */
 
-const callInput = z.object({ clientKey: z.string().min(1), clientName: z.string().min(1), phone: z.string().optional(), callDate: z.string().optional(), outcome: z.string().min(1), promotion: z.string().optional(), promotionRedeemed: z.boolean().default(false), nextCallDate: z.string().optional(), recoveryResult: z.string().optional(), notes: z.string().optional(), assignedTo: z.string().max(160).optional(), campaignStage: z.enum(["week", "soon", "tomorrow", "today", "past"]).optional(), campaignChannel: z.enum(["llamada", "whatsapp", "correo", "sms"]).optional() });
+const callInput = z.object({ clientKey: z.string().min(1), clientName: z.string().min(1), phone: z.string().optional(), callDate: z.string().optional(), outcome: z.string().min(1), promotion: z.string().optional(), promotionRedeemed: z.boolean().default(false), nextCallDate: z.string().optional(), recoveryResult: z.string().optional(), notes: z.string().optional(), assignedTo: z.string().max(160).optional(), campaignStage: z.enum(["week", "soon", "tomorrow", "today", "past"]).optional(), campaignChannel: z.enum(["llamada", "whatsapp", "correo", "sms"]).optional(), resolvePriorityKey: z.string().max(220).optional() });
 const birthdayCampaignInput = z.object({
   clientKey: z.string().min(1),
   clientName: z.string().min(1),
@@ -388,13 +388,30 @@ export const appRouter = router({
     list: publicProcedure.query(() => db.listCallLogs()),
     create: publicProcedure
       .input(callInput)
-      .mutation(({ input, ctx }) => db.createCallLog({
-        ...input,
-        callDate: input.callDate ? new Date(input.callDate) : new Date(),
-        nextCallDate: input.nextCallDate ? new Date(input.nextCallDate) : null,
-        promotionRedeemed: input.promotionRedeemed ? 1 : 0,
-        createdBy: currentActor(ctx),
-      })),
+      .mutation(async ({ input, ctx }) => {
+        const { resolvePriorityKey, ...callData } = input;
+        const created = await db.createCallLog({
+          ...callData,
+          callDate: callData.callDate ? new Date(callData.callDate) : new Date(),
+          nextCallDate: callData.nextCallDate ? new Date(callData.nextCallDate) : null,
+          promotionRedeemed: callData.promotionRedeemed ? 1 : 0,
+          createdBy: currentActor(ctx),
+        });
+        await db.syncBirthdayProgressFromHistory(created.clientKey);
+        const shouldResolve =
+          resolvePriorityKey &&
+          !/no contest|inválid|invald/i.test(callData.outcome || "");
+        if (shouldResolve) {
+          await db.savePriorityItem({
+            priorityKey: resolvePriorityKey,
+            status: "done",
+            responsible: null,
+            dueDate: null,
+            updatedBy: currentActor(ctx),
+          });
+        }
+        return created;
+      }),
     update: publicProcedure
       .input(
         z.object({

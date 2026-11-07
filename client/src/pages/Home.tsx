@@ -1371,9 +1371,11 @@ export default function Home() {
           profile={quickCallProfile}
           logs={(callsQuery.data ?? []) as CallLog[]}
           onClose={() => setQuickCallProfile(null)}
-          onSaved={profile => {
+          onSaved={(profile, meta) => {
             setCallSavedNotice(
-              `Llamada de ${profile.name} guardada. Si programaste una próxima llamada, ya aparece en Prioridades.`
+              meta?.priorityResolved
+                ? `Llamada de ${profile.name} guardada. La prioridad del cliente quedó resuelta.`
+                : `Llamada de ${profile.name} guardada. Si programaste una próxima llamada, ya aparece en Prioridades.`
             );
             window.setTimeout(() => setCallSavedNotice(""), 5000);
           }}
@@ -4173,6 +4175,13 @@ function Overview({
   const missingQuality = Math.max(0, records.length - answeredCount);
   const badClients = profiles.filter(p => clean(p.quality) === "malo").length;
   const todayBirthdayCount = birthdayMarketing.filter(item => item.days === 0).length;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const overdueFollowUps = logs.filter(log => {
+    if (!log.nextCallDate) return false;
+    const date = new Date(log.nextCallDate);
+    return !Number.isNaN(date.getTime()) && date < startOfToday;
+  }).length;
   const nextBirthdays = birthdayMarketing
     .filter(item => item.days >= 0 && item.days <= 7)
     .slice(0, 3);
@@ -4332,6 +4341,17 @@ function Overview({
               action="Revisar"
               onClick={() => onNavigate("priorities")}
             />
+            {overdueFollowUps > 0 && (
+              <TodayTask
+                tone="critical"
+                icon={Phone}
+                title="Llamadas atrasadas"
+                detail="Seguimientos que ya pasaron de fecha"
+                count={overdueFollowUps}
+                action="Llamar"
+                onClick={() => onNavigate("calls")}
+              />
+            )}
             <TodayTask
               tone={badClients ? "critical" : "success"}
               icon={AlertTriangle}
@@ -6317,15 +6337,26 @@ function CallLogForm({
   campaignStage?: CampaignStage;
   campaignChannel?: CampaignChannel;
   logs?: CallLog[];
-  onSaved?: (profile: ClientProfile) => void;
+  onSaved?: (
+    profile: ClientProfile,
+    meta?: { priorityResolved: boolean }
+  ) => void;
 }) {
   const utils = trpc.useUtils();
   const promotionsQuery = trpc.promotions.list.useQuery();
   const responsibleQuery = trpc.responsibleUsers.list.useQuery();
+  const priorityKey =
+    profile.segment === "En riesgo" ? `risk-${profile.key}` : undefined;
   const create = trpc.calls.create.useMutation({
     onSuccess: async () => {
-      await utils.calls.list.invalidate();
-      onSaved?.(profile);
+      await Promise.all([
+        utils.calls.list.invalidate(),
+        utils.birthdayCampaigns.list.invalidate(),
+        utils.priorities.list.invalidate(),
+      ]);
+      onSaved?.(profile, {
+        priorityResolved: Boolean(priorityKey) && resolvesPriority,
+      });
       onClose();
     },
   });
@@ -6347,6 +6378,8 @@ function CallLogForm({
   const [callDate, setCallDate] = useState(() =>
     new Date().toISOString().slice(0, 16)
   );
+  const resolvesPriority =
+    Boolean(priorityKey) && !/no contest|inválid|invald/i.test(outcome);
   const dialogRef = useDialogFocus(true, onClose);
   const clientLogs = logs
     .filter(log => log.clientKey === profile.key)
@@ -6507,6 +6540,11 @@ function CallLogForm({
             placeholder="Qué comentó el cliente y próximo paso…"
           />
         </label>
+        {resolvesPriority && (
+          <p className="call-priority-note">
+            ✓ Al guardar, la prioridad de este cliente se marcará como resuelta.
+          </p>
+        )}
         <div className="modal-actions">
           <Button variant="outline" onClick={onClose}>
             Cancelar
@@ -6528,6 +6566,7 @@ function CallLogForm({
                 recoveryResult,
                 assignedTo: assignedTo || undefined,
                 notes,
+                resolvePriorityKey: resolvesPriority ? priorityKey : undefined,
               })
             }
           >
@@ -6803,6 +6842,16 @@ function CallsHistory({
   const [toDate, setToDate] = useState("");
   const utils = trpc.useUtils();
   const [editLog, setEditLog] = useState<CallLog | null>(null);
+  const [pinAction, setPinAction] = useState<
+    { type: "edit"; log: CallLog } | { type: "delete"; log: CallLog } | null
+  >(null);
+  const [pinDraft, setPinDraft] = useState("");
+  const [pinError, setPinError] = useState("");
+  const pinDialogRef = useDialogFocus(Boolean(pinAction), () => {
+    setPinAction(null);
+    setPinDraft("");
+    setPinError("");
+  });
   const [draft, setDraft] = useState({
     outcome: "",
     promotion: "",
@@ -6845,37 +6894,46 @@ function CallsHistory({
       assignedTo: log.assignedTo ?? "",
     });
   };
-  const saveEdit = () => {
+  const requestEditSave = () => {
     if (!editLog) return;
-    const pin = window.prompt("Credencial administrativa:");
-    if (!pin) return;
-    updateCall.mutate({
-      id: editLog.id,
-      outcome: draft.outcome.trim(),
-      promotion: draft.promotion || undefined,
-      promotionRedeemed: draft.promotionRedeemed ? 1 : 0,
-      recoveryResult: draft.recoveryResult || undefined,
-      notes: draft.notes || undefined,
-      callDate: draft.callDate
-        ? new Date(`${draft.callDate}T12:00:00`).toISOString()
-        : undefined,
-      nextCallDate: draft.nextCallDate
-        ? new Date(`${draft.nextCallDate}T12:00:00`).toISOString()
-        : null,
-      assignedTo: draft.assignedTo || undefined,
-      adminPin: pin,
-    });
+    setPinAction({ type: "edit", log: editLog });
+    setPinDraft("");
+    setPinError("");
   };
-  const deleteLog = (log: CallLog) => {
-    if (
-      !window.confirm(
-        `¿Eliminar el registro de ${log.clientName || "cliente"} del ${formatDateTime(log.callDate)}?`
-      )
-    )
+  const requestDelete = (log: CallLog) => {
+    setPinAction({ type: "delete", log });
+    setPinDraft("");
+    setPinError("");
+  };
+  const confirmCallPin = () => {
+    if (!pinAction) return;
+    if (pinDraft.trim() !== "5956") {
+      setPinError("Clave incorrecta. Intenta de nuevo.");
       return;
-    const pin = window.prompt("Credencial administrativa:");
-    if (!pin) return;
-    removeCall.mutate({ id: log.id, adminPin: pin });
+    }
+    if (pinAction.type === "delete") {
+      removeCall.mutate({ id: pinAction.log.id, adminPin: pinDraft.trim() });
+    } else if (editLog) {
+      updateCall.mutate({
+        id: editLog.id,
+        outcome: draft.outcome.trim(),
+        promotion: draft.promotion || undefined,
+        promotionRedeemed: draft.promotionRedeemed ? 1 : 0,
+        recoveryResult: draft.recoveryResult || undefined,
+        notes: draft.notes || undefined,
+        callDate: draft.callDate
+          ? new Date(`${draft.callDate}T12:00:00`).toISOString()
+          : undefined,
+        nextCallDate: draft.nextCallDate
+          ? new Date(`${draft.nextCallDate}T12:00:00`).toISOString()
+          : null,
+        assignedTo: draft.assignedTo || undefined,
+        adminPin: pinDraft.trim(),
+      });
+    }
+    setPinAction(null);
+    setPinDraft("");
+    setPinError("");
   };
   const query = normalizeText(search);
   const dateMatch = (value: Date | string, from: string, to: string) => {
@@ -7188,7 +7246,7 @@ function CallsHistory({
                         </button>
                         <button
                           className="small-action danger"
-                          onClick={() => deleteLog(log)}
+                          onClick={() => requestDelete(log)}
                         >
                           Eliminar
                         </button>
@@ -7328,13 +7386,91 @@ function CallsHistory({
             <div className="bw-modal-actions">
               <button
                 className="bw-action bw-action-whatsapp"
-                onClick={saveEdit}
+                onClick={requestEditSave}
                 disabled={updateCall.isPending}
               >
                 {updateCall.isPending ? "Guardando…" : "Guardar cambios"}
               </button>
               <button className="bw-action" onClick={() => setEditLog(null)}>
                 Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {pinAction && (
+        <div
+          className="priority-pin-backdrop"
+          onClick={() => {
+            setPinAction(null);
+            setPinDraft("");
+            setPinError("");
+          }}
+        >
+          <div
+            className="priority-pin-modal"
+            ref={pinDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirmar cambio de llamada"
+            onClick={event => event.stopPropagation()}
+          >
+            <p className="eyebrow">CONFIRMAR</p>
+            <h3>
+              {pinAction.type === "delete"
+                ? "Eliminar llamada"
+                : "Guardar cambios de la llamada"}
+            </h3>
+            <p className="muted">
+              {pinAction.type === "delete"
+                ? `Se eliminará el registro de ${pinAction.log.clientName || "este cliente"} del ${formatDateTime(pinAction.log.callDate)}.`
+                : `Se actualizará el registro de ${pinAction.log.clientName || "este cliente"}.`}
+            </p>
+            <small className="priority-pin-help">
+              Escribe la clave de 4 dígitos del administrador.
+            </small>
+            <input
+              type="password"
+              inputMode="numeric"
+              autoFocus
+              value={pinDraft}
+              onChange={event => {
+                setPinDraft(event.target.value);
+                setPinError("");
+              }}
+              onKeyDown={event => {
+                if (event.key === "Enter") confirmCallPin();
+                if (event.key === "Escape") {
+                  setPinAction(null);
+                  setPinDraft("");
+                  setPinError("");
+                }
+              }}
+              placeholder="Clave"
+              aria-label="Clave del administrador"
+            />
+            {pinError && <small className="priority-pin-error">{pinError}</small>}
+            <div className="priority-pin-actions">
+              <button
+                className="btn-borde"
+                onClick={() => {
+                  setPinAction(null);
+                  setPinDraft("");
+                  setPinError("");
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn-rojo"
+                disabled={updateCall.isPending || removeCall.isPending}
+                onClick={confirmCallPin}
+              >
+                {updateCall.isPending || removeCall.isPending
+                  ? "Guardando…"
+                  : pinAction.type === "delete"
+                    ? "Eliminar"
+                    : "Confirmar"}
               </button>
             </div>
           </div>
