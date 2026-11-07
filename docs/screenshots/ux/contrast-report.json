@@ -38,21 +38,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -67,66 +67,12 @@
         "threshold": 4.5
       },
       {
-        "selector": "section.panel.voice-negative-panel > div.negative-word-list > button.sentiment-word.sentiment-negative > b",
-        "text": "falta",
-        "color": "rgb(255, 255, 255)",
-        "bg": "rgb(255, 241, 239)",
-        "ratio": 1.1,
-        "size": 13,
-        "threshold": 4.5
-      },
-      {
         "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
         "text": "Centro de acción",
         "color": "rgb(215, 236, 223)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.14,
         "size": 14,
-        "threshold": 4.5
-      },
-      {
-        "selector": "section.panel.voice-highlight-panel > div.positive-word-list > button.sentiment-word.sentiment-positive > b",
-        "text": "bueno",
-        "color": "rgb(255, 255, 255)",
-        "bg": "rgb(227, 242, 234)",
-        "ratio": 1.16,
-        "size": 13,
-        "threshold": 4.5
-      },
-      {
-        "selector": "section.panel.voice-highlight-panel > div.positive-word-list > button.sentiment-word.sentiment-positive > strong",
-        "text": "11",
-        "color": "rgb(255, 255, 255)",
-        "bg": "rgb(227, 242, 234)",
-        "ratio": 1.16,
-        "size": 16,
-        "threshold": 4.5
-      },
-      {
-        "selector": "section.panel.voice-negative-panel > div.negative-word-list > button.sentiment-word.sentiment-negative > small",
-        "text": "menciones · ver comentarios",
-        "color": "rgb(255, 217, 223)",
-        "bg": "rgb(255, 241, 239)",
-        "ratio": 1.17,
-        "size": 10,
-        "threshold": 4.5
-      },
-      {
-        "selector": "section.panel > div.voice-list > div.voice-list-item > p",
-        "text": "Todo bien!",
-        "color": "rgb(219, 233, 245)",
-        "bg": "rgb(255, 255, 255)",
-        "ratio": 1.24,
-        "size": 12,
-        "threshold": 4.5
-      },
-      {
-        "selector": "section.panel.voice-highlight-panel > div.positive-word-list > button.sentiment-word.sentiment-positive > small",
-        "text": "menciones · ver comentarios",
-        "color": "rgb(183, 216, 206)",
-        "bg": "rgb(227, 242, 234)",
-        "ratio": 1.32,
-        "size": 10,
         "threshold": 4.5
       },
       {
@@ -148,21 +94,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -204,21 +150,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -260,21 +206,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -316,21 +262,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -372,6 +318,15 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
@@ -381,48 +336,12 @@
         "threshold": 4.5
       },
       {
-        "selector": "div.priority-list > div.priority-item.priority-top > span.priority-copy > em",
-        "text": "Ver todas sus encuestas",
-        "color": "rgb(255, 211, 106)",
-        "bg": "rgb(255, 255, 255)",
-        "ratio": 1.42,
-        "size": 12,
-        "threshold": 4.5
-      },
-      {
-        "selector": "div.priority-item.priority-top > span.priority-copy > div.priority-history > button.history-toggle",
-        "text": "Ver historial",
-        "color": "rgb(142, 223, 255)",
-        "bg": "rgb(255, 255, 255)",
-        "ratio": 1.48,
-        "size": 10,
-        "threshold": 4.5
-      },
-      {
         "selector": "div.priority-list > div.priority-item.priority-top > span.priority-copy > small.priority-meta",
         "text": "VENCIDA ·",
         "color": "rgb(255, 179, 191)",
         "bg": "rgb(255, 255, 255)",
         "ratio": 1.69,
         "size": 12,
-        "threshold": 4.5
-      },
-      {
-        "selector": "div.content > section.panel.priority-panel > div.priority-filters > small.priority-status-help",
-        "text": "El botón avanza: Pendiente → En seguimiento → Atendido.",
-        "color": "rgb(169, 197, 213)",
-        "bg": "rgb(255, 255, 255)",
-        "ratio": 1.81,
-        "size": 10,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -464,21 +383,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -520,21 +439,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -576,21 +495,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -632,21 +551,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -688,21 +607,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
         "threshold": 4.5
       }
     ],
@@ -744,39 +663,21 @@
         "threshold": 4.5
       },
       {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
         "selector": "aside.sidebar > div.sidebar-bottom > div > span",
         "text": "Google Sheets",
         "color": "rgb(185, 217, 199)",
         "bg": "rgb(242, 247, 244)",
         "ratio": 1.4,
         "size": 11,
-        "threshold": 4.5
-      },
-      {
-        "selector": "div.content > section.panel.admin-session-panel > div.session-admin-filters > label",
-        "text": "Usuario",
-        "color": "rgb(203, 217, 230)",
-        "bg": "rgb(255, 255, 255)",
-        "ratio": 1.44,
-        "size": 10,
-        "threshold": 4.5
-      },
-      {
-        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
-        "text": "OPERACIÓN",
-        "color": "rgb(111, 139, 167)",
-        "bg": "rgb(242, 247, 244)",
-        "ratio": 3.27,
-        "size": 9,
-        "threshold": 4.5
-      },
-      {
-        "selector": "div.access-user-list > div.access-user-card > div.permission-chips > span.disabled",
-        "text": "Ver clientes",
-        "color": "rgb(107, 133, 119)",
-        "bg": "rgb(241, 246, 243)",
-        "ratio": 3.66,
-        "size": 10,
         "threshold": 4.5
       }
     ]

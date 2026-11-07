@@ -2028,3 +2028,10 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
 .table-call:hover { background: #ffe4df !important; }
 .bw-chip:hover { background: #eaf6ef !important; color: #123b26 !important; }
 .filter-group button:hover { color: #1d4a31 !important; }
+
+/* Ajustes puntuales finales */
+.priority-item .priority-meta, .priority-item.is-overdue .priority-meta { color: #b52e22 !important; }
+.account-control .account-status span, .account-control .account-status b { color: #4f6f5e !important; }
+.target-bar-row { color: #173b2b !important; }
+.target-bar-track i { background: linear-gradient(90deg, #1d4a31, #2f6b4f) !important; }
+.chart-month-select { background: #ffffff !important; color: #173b2b !important; border-color: #cfe4d8 !important; }
