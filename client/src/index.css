@@ -1836,3 +1836,13 @@ td b { color: #173b2b !important; }
   .filter-bar .search-box, .filter-bar .filter-group, .filter-bar .reset-button { grid-column: 1 / -1 !important; }
   .filter-bar .filter-group { display: flex !important; justify-content: space-between !important; }
 }
+
+/* Últimos ajustes de legibilidad en Equipo y filtros móviles */
+.stats-grid .stat-card strong, .stats-grid .stat-card b { color: #173b2b !important; }
+.targets-toggle, .targets-toggle h3, .targets-toggle small { color: #173b2b !important; }
+.team-callout p, .team-callout small, .team-callout span, .team-callout div { color: #5c7a6b !important; }
+.team-callout b { color: #173b2b !important; }
+.period-comparison small.muted, .period-comparison .muted { color: #5c7a6b !important; }
+@media (max-width: 760px) {
+  .search-box input { font-size: 13px !important; }
+}
