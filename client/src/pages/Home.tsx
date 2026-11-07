@@ -15,6 +15,7 @@ import {
   FileText,
   Flag,
   LayoutDashboard,
+  Menu,
   MessageSquareText,
   Phone,
   RefreshCw,
@@ -734,7 +735,7 @@ export default function Home() {
       <div className="loading-screen">
         <img
           className="loading-logo"
-          src="/manus-storage/logo-blanco.png"
+          src="/manus-storage/logo1_5c69b281.png"
           alt="Coronel"
         />
         <p>Verificando sesión segura…</p>
@@ -746,7 +747,7 @@ export default function Home() {
         <div className="auth-wall-card">
           <img
             className="loading-logo"
-            src="/manus-storage/logo-blanco.png"
+            src="/manus-storage/logo1_5c69b281.png"
             alt="Coronel"
           />
           <Pill tone="blue">ACCESO RESTRINGIDO</Pill>
@@ -770,7 +771,7 @@ export default function Home() {
       <div className="loading-screen">
         <img
           className="loading-logo"
-          src="/manus-storage/logo-blanco.png"
+          src="/manus-storage/logo1_5c69b281.png"
           alt="Coronel"
         />
         <p>Cargando datos desde Google Sheets…</p>
@@ -791,7 +792,7 @@ export default function Home() {
         <div className="brand">
           <img
             className="brand-logo"
-            src="/manus-storage/logo-blanco.png"
+            src="/manus-storage/logo1_5c69b281.png"
             alt="Coronel · Pollos y Parrillas"
           />
           <span className="brand-tagline">Sistema de gestión</span>
@@ -1152,6 +1153,7 @@ export default function Home() {
                   logs={(callsQuery.data ?? []) as CallLog[]}
                   search={search}
                   isAdmin={isAdmin}
+                  onNavigate={navigate}
                   promotions={
                     (promotionsAdminQuery.data ?? []) as PromotionItem[]
                   }
@@ -1194,6 +1196,76 @@ export default function Home() {
           <span>Datos personales: acceso restringido al equipo autorizado</span>
         </footer>
       </main>
+      <nav className="mobile-bottom-nav" aria-label="Navegación principal">
+        {[
+          { id: "overview" as Page, label: "Hoy", icon: LayoutDashboard },
+          { id: "birthdays" as Page, label: "Cumples", icon: Cake },
+          { id: "clients" as Page, label: "Clientes", icon: Users },
+          { id: "calls" as Page, label: "Llamadas", icon: Phone },
+        ].map(item => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              className={page === item.id ? "active" : ""}
+              onClick={() => navigate(item.id)}
+              aria-current={page === item.id ? "page" : undefined}
+            >
+              <Icon size={19} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+        <button
+          className={
+            !["overview", "birthdays", "clients", "calls"].includes(page) ||
+            mobileMenuOpen
+              ? "active"
+              : ""
+          }
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Más opciones"
+        >
+          <Menu size={19} />
+          <span>Más</span>
+        </button>
+      </nav>
+      {mobileMenuOpen && (
+        <div
+          className="mobile-more-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="mobile-more-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Más opciones"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="mobile-more-head">
+              <b>Más opciones</b>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Cerrar"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="mobile-more-grid">
+              {visibleTabs.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  className={page === id ? "selected" : ""}
+                  onClick={() => navigate(id)}
+                >
+                  <Icon size={17} />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       <PdfPreviewModal
         open={pdfPreviewOpen}
         onClose={() => setPdfPreviewOpen(false)}
@@ -4012,14 +4084,6 @@ function Overview({
           onClick={() => onNavigate("voice")}
         />
         <Stat
-          label="ALERTAS"
-          value={priorityCount}
-          detail="Top 5 prioridades"
-          accent="red"
-          icon={AlertTriangle}
-          onClick={() => onNavigate("priorities")}
-        />
-        <Stat
           label="CUMPLEAÑOS"
           value={birthdays.length}
           detail="próximos 7 días"
@@ -6147,11 +6211,13 @@ function CallsHistory({
   search,
   promotions,
   isAdmin,
+  onNavigate,
 }: {
   logs: CallLog[];
   search: string;
   promotions: PromotionItem[];
   isAdmin: boolean;
+  onNavigate: (page: Page) => void;
 }) {
   const [outcome, setOutcome] = useState("Todos");
   const [redeemed, setRedeemed] = useState("Todos");
@@ -6493,7 +6559,12 @@ function CallsHistory({
             </table>
           </div>
         ) : (
-          <Empty text="No hay llamadas que coincidan con la búsqueda y filtros." />
+          <div className="empty-state-block">
+            <Empty text="Todavía no hay llamadas registradas con estos filtros." />
+            <button className="btn-borde" onClick={() => onNavigate("clients")}>
+              Ir a Clientes para registrar una llamada
+            </button>
+          </div>
         )}
       </section>
       {editLog && (

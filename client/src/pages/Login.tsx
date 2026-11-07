@@ -140,7 +140,7 @@ export default function Login() {
   return (
     <div className="auth-wall">
       <div className="auth-wall-card">
-        <img className="loading-logo" src="/manus-storage/logo-blanco.png" alt="Coronel · Pollos y Parrillas" />
+        <img className="loading-logo" src="/manus-storage/logo1_5c69b281.png" alt="Coronel · Pollos y Parrillas" />
         <span className="auth-brand-caption">Sistema de gestión</span>
         <span className="auth-badge">
           {mode === "login"
