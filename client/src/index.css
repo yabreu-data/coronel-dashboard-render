@@ -1736,3 +1736,75 @@ td b { color: #173b2b !important; }
   .mobile-more-grid button { display: flex; align-items: center; gap: 8px; padding: 12px 10px; border: 1px solid var(--line); border-radius: 12px; background: #ffffff; color: #3d5f4e; font-size: 12px; font-weight: 700; text-align: left; }
   .mobile-more-grid button.selected { background: #e3f2ea; border-color: #acd3b6; color: #1d4a31; }
 }
+
+/* Ajustes de contraste del tema claro */
+.stat-card strong, .stat-card b { color: #173b2b !important; }
+.stat-card .eyebrow { color: #1d4a31 !important; }
+.page-intro p, .birthday-page-intro p, .hero-strip p { color: #5c7a6b !important; }
+.alert-banner-title b, .alert-banner-title strong { color: #b52e22 !important; }
+.alert-actions .alert-card { background: #ffffff !important; border-color: #d7e8dd !important; color: #173b2b !important; }
+.alert-actions .alert-card.danger { background: #fff1ef !important; border-color: #efb8b1 !important; }
+.alert-actions .alert-card.overdue-alert { background: #fff1ef !important; border-color: #efb8b1 !important; }
+.alert-actions .alert-card.birthday-alert { background: #f2faf5 !important; border-color: #acd3b6 !important; }
+.alert-actions .alert-card.muted-alert { background: #f7faf8 !important; border-color: #d7e8dd !important; }
+.alert-actions .alert-card b, .alert-actions .alert-card small, .alert-actions .alert-card strong { color: #173b2b !important; }
+.alert-card.overdue-alert b { color: #b52e22 !important; }
+.alert-card.overdue-alert small { color: #8a3b32 !important; }
+
+/* Cumpleaños */
+.bw-metric { background: #ffffff !important; border-color: #d7e8dd !important; }
+.bw-metric small { color: #5c7a6b !important; }
+.bw-metric b { color: #1d4a31 !important; }
+.bw-metric span { color: #5c7a6b !important; }
+.bw-metric-today { background: #fff4f3 !important; border-color: #efb8b1 !important; }
+.bw-metric-today b { color: #b52e22 !important; }
+.bw-metric-week b { color: #8a5a12 !important; }
+.bw-metric-contact b { color: #2f6b4f !important; }
+.bw-metric-redeem b { color: #1d4a31 !important; }
+.birthday-toolbar-arrow, .birthday-toolbar-action { background: #ffffff !important; color: #1d4a31 !important; border-color: #acd3b6 !important; }
+.birthday-toolbar-month { color: #173b2b !important; }
+.bw-filters { border-color: #e2efe8 !important; }
+.bw-chip { background: #ffffff !important; border-color: #cfe4d8 !important; color: #3d5f4e !important; }
+.bw-chip b { background: #eef8f2 !important; color: #1d4a31 !important; }
+.bw-chip.active { background: #1d4a31 !important; color: #ffffff !important; border-color: #1d4a31 !important; }
+.bw-chip-dia.active { background: #fff1ef !important; color: #b52e22 !important; border-color: #efb8b1 !important; }
+.bw-chip-semana.active { background: #fff8e8 !important; color: #8a5a12 !important; border-color: #e8c98a !important; }
+.bw-chip-mes.active { background: #eaf3ff !important; color: #2f5b8a !important; border-color: #b9d3ee !important; }
+.bw-chip-seguimiento.active { background: #eaf6ef !important; color: #1d4a31 !important; border-color: #acd3b6 !important; }
+.bw-search { background: #ffffff !important; border-color: #cfe4d8 !important; color: #5c7a6b !important; }
+.bw-search input { color: #173b2b !important; }
+.bw-pending-toggle { background: #ffffff !important; color: #3d5f4e !important; border-color: #cfe4d8 !important; }
+.bw-pending-toggle.active { background: #fff8e8 !important; color: #8a5a12 !important; border-color: #e8c98a !important; }
+.bw-group-head b { color: #173b2b !important; }
+.bw-group-head small { color: #5c7a6b !important; }
+.bw-group-count { background: #eef8f2 !important; color: #1d4a31 !important; border-color: #cfe4d8 !important; }
+.bw-title > b { color: #173b2b !important; }
+.bw-meta { color: #5c7a6b !important; }
+.bw-days { color: #2f6b4f !important; }
+.bw-next { color: #8a5a12 !important; }
+.bw-next.overdue { color: #b52e22 !important; }
+.bw-date { background: #1d4a31 !important; border-color: #1d4a31 !important; }
+.bw-date b { color: #ffffff !important; }
+.bw-date small { color: #d7ecdf !important; }
+.bw-status button { background: #ffffff !important; color: #3d5f4e !important; border-color: #cfe4d8 !important; }
+.bw-status button.active { background: #1d4a31 !important; color: #ffffff !important; border-color: #1d4a31 !important; }
+.bw-status button.warn { background: #fff1ef !important; color: #b52e22 !important; border-color: #efb8b1 !important; }
+.bw-action { background: #ffffff !important; color: #1d4a31 !important; border-color: #cfe4d8 !important; }
+.bw-action-whatsapp { background: #1d4a31 !important; color: #ffffff !important; border-color: #1d4a31 !important; }
+.bw-action-copy { color: #1d4a31 !important; }
+.bw-saved { color: #1d4a31 !important; }
+.bw-edit, .bw-modal, .call-modal { background: #ffffff !important; color: #173b2b !important; }
+.bw-edit label, .bw-edit span, .bw-modal p, .bw-modal h3 { color: #173b2b !important; }
+.bw-history-link { color: #2f6b4f !important; }
+
+/* Logos sin caja blanca sobre fondos claros */
+.brand-logo, .loading-logo, .boot-logo img { background: transparent !important; border: 0 !important; mix-blend-mode: multiply; }
+
+/* Filtros móviles sin superposición */
+@media (max-width: 760px) {
+  .filter-bar { display: grid !important; grid-template-columns: 1fr !important; gap: 8px !important; position: relative !important; }
+  .filter-bar .reset-button { position: static !important; margin: 0 !important; width: 100% !important; text-align: center !important; }
+  .filter-bar .search-box { width: 100% !important; }
+  .filter-bar .filter-group, .filter-bar .export-group { width: 100% !important; display: flex !important; gap: 8px !important; }
+  .filter-bar .export-group button { flex: 1 !important; }
+}
