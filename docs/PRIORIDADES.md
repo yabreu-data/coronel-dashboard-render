@@ -83,6 +83,7 @@ Se eliminó el `window.prompt` nativo.
 
 - [Escritorio](screenshots/ux/priorities-redesign.png)
 - [Edición](screenshots/ux/priorities-redesign-edit.png)
+- [PIN de confirmación](screenshots/ux/priorities-redesign-pin.png)
 - [Móvil](screenshots/ux/priorities-redesign-mobile.png)
 
 ## Próximos pasos
