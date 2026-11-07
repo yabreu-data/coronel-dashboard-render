@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { useDialogFocus } from "@/hooks/useDialogFocus";
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -808,7 +809,7 @@ export default function Home() {
         <div className="brand">
           <img
             className="brand-logo"
-            src="/manus-storage/logo-coronel.png"
+            src="/manus-storage/logo-blanco.png"
             alt="Coronel · Pollos y Parrillas"
           />
           <span className="brand-tagline">Sistema de gestión</span>
@@ -1922,6 +1923,7 @@ function PdfPreviewModal({
     scopedGood >= scopedBad
       ? "Predomina la percepción positiva frente a las clasificaciones malas."
       : "Las clasificaciones malas superan a las positivas y requieren seguimiento.";
+  const dialogRef = useDialogFocus(open, onClose);
   const dateLabel = `${fromDate || "inicio"} – ${toDate || "hoy"}`;
   const summary = `En ${dateLabel} se registraron ${scopedRecords.length} encuestas, con ${Math.round(scopedPositive * 100)}% de calidad positiva. ${trend}`;
   const toggle = (key: keyof typeof sections) =>
@@ -1930,6 +1932,10 @@ function PdfPreviewModal({
     <div className="modal-backdrop pdf-preview-backdrop" onClick={onClose}>
       <div
         className="pdf-preview-modal"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Vista previa del reporte"
         onClick={event => event.stopPropagation()}
       >
         <div className="modal-head">
@@ -2419,6 +2425,18 @@ function BirthdayWorkspace({
   const [historyKey, setHistoryKey] = useState<string | null>(null);
   const [historySection, setHistorySection] = useState<"summary" | "contacts">("summary");
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  useEffect(() => {
+    if (!callKey && !historyKey && !templatesOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCallKey(null);
+        setHistoryKey(null);
+        setTemplatesOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [callKey, historyKey, templatesOpen]);
   const [activeTemplate, setActiveTemplate] = useState("mes");
   const [templateDraft, setTemplateDraft] = useState("");
   const [templateSaved, setTemplateSaved] = useState(false);
@@ -3235,7 +3253,7 @@ function BirthdayWorkspace({
 
       {callRow && (
         <div className="bw-modal-backdrop" onClick={() => setCallKey(null)}>
-          <div className="bw-modal" onClick={event => event.stopPropagation()}>
+          <div className="bw-modal" role="dialog" aria-modal="true" aria-label="Detalle de cumpleaños" onClick={event => event.stopPropagation()}>
             <div className="bw-modal-head">
               <h3>Llamar a {callRow.item.record.clientName || "cliente"}</h3>
               <button onClick={() => setCallKey(null)}>×</button>
@@ -3297,7 +3315,7 @@ function BirthdayWorkspace({
 
       {historyRow && (
         <div className="bw-modal-backdrop" onClick={() => setHistoryKey(null)}>
-          <div className="bw-modal bw-modal-wide" onClick={event => event.stopPropagation()}>
+          <div className="bw-modal bw-modal-wide" role="dialog" aria-modal="true" aria-label="Detalle de cumpleaños" onClick={event => event.stopPropagation()}>
             <div className="bw-modal-head">
               <h3>
                 Ficha de {historyRow.item.record.clientName || "cliente"}
@@ -3378,7 +3396,7 @@ function BirthdayWorkspace({
 
       {templatesOpen && (
         <div className="bw-modal-backdrop" onClick={() => setTemplatesOpen(false)}>
-          <div className="bw-modal bw-modal-wide" onClick={event => event.stopPropagation()}>
+          <div className="bw-modal bw-modal-wide" role="dialog" aria-modal="true" aria-label="Detalle de cumpleaños" onClick={event => event.stopPropagation()}>
             <div className="bw-modal-head">
               <h3>Mensajes de WhatsApp por etapa</h3>
               <button onClick={() => setTemplatesOpen(false)}>×</button>
@@ -3984,6 +4002,13 @@ function Overview({
   onNavigate: (page: Page, filter?: string, focus?: OverviewFocus) => void;
   onOpenClient: (key: string) => void;
 }) {
+  const [onboardingHidden, setOnboardingHidden] = useState(
+    () => localStorage.getItem("coronel.onboardingDismissed") === "1"
+  );
+  const dismissOnboarding = () => {
+    localStorage.setItem("coronel.onboardingDismissed", "1");
+    setOnboardingHidden(true);
+  };
   const productStats = useMemo(() => {
     const map: Record<
       string,
@@ -4093,6 +4118,65 @@ function Overview({
           </button>
         </div>
       </section>
+      {!onboardingHidden && (
+        <section className="onboarding-panel">
+          <div className="onboarding-head">
+            <div>
+              <p className="eyebrow">PRIMEROS PASOS</p>
+              <h3>Tu rutina de hoy, en tres pasos</h3>
+              <p className="muted">
+                Empieza por lo urgente y registra el contacto para que el
+                seguimiento quede trazable.
+              </p>
+            </div>
+            <button
+              className="onboarding-close"
+              onClick={dismissOnboarding}
+              aria-label="Ocultar primeros pasos"
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="onboarding-steps">
+            <button onClick={() => onNavigate("priorities")}>
+              <span className="onboarding-num">1</span>
+              <div>
+                <b>
+                  {plural(
+                    overdueCount,
+                    "prioridad vencida",
+                    "prioridades vencidas"
+                  )}
+                </b>
+                <small>Atiende primero lo que ya pasó de fecha.</small>
+              </div>
+              <ChevronRight size={16} />
+            </button>
+            <button onClick={() => onNavigate("birthdays")}>
+              <span className="onboarding-num">2</span>
+              <div>
+                <b>
+                  {plural(
+                    birthdays.length,
+                    "cumpleaños próximo",
+                    "cumpleaños próximos"
+                  )}
+                </b>
+                <small>Envía WhatsApp y registra la respuesta.</small>
+              </div>
+              <ChevronRight size={16} />
+            </button>
+            <button onClick={() => onNavigate("clients")}>
+              <span className="onboarding-num">3</span>
+              <div>
+                <b>Registra una llamada</b>
+                <small>Deja contexto, promoción y próxima acción.</small>
+              </div>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </section>
+      )}
       <section className="hero-strip">
         <div>
           <Pill tone="orange">RESUMEN EJECUTIVO</Pill>
@@ -5827,6 +5911,7 @@ function CallLogForm({
   const [callDate, setCallDate] = useState(() =>
     new Date().toISOString().slice(0, 16)
   );
+  const dialogRef = useDialogFocus(true, onClose);
   const clientLogs = logs
     .filter(log => log.clientKey === profile.key)
     .sort(
@@ -5840,7 +5925,14 @@ function CallLogForm({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="call-modal" onClick={event => event.stopPropagation()}>
+      <div
+        className="call-modal"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Registrar llamada"
+        onClick={event => event.stopPropagation()}
+      >
         <div className="modal-head">
           <div>
             <p className="eyebrow">SEGUIMIENTO DE CONTACTO</p>
@@ -6523,8 +6615,8 @@ function CallsHistory({
           </div>
         </div>
         {visible.length ? (
-          <div className="table-wrap">
-            <table>
+          <div className="table-wrap calls-table-wrap">
+            <table className="calls-table">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -6540,15 +6632,15 @@ function CallsHistory({
               <tbody>
                 {visible.map(log => (
                   <tr key={log.id}>
-                    <td>{formatDateTime(log.callDate)}</td>
-                    <td>
+                    <td data-label="Fecha">{formatDateTime(log.callDate)}</td>
+                    <td data-label="Cliente">
                       <b>{log.clientName}</b>
                       <small className="table-sub">
                         {log.phone || "Sin teléfono"}
                       </small>
                     </td>
-                    <td>{log.outcome}</td>
-                    <td>
+                    <td data-label="Resultado">{log.outcome}</td>
+                    <td data-label="Promoción">
                       {log.promotion || "—"}
                       <small className="table-sub">
                         {log.promotion
@@ -6558,7 +6650,7 @@ function CallsHistory({
                           : ""}
                       </small>
                     </td>
-                    <td>
+                    <td data-label="Seguimiento">
                       {log.recoveryResult || "Pendiente"}
                       <small className="table-sub">
                         {log.nextCallDate
@@ -6566,8 +6658,8 @@ function CallsHistory({
                           : "Sin próxima fecha"}
                       </small>
                     </td>
-                    <td>{log.notes || "—"}</td>
-                    <td>
+                    <td data-label="Notas">{log.notes || "—"}</td>
+                    <td data-label="Registró / Responsable">
                       {log.createdBy || "Dashboard"}
                       <small className="table-sub">
                         Responsable: {log.assignedTo || "Sin asignar"}
@@ -7307,11 +7399,14 @@ function TargetPerformanceChart({
         <div className="target-bar-chart">
           {visible
             .sort((a, b) => b.surveys - a.surveys)
-            .map(row => (
+            .map(row => {
+              const good = row.positive === null ? 0 : Math.round((row.positive / 100) * row.surveys);
+              const ci = row.positive === null ? null : wilsonInterval(good, row.surveys);
+              return (
               <button
                 className="target-bar-row"
                 key={row.server}
-                title={`${row.server}: ${row.surveys} encuestas · ${row.positive === null ? "sin calidad" : `${row.positive}% positivo`}`}
+                title={`${row.server}: ${row.surveys} encuestas · ${row.positive === null ? "sin calidad" : `${row.positive}% positivo · IC95 ${ci ? `${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%` : "—"}`}`}
               >
                 <span className="target-bar-name">{row.server}</span>
                 <span className="target-bar-track">
@@ -7326,7 +7421,8 @@ function TargetPerformanceChart({
                   {row.positive === null ? "—" : `${row.positive}%`}
                 </small>
               </button>
-            ))}
+              );
+            })}
         </div>
       ) : (
         <Empty text="No hay datos de meseros para graficar." />

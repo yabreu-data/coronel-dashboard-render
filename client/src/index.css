@@ -1846,3 +1846,66 @@ td b { color: #173b2b !important; }
 @media (max-width: 760px) {
   .search-box input { font-size: 13px !important; }
 }
+
+/* ===== Jerarquía visual: navegación oscura + área de trabajo clara ===== */
+body, .app-shell { background: #f2f7f4 !important; }
+.main-area { background: radial-gradient(circle at 92% -8%, #e2f1e8 0%, transparent 36%), #f2f7f4 !important; }
+.sidebar { background: linear-gradient(180deg, #1d4a31 0%, #153b28 100%) !important; border-right: 1px solid #123522 !important; color: #eaf4ee !important; }
+.sidebar .brand b { color: #ffffff !important; }
+.sidebar .brand span, .sidebar .side-label, .sidebar .sidebar-bottom span { color: #b9d9c7 !important; }
+.sidebar .nav-item { color: #d7ecdf !important; }
+.sidebar .nav-item:hover { background: rgba(255,255,255,.10) !important; color: #ffffff !important; }
+.sidebar .nav-item.active { background: #acd3b6 !important; color: #123b26 !important; box-shadow: inset 3px 0 0 #d93a2b !important; }
+.sidebar .nav-item.active .nav-arrow { color: #123b26 !important; }
+.sidebar .sidebar-bottom { border-top: 1px solid rgba(255,255,255,.14) !important; }
+.sidebar .nav-badge { box-shadow: 0 0 0 2px #1d4a31; }
+.brand-logo { mix-blend-mode: normal !important; background: transparent !important; border: 0 !important; width: 150px !important; }
+.topbar { background: rgba(255,255,255,.86) !important; border-bottom: 1px solid #d7e8dd !important; backdrop-filter: blur(10px); }
+.filter-bar { background: #ffffff !important; border-color: #cfe4d8 !important; }
+.panel, .stat-card { background: #ffffff !important; }
+.quality-face { background: #eaf6ef !important; border-color: #cfe4d8 !important; }
+.period-comparison, .targets-panel, .team-date-filter { background: #eef7f1 !important; border-color: #cfe4d8 !important; }
+.intro-note, .team-callout { background: #eaf6ef !important; border-color: #acd3b6 !important; }
+.bw-metric { background: #ffffff !important; }
+.bw-metric-today { background: #fff3f1 !important; }
+.bw-panel { background: #ffffff !important; }
+th { background: #eaf6ef !important; }
+tr:hover td { background: #f7fbf8 !important; }
+.footer { background: #eaf6ef !important; border-top: 1px solid #d7e8dd !important; }
+.alert-banner { background: linear-gradient(110deg, #fff3f0, #fffdfc) !important; }
+.mobile-bottom-nav { background: #ffffff !important; }
+.mobile-more-panel { background: #ffffff !important; }
+
+/* Ajustes del login a la nueva jerarquía */
+.auth-wall { background: radial-gradient(circle at 20% 10%, #dcefe4 0%, #f2f7f4 55%) !important; }
+.auth-wall-card { box-shadow: 0 24px 60px rgba(29,74,49,.14) !important; }
+.auth-badge { background: #1d4a31 !important; color: #eaf4ee !important; }
+
+/* Primeros pasos */
+.onboarding-panel { margin: 14px 0; padding: 16px 18px; border: 1px solid #acd3b6; border-radius: 16px; background: #eaf6ef !important; }
+.onboarding-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+.onboarding-head h3 { margin: 3px 0 2px; font-size: 17px; }
+.onboarding-head p { margin: 0; }
+.onboarding-close { width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center; border: 1px solid #cfe4d8; border-radius: 9px; background: #ffffff; color: #1d4a31; }
+.onboarding-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.onboarding-steps > button { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid #cfe4d8; border-radius: 12px; background: #ffffff; color: #173b2b; text-align: left; }
+.onboarding-steps > button:hover { border-color: #acd3b6; background: #f7fcf9; }
+.onboarding-num { width: 25px; height: 25px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; background: #1d4a31; color: #ffffff; font-size: 11px; font-weight: 900; }
+.onboarding-steps b { display: block; font-size: 12px; color: #173b2b; }
+.onboarding-steps small { display: block; margin-top: 2px; color: #5c7a6b; font-size: 11px; line-height: 1.35; }
+.onboarding-steps > button > svg { margin-left: auto; color: #2f6b4f; flex-shrink: 0; }
+@media (max-width: 760px) { .onboarding-steps { grid-template-columns: 1fr; } .onboarding-panel { padding: 14px; } }
+
+/* Tabla de llamadas como cards en móvil */
+@media (max-width: 760px) {
+  .calls-table-wrap { margin-right: 0 !important; }
+  .calls-table thead { display: none !important; }
+  .calls-table, .calls-table tbody, .calls-table tr, .calls-table td { display: block !important; width: 100% !important; }
+  .calls-table tr { margin-bottom: 10px; padding: 12px 13px; border: 1px solid #d7e8dd; border-radius: 14px; background: #ffffff; box-shadow: 0 6px 16px rgba(29,74,49,.05); }
+  .calls-table td { display: flex !important; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 5px 0 !important; border: 0 !important; text-align: right; }
+  .calls-table td::before { content: attr(data-label); flex: 0 0 38%; color: #5c7a6b; font-size: 10px; font-weight: 800; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
+  .calls-table td[data-label="Notas"] { display: block !important; text-align: left; }
+  .calls-table td[data-label="Notas"]::before { display: block; margin-bottom: 4px; }
+  .calls-table td.calls-actions { display: flex !important; justify-content: flex-start; gap: 8px; padding-top: 10px !important; }
+  .calls-table td.calls-actions::before { display: none; }
+}
