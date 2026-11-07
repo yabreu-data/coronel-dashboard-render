@@ -7034,8 +7034,8 @@ function CallsHistory({
           </div>
           <Pill tone={overdueCalls.length ? "red" : "green"}>
             {overdueCalls.length
-              ? `${overdueCalls.length} atrasadas`
-              : `${upcomingCalls.length} programadas`}
+              ? plural(overdueCalls.length, "atrasada", "atrasadas")
+              : plural(upcomingCalls.length, "programada", "programadas")}
           </Pill>
         </div>
         {overdueCalls.length > 0 && (
