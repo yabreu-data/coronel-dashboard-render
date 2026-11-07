@@ -234,9 +234,6 @@ importers:
       esbuild:
         specifier: ^0.25.0
         version: 0.25.12
-      playwright-core:
-        specifier: ^1.65.0
-        version: 1.65.0
       postcss:
         specifier: ^8.4.47
         version: 8.5.32
@@ -3535,11 +3532,6 @@ packages:
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
-
-  playwright-core@1.65.0:
-    resolution: {integrity: sha512-vNSKgH6YqtN7cdT/L334zo0a+YwkrpicyrHJlWWPIm/Q+Nn2SWInil01oT0mbu96U4GgoRtCYQD9CzJQgju+lA==}
-    engines: {node: '>=20'}
-    hasBin: true
 
   points-on-curve@0.2.0:
     resolution: {integrity: sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==}
@@ -7444,8 +7436,6 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
-
-  playwright-core@1.65.0: {}
 
   points-on-curve@0.2.0: {}
 
