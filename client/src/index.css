@@ -1909,3 +1909,12 @@ tr:hover td { background: #f7fbf8 !important; }
   .calls-table td.calls-actions { display: flex !important; justify-content: flex-start; gap: 8px; padding-top: 10px !important; }
   .calls-table td.calls-actions::before { display: none; }
 }
+
+/* Callouts y estados vacíos con contraste final */
+.intro-note b, .intro-note strong { color: #1d4a31 !important; }
+.intro-note small, .intro-note span { color: #5c7a6b !important; }
+.intro-note svg { color: #2f6b4f !important; }
+.empty-state-block .btn-borde { background: #e3f2ea !important; color: #1d4a31 !important; border: 1px solid #acd3b6 !important; padding: 10px 14px !important; }
+.period-comparison small, .period-comparison .muted, .targets-panel .targets-toggle small { color: #5c7a6b !important; }
+.targets-panel .targets-toggle, .targets-panel .targets-toggle h3 { color: #173b2b !important; }
+.stat-card strong, .stat-card b { color: #173b2b !important; }

@@ -388,13 +388,24 @@ la incertidumbre debe ser visible y comprensible.
 - Atajo **Ctrl/Cmd+K** para enfocar la búsqueda.
 - Foco visible y `prefers-reduced-motion` respetados.
 
-### Pendiente de una segunda iteración
+### Cierre de los puntos anteriores
 
-- Onboarding de 3 pasos y checklist de primer uso.
-- Conversión de tablas a cards en móvil (requiere reestructurar cada tabla).
-- Foco atrapado/Esc/retorno de foco en todos los modales.
-- Gráficos con n/IC y tooltips en Historial/Equipo.
-- Biblioteca formal de componentes (`PageHeader`, `FilterBar`, `DataTable`).
+- **Onboarding**: panel “Tu rutina de hoy, en tres pasos” en Centro de acción,
+  con descarte persistente.
+- **Tablas móviles**: la tabla de Llamadas se convierte en cards con etiquetas;
+  las demás tablas conservan scroll hasta su migración.
+- **Modales**: `useDialogFocus` atrapa el foco, cierra con `Esc` y devuelve el
+  foco; aplicado a registrar llamada y vista previa de PDF. Los modales de
+  cumpleaños ya cierran con `Esc`.
+- **Gráficos**: tooltip con n e IC95 en la comparativa de meseros.
+- **Sistema de diseño**: documentado en [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
+
+### Extracción pendiente
+
+- Convertir la documentación del sistema de diseño en componentes reutilizables
+  (`PageHeader`, `FilterBar`, `DataTable`, `EmptyState`).
+- Migrar las tablas restantes (clientes, historial, auditoría) al patrón de
+  cards en móvil.
 
 ## 11. Siguiente paso recomendado
 
