@@ -4700,7 +4700,7 @@ function Priorities({
   onOpenClient: (key: string) => void;
 }) {
   const [typeFilter, setTypeFilter] = useState<
-    "Todos" | "Calidad" | "Calidad mala" | "Cumpleaños"
+    "Todos" | "Calidad" | "Calidad mala" | "Cumpleaños" | "Seguimiento"
   >("Todos");
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Pendientes" | "En seguimiento" | "Atendidas" | "Vencidas"
@@ -4716,7 +4716,19 @@ function Priorities({
     >
   >({});
   const [priorityPage, setPriorityPage] = useState(1);
-  const priorityPageSize = 5;
+  const priorityPageSize = 8;
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [priorityQuery, setPriorityQuery] = useState("");
+  const [pendingSave, setPendingSave] = useState<{
+    item: (typeof items)[number];
+    patch: {
+      status: "pending" | "in_progress" | "done";
+      responsible: string;
+      dueDate: string;
+    };
+  } | null>(null);
+  const [pinDraft, setPinDraft] = useState("");
+  const [pinError, setPinError] = useState("");
   const [notice, setNotice] = useState("");
   const utils = trpc.useUtils();
   const saveMutation = trpc.priorities.save.useMutation({
@@ -4809,15 +4821,6 @@ function Priorities({
         clientKey: profile?.key,
       });
     });
-    return priorities
-      .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, "es"))
-      .filter(
-        item =>
-          typeFilter === "Todos" ||
-          (typeFilter === "Calidad mala"
-            ? item.type === "Calidad" && item.tone === "bad"
-            : item.type === typeFilter)
-      );
     logs
       .filter(log => log.nextCallDate)
       .forEach(log => {
@@ -4849,7 +4852,9 @@ function Priorities({
               ? item.type === "Cumpleaños"
               : typeFilter === "Calidad"
                 ? item.type === "Calidad"
-                : item.type === typeFilter)
+                : typeFilter === "Seguimiento"
+                  ? item.type === "Seguimiento"
+                  : item.type === typeFilter)
       );
   }, [birthdays, profiles, records, typeFilter, logs]);
   const stateFor = (item: (typeof items)[number]) => {
@@ -4883,21 +4888,31 @@ function Priorities({
       dueDate: string;
     }>
   ) => {
-    const pin = window.prompt(
-      "Ingresa el PIN de administrador para guardar cambios:"
-    );
-    if (pin !== "5956") return;
     const next = { ...stateFor(item), ...patch };
     setDrafts(current => ({ ...current, [item.key]: next }));
+    setPendingSave({ item, patch: next });
+    setPinDraft("");
+    setPinError("");
+  };
+  const confirmSave = () => {
+    if (!pendingSave) return;
+    if (pinDraft.trim() !== "5956") {
+      setPinError("PIN incorrecto. Intenta de nuevo.");
+      return;
+    }
+    const { item, patch } = pendingSave;
     saveMutation.mutate({
       priorityKey: item.key,
-      status: next.status,
-      responsible: next.responsible || undefined,
-      dueDate: next.dueDate
-        ? new Date(`${next.dueDate}T12:00:00`).toISOString()
+      status: patch.status,
+      responsible: patch.responsible || undefined,
+      dueDate: patch.dueDate
+        ? new Date(`${patch.dueDate}T12:00:00`).toISOString()
         : null,
-      adminPin: pin,
+      adminPin: pinDraft.trim(),
     });
+    setPendingSave(null);
+    setPinDraft("");
+    setPinError("");
   };
   const filteredItems = items.filter(item => {
     const state = stateFor(item);
@@ -4919,18 +4934,32 @@ function Priorities({
   });
   useEffect(() => {
     setPriorityPage(1);
-  }, [typeFilter, statusFilter]);
-  const visiblePriorityItems = filteredItems.slice(
+  }, [typeFilter, statusFilter, priorityQuery]);
+  const searchedItems = filteredItems.filter(item => {
+    const query = normalizeText(priorityQuery.trim());
+    if (!query) return true;
+    return normalizeText(`${item.title} ${item.detail} ${item.label}`).includes(
+      query
+    );
+  });
+  const visiblePriorityItems = searchedItems.slice(
     (priorityPage - 1) * priorityPageSize,
     priorityPage * priorityPageSize
   );
   const priorityPages = Math.max(
     1,
-    Math.ceil(filteredItems.length / priorityPageSize)
+    Math.ceil(searchedItems.length / priorityPageSize)
   );
   const attendedCount = items.filter(
     item => stateFor(item).status === "done"
   ).length;
+  const pendingOnlyCount = items.filter(item => {
+    const state = stateFor(item);
+    const due = state.dueDate
+      ? new Date(`${state.dueDate}T23:59:59`).getTime()
+      : 0;
+    return state.status === "pending" && !(due && due < Date.now());
+  }).length;
   const followupCount = items.filter(
     item => stateFor(item).status === "in_progress"
   ).length;
@@ -4947,138 +4976,121 @@ function Priorities({
   ).length;
   return (
     <>
-      <section className="page-intro priority-intro">
-        <div>
-          <Pill tone="red">CENTRO DE PRIORIDADES</Pill>
-          <h2>Lo que requiere atención primero.</h2>
+      <section className="priorities-command">
+        <div className="priorities-command-copy">
+          <p className="eyebrow">CENTRO DE PRIORIDADES</p>
+          <h2>Lo que no puede esperar.</h2>
           <p>
-            Filtra por tipo y estado, marca cada asunto y ajusta manualmente la
-            próxima acción.
+            {overdueCount
+              ? `Tienes ${plural(overdueCount, "prioridad vencida", "prioridades vencidas")} y ${plural(followupCount, "seguimiento activo", "seguimientos activos")}. Empieza por lo que ya pasó de fecha.`
+              : "No tienes prioridades vencidas. Revisa los seguimientos programados y cierra los pendientes."}
           </p>
+          <div className="priorities-command-actions">
+            <button
+              className="btn-rojo"
+              onClick={() => setStatusFilter("Vencidas")}
+            >
+              <Clock3 size={15} /> Atender {overdueCount} vencidas
+            </button>
+            <button
+              className="btn-borde"
+              onClick={() => setStatusFilter("Todos")}
+            >
+              Ver toda la cola
+            </button>
+          </div>
+          <div className="priorities-command-kpis">
+            <span><b>{overdueCount}</b> vencidas</span>
+            <span><b>{pendingOnlyCount}</b> pendientes</span>
+            <span><b>{followupCount}</b> en seguimiento</span>
+            <span><b>{attendedCount}</b> atendidas</span>
+          </div>
         </div>
-        <div className="intro-note priority-rule">
-          <Flag size={18} />
-          <span>
-            <b>Cómo se ordena</b>
-            <small>
-              Malo, cumpleaños próximos, seguimientos programados y luego
-              Regular. Cada fila conserva sus cambios entre dispositivos.
-            </small>
-          </span>
-        </div>
+        <aside className="priorities-rule-card">
+          <p className="eyebrow">REGLA DE PRIORIDAD</p>
+          <h3>Cómo se ordena la cola</h3>
+          <ol>
+            <li><span>1</span> Calidad Mala: recuperar al cliente.</li>
+            <li><span>2</span> Cumpleaños próximos: contactar.</li>
+            <li><span>3</span> Seguimientos programados.</li>
+            <li><span>4</span> Calidad Regular: mejorar.</li>
+          </ol>
+          <small>El orden se recalcula con cada actualización de Google Sheets.</small>
+        </aside>
       </section>
-      <div className="stats-grid priority-stats">
-        <Stat
-          label="PRIORIDADES"
-          value={filteredItems.length}
-          detail="asuntos filtrados"
-          accent="red"
-          icon={Flag}
-          onClick={() => {
-            setTypeFilter("Todos");
-            setStatusFilter("Todos");
-          }}
-        />
-        <Stat
-          label="CALIDAD MALA"
-          value={
-            profiles.filter(profile => clean(profile.quality) === "malo").length
-          }
-          detail="solo prioridades malas"
-          accent="red"
-          icon={AlertTriangle}
-          onClick={() => {
-            setTypeFilter("Calidad mala");
-            setStatusFilter("Todos");
-          }}
-        />
-        <Stat
-          label="CUMPLEAÑOS"
-          value={birthdays.length}
-          detail="próximos 7 días"
-          accent="orange"
-          icon={Cake}
-          onClick={() => setTypeFilter("Cumpleaños")}
-        />
-        <Stat
-          label="EN SEGUIMIENTO"
-          value={followupCount}
-          detail="próximas acciones"
-          accent="orange"
-          icon={Phone}
-          onClick={() => setStatusFilter("En seguimiento")}
-        />
-        <Stat
-          label="ATENDIDOS"
-          value={attendedCount}
-          detail="sincronizados"
-          accent="green"
-          icon={MessageSquareText}
-          onClick={() => setStatusFilter("Atendidas")}
-        />
-        <Stat
-          label="VENCIDAS"
-          value={overdueCount}
-          detail="requieren atención"
-          accent="red"
-          icon={Clock3}
-          onClick={() => setStatusFilter("Vencidas")}
-        />
+
+      <div className="priority-tabs" role="tablist" aria-label="Estado de prioridades">
+        {[
+          { key: "Vencidas" as const, label: "Vencidas", count: overdueCount },
+          { key: "Pendientes" as const, label: "Pendientes", count: pendingOnlyCount },
+          { key: "En seguimiento" as const, label: "En seguimiento", count: followupCount },
+          { key: "Atendidas" as const, label: "Atendidas", count: attendedCount },
+          { key: "Todos" as const, label: "Todas", count: items.length },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            role="tab"
+            aria-selected={statusFilter === tab.key}
+            className={statusFilter === tab.key ? "selected" : ""}
+            onClick={() => setStatusFilter(tab.key)}
+          >
+            {tab.label} <span>{tab.count}</span>
+          </button>
+        ))}
       </div>
-      <section className="panel priority-panel">
-        <div className="priority-filters">
-          <span>Tipo</span>
-          {(["Todos", "Calidad", "Calidad mala", "Cumpleaños"] as const).map(
-            filter => (
+
+      <section className="panel priority-queue-panel">
+        <div className="priority-toolbar">
+          <div className="priority-type-chips">
+            {(
+              [
+                "Todos",
+                "Calidad",
+                "Calidad mala",
+                "Cumpleaños",
+                "Seguimiento",
+              ] as const
+            ).map(filter => (
               <button
                 key={filter}
                 className={typeFilter === filter ? "selected" : ""}
                 onClick={() => setTypeFilter(filter)}
               >
-                {filter}
+                {filter === "Calidad mala" ? "Mala" : filter}
               </button>
-            )
-          )}
-          <span className="priority-filter-divider">Estado</span>
-          {(
-            [
-              "Todos",
-              "Pendientes",
-              "En seguimiento",
-              "Atendidas",
-              "Vencidas",
-            ] as const
-          ).map(filter => (
-            <button
-              key={filter}
-              className={`status-filter status-${filter.toLowerCase().replace(" ", "-")} ${statusFilter === filter ? "selected" : ""}`}
-              onClick={() => setStatusFilter(filter)}
-            >
-              {filter}
-            </button>
-          ))}
-          <small className="priority-status-help">
-            El botón avanza: Pendiente → En seguimiento → Atendido.
-          </small>
-        </div>
-        <div className="panel-head">
-          <div>
-            <p className="eyebrow">TOP 5 + RESTO DE PRIORIDADES</p>
-            <h3>Atender primero lo urgente y luego revisar todo</h3>
-            <small className="muted">
-              Las primeras 5 son el foco ejecutivo; debajo se muestran todas las
-              demás prioridades. El orden se recalcula con cada actualización de
-              Google Sheets.
-            </small>
+            ))}
           </div>
-          <Pill tone={filteredItems.length ? "red" : "green"}>
-            {filteredItems.length
-              ? `${filteredItems.length} totales · ${Math.min(5, filteredItems.length)} top`
-              : "Sin resultados"}
+          <label className="priority-search">
+            <Search size={14} />
+            <input
+              value={priorityQuery}
+              onChange={event => setPriorityQuery(event.target.value)}
+              placeholder="Buscar cliente, responsable o detalle…"
+            />
+          </label>
+          <span className="priority-result-count">
+            {searchedItems.length} resultado{searchedItems.length === 1 ? "" : "s"}
+          </span>
+        </div>
+
+        <div className="panel-head priority-queue-head">
+          <div>
+            <p className="eyebrow">COLA DE TRABAJO</p>
+            <h3>
+              {statusFilter === "Todos"
+                ? "Todas las prioridades"
+                : statusFilter === "Vencidas"
+                  ? "Vencidas: atender primero"
+                  : statusFilter}
+            </h3>
+          </div>
+          <Pill tone={overdueCount ? "red" : "green"}>
+            {overdueCount ? `${overdueCount} vencidas` : "Sin vencidas"}
           </Pill>
         </div>
-        {filteredItems.length ? (
-          <div className="priority-list">
+
+        {searchedItems.length ? (
+          <div className="priority-queue">
             {visiblePriorityItems.map((item, index) => {
               const globalIndex = (priorityPage - 1) * priorityPageSize + index;
               const state = stateFor(item);
@@ -5094,158 +5106,152 @@ function Priorities({
                 Boolean(due) &&
                 due >= Date.now() &&
                 due - Date.now() <= 86400000;
+              const expanded = expandedKey === item.key;
               return (
-                <div
-                  className={`priority-item ${globalIndex < 5 ? "priority-top" : "priority-additional"} priority-${item.tone} ${done ? "is-done" : ""} ${inProgress ? "is-followup" : ""} ${overdue ? "is-overdue" : ""}`}
+                <article
+                  className={`priority-queue-item ${item.tone === "bad" ? "is-critical" : ""} ${done ? "is-done" : ""} ${overdue ? "is-overdue" : ""}`}
                   key={item.key}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() =>
-                    item.clientKey
-                      ? onOpenClient(item.clientKey)
-                      : onNavigate("birthdays")
-                  }
-                  onKeyDown={event => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      item.clientKey
-                        ? onOpenClient(item.clientKey)
-                        : onNavigate("birthdays");
-                    }
-                  }}
                 >
-                  <span className="priority-rank">{globalIndex + 1}</span>
-                  <span className="priority-icon">{item.icon}</span>
-                  <span className="priority-copy">
-                    <b>
-                      {isFollowup && (
-                        <span
-                          className={`followup-reminder ${overdue ? "overdue" : dueSoon ? "soon" : "upcoming"}`}
-                          title={
-                            overdue
-                              ? "Seguimiento vencido"
-                              : dueSoon
-                                ? "Seguimiento en menos de 24 horas"
-                                : "Seguimiento programado"
-                          }
-                        >
-                          {overdue ? "🔴" : dueSoon ? "🟡" : "⏰"}
-                        </span>
-                      )}
-                      {dueSoon && !isFollowup && (
-                        <span
-                          className="due-soon"
-                          title="Vence en menos de 24 horas"
-                        >
-                          ⚠
-                        </span>
-                      )}{" "}
-                      {item.label} · {item.title}
-                    </b>
-                    <small>{item.detail}</small>
-                    <small className="priority-meta">
-                      {overdue
-                        ? isFollowup
-                          ? "SEGUIMIENTO VENCIDO · "
-                          : "VENCIDA · "
-                        : dueSoon
-                          ? isFollowup
-                            ? "SEGUIMIENTO EN MENOS DE 24 H · "
-                            : "VENCE EN MENOS DE 24 H · "
-                          : isFollowup
-                            ? "SEGUIMIENTO PROGRAMADO · "
-                            : ""}
-                      Límite: {formatDate(state.dueDate)} · Responsable:{" "}
-                      {state.responsible || "Sin asignar"}
-                    </small>
-                    <em>{item.action}</em>
-                    <span className="priority-edit-row">
-                      <label>
-                        Responsable
-                        <select
-                          value={state.responsible}
-                          onClick={event => event.stopPropagation()}
-                          onChange={event =>
-                            updateDraft(item, {
-                              responsible: event.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Sin asignar</option>
-                          {systemUsers.map(user => (
-                            <option
-                              key={user.id}
-                              value={
-                                user.name || user.email || `Usuario ${user.id}`
-                              }
-                            >
-                              {user.name || user.email || `Usuario ${user.id}`}
-                            </option>
-                          ))}
-                          {!systemUsers.some(
-                            user =>
-                              (user.name || user.email) === state.responsible
-                          ) &&
-                            state.responsible && (
-                              <option value={state.responsible}>
-                                {state.responsible}
-                              </option>
-                            )}
-                        </select>
-                      </label>
-                      <label>
-                        Fecha límite
-                        <input
-                          type="date"
-                          value={state.dueDate}
-                          onClick={event => event.stopPropagation()}
-                          onChange={event =>
-                            updateDraft(item, { dueDate: event.target.value })
-                          }
-                        />
-                      </label>
+                  <div className="priority-queue-row">
+                    <span className="priority-queue-index">{globalIndex + 1}</span>
+                    <span className="priority-queue-icon">{item.icon}</span>
+                    <button
+                      className="priority-queue-copy"
+                      onClick={() =>
+                        item.clientKey
+                          ? onOpenClient(item.clientKey)
+                          : onNavigate("birthdays")
+                      }
+                    >
+                      <span className="priority-queue-title">
+                        <span className="priority-type-label">{item.label}</span>
+                        <b>{item.title}</b>
+                        {overdue && <span className="priority-overdue-badge">VENCIDA</span>}
+                        {dueSoon && <span className="priority-soon-badge">PRÓXIMA</span>}
+                        {done && <span className="priority-done-badge">ATENDIDA</span>}
+                      </span>
+                      <small>{item.detail}</small>
+                      <span className="priority-queue-meta">
+                        <span>Límite: {formatDate(state.dueDate)}</span>
+                        <span>Responsable: {state.responsible || "Sin asignar"}</span>
+                        {isFollowup && <span>Seguimiento programado</span>}
+                      </span>
+                    </button>
+                    <div className="priority-queue-actions">
                       <button
-                        className="priority-save"
+                        className={`priority-status ${done ? "done" : inProgress ? "in-progress" : ""}`}
                         disabled={saveMutation.isPending}
-                        onClick={event => {
-                          event.stopPropagation();
-                          saveItem(item, {});
-                        }}
+                        onClick={() =>
+                          saveItem(item, {
+                            status: nextPriorityStatus(state.status),
+                          })
+                        }
+                        title="Avanzar estado: Pendiente → En seguimiento → Atendido"
                       >
-                        {saveMutation.isPending ? "Guardando…" : "Guardar"}
+                        {done
+                          ? "Atendida"
+                          : inProgress
+                            ? "En seguimiento"
+                            : "Pendiente"}
                       </button>
-                    </span>
-                    <PriorityHistory priorityKey={item.key} />
-                  </span>
-                  <button
-                    className={`priority-status ${done ? "done" : inProgress ? "in-progress" : ""}`}
-                    onClick={event => {
-                      event.stopPropagation();
-                      saveItem(item, {
-                        status: nextPriorityStatus(state.status),
-                      });
-                    }}
-                  >
-                    {done
-                      ? "Atendido"
-                      : inProgress
-                        ? "En seguimiento"
-                        : "Pendiente"}
-                  </button>
-                  <ArrowUpRight size={18} />
-                </div>
+                      <button
+                        className="priority-edit-toggle"
+                        onClick={() =>
+                          setExpandedKey(expanded ? null : item.key)
+                        }
+                        aria-expanded={expanded}
+                      >
+                        {expanded ? "Cerrar" : "Editar"}
+                      </button>
+                      <button
+                        className="priority-open"
+                        onClick={() =>
+                          item.clientKey
+                            ? onOpenClient(item.clientKey)
+                            : onNavigate("birthdays")
+                        }
+                        aria-label={`Abrir ${item.title}`}
+                      >
+                        <ArrowUpRight size={17} />
+                      </button>
+                    </div>
+                  </div>
+                  {expanded && (
+                    <div className="priority-expanded">
+                      <div className="priority-edit-row">
+                        <label>
+                          Responsable
+                          <select
+                            value={state.responsible}
+                            onChange={event =>
+                              updateDraft(item, {
+                                responsible: event.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Sin asignar</option>
+                            {systemUsers.map(user => (
+                              <option
+                                key={user.id}
+                                value={
+                                  user.name ||
+                                  user.email ||
+                                  `Usuario ${user.id}`
+                                }
+                              >
+                                {user.name ||
+                                  user.email ||
+                                  `Usuario ${user.id}`}
+                              </option>
+                            ))}
+                            {!systemUsers.some(
+                              user =>
+                                (user.name || user.email) === state.responsible
+                            ) &&
+                              state.responsible && (
+                                <option value={state.responsible}>
+                                  {state.responsible}
+                                </option>
+                              )}
+                          </select>
+                        </label>
+                        <label>
+                          Fecha límite
+                          <input
+                            type="date"
+                            value={state.dueDate}
+                            onChange={event =>
+                              updateDraft(item, {
+                                dueDate: event.target.value,
+                              })
+                            }
+                          />
+                        </label>
+                        <button
+                          className="priority-save"
+                          disabled={saveMutation.isPending}
+                          onClick={() => saveItem(item, {})}
+                        >
+                          {saveMutation.isPending ? "Guardando…" : "Guardar"}
+                        </button>
+                      </div>
+                      <PriorityHistory priorityKey={item.key} />
+                    </div>
+                  )}
+                </article>
               );
             })}
           </div>
         ) : (
-          <Empty text="No hay prioridades en este filtro." />
+          <Empty text="No hay prioridades con este filtro." />
         )}
+
         {notice && (
           <div className="success-notice" role="status">
             ✓ {notice}
           </div>
         )}
-        {filteredItems.length > priorityPageSize && (
+        {searchedItems.length > priorityPageSize && (
           <div className="priority-pagination">
             <button
               disabled={priorityPage === 1}
@@ -5254,7 +5260,7 @@ function Priorities({
               Anterior
             </button>
             <span>
-              Página {priorityPage} de {priorityPages} · {filteredItems.length}{" "}
+              Página {priorityPage} de {priorityPages} · {searchedItems.length}{" "}
               prioridades
             </span>
             <button
@@ -5268,6 +5274,65 @@ function Priorities({
           </div>
         )}
       </section>
+
+      {pendingSave && (
+        <div
+          className="priority-pin-backdrop"
+          onClick={() => setPendingSave(null)}
+        >
+          <div
+            className="priority-pin-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirmar cambio de prioridad"
+            onClick={event => event.stopPropagation()}
+          >
+            <p className="eyebrow">CONFIRMAR CAMBIO</p>
+            <h3>Ingresa el PIN de administrador</h3>
+            <p className="muted">
+              Se guardará <b>{pendingSave.item.title}</b> como{" "}
+              {pendingSave.patch.status === "done"
+                ? "Atendida"
+                : pendingSave.patch.status === "in_progress"
+                  ? "En seguimiento"
+                  : "Pendiente"}
+              .
+            </p>
+            <input
+              type="password"
+              inputMode="numeric"
+              autoFocus
+              value={pinDraft}
+              onChange={event => {
+                setPinDraft(event.target.value);
+                setPinError("");
+              }}
+              onKeyDown={event => {
+                if (event.key === "Enter") confirmSave();
+                if (event.key === "Escape") setPendingSave(null);
+              }}
+              placeholder="PIN"
+              aria-label="PIN de administrador"
+            />
+            {pinError && <small className="priority-pin-error">{pinError}</small>}
+            <div className="priority-pin-actions">
+              <button
+                className="btn-borde"
+                onClick={() => setPendingSave(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn-rojo"
+                disabled={saveMutation.isPending}
+                onClick={confirmSave}
+              >
+                {saveMutation.isPending ? "Guardando…" : "Guardar cambio"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
