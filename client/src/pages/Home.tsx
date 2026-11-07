@@ -552,6 +552,58 @@ function BusinessGuide({
   );
 }
 
+type InsightTone = "positive" | "warning" | "critical" | "neutral";
+
+function InsightCard({
+  label,
+  title,
+  evidence,
+  action,
+  tone,
+  icon: Icon,
+  meta,
+  onClick,
+}: {
+  label: string;
+  title: string;
+  evidence: string;
+  action?: string;
+  tone: InsightTone;
+  icon: typeof Clock3;
+  meta?: string;
+  onClick?: () => void;
+}) {
+  const content = (
+    <>
+      <span className="insight-card-top">
+        <span className="insight-icon">
+          <Icon size={17} />
+        </span>
+        <span className="insight-label">{label}</span>
+        {meta && <span className="insight-meta">{meta}</span>}
+      </span>
+      <h3>{title}</h3>
+      <p>{evidence}</p>
+      {action && (
+        <span className="insight-action">
+          {action} <ChevronRight size={14} />
+        </span>
+      )}
+    </>
+  );
+  return onClick ? (
+    <button
+      type="button"
+      className={`insight-card insight-${tone}`}
+      onClick={onClick}
+    >
+      {content}
+    </button>
+  ) : (
+    <article className={`insight-card insight-${tone}`}>{content}</article>
+  );
+}
+
 function Empty({ text }: { text: string }) {
   return (
     <div className="empty">
@@ -4185,6 +4237,8 @@ function Overview({
   const nextBirthdays = birthdayMarketing
     .filter(item => item.days >= 0 && item.days <= 7)
     .slice(0, 3);
+  const topRisk = risks[0];
+  const nextBirthday = nextBirthdays[0];
   const firstName = (userName || "equipo")
     .split(" ")[0]
     .split("@")[0];
@@ -4317,6 +4371,81 @@ function Overview({
             </button>
           </div>
         </aside>
+      </section>
+      <section className="insights-section">
+        <div className="insights-head">
+          <div>
+            <p className="eyebrow">INSIGHTS DE HOY</p>
+            <h2>Tres cosas que importan</h2>
+          </div>
+          <p>Lo que dicen tus datos, sin vueltas.</p>
+        </div>
+        <div className="insights-grid">
+          <InsightCard
+            label="PRIORIDAD N°1"
+            tone={overdueCount ? "critical" : "positive"}
+            icon={Clock3}
+            title={
+              overdueCount
+                ? `${overdueCount} prioridades atrasadas`
+                : "No hay prioridades atrasadas"
+            }
+            evidence={
+              overdueCount
+                ? `De ${priorityCount} prioridades abiertas. Empieza por las que ya pasaron de fecha.`
+                : "La cola está al día. Revisa cumpleaños y seguimientos."
+            }
+            meta={
+              priorityCount
+                ? `${Math.round((overdueCount / Math.max(priorityCount, 1)) * 100)}% de la cola`
+                : undefined
+            }
+            action="Abrir prioridades"
+            onClick={() => onNavigate("priorities")}
+          />
+          <InsightCard
+            label="CLIENTE EN RIESGO"
+            tone={topRisk ? "warning" : "positive"}
+            icon={Phone}
+            title={topRisk?.name || "Sin clientes en riesgo"}
+            evidence={
+              topRisk
+                ? `${topRisk.phone || "Sin teléfono"} · ${topRisk.comment || "Sin comentario registrado"}`
+                : "No hay clientes con calidad Mala o Regular pendientes."
+            }
+            meta={topRisk?.quality || undefined}
+            action={topRisk ? "Abrir ficha" : "Ver clientes"}
+            onClick={() =>
+              topRisk ? onOpenClient(topRisk.key) : onNavigate("clients")
+            }
+          />
+          <InsightCard
+            label="CUMPLEAÑOS PRÓXIMO"
+            tone={nextBirthday ? "neutral" : "positive"}
+            icon={Cake}
+            title={nextBirthday?.record.clientName || "Sin cumpleaños próximos"}
+            evidence={
+              nextBirthday
+                ? `${nextBirthday.promotion || "Sin promoción"} · ${
+                    nextBirthday.days === 0
+                      ? "es hoy"
+                      : nextBirthday.days === 1
+                        ? "es mañana"
+                        : `en ${nextBirthday.days} días`
+                  }`
+                : "No hay cumpleaños en los próximos 7 días."
+            }
+            meta={
+              nextBirthday
+                ? nextBirthday.days === 0
+                  ? "HOY"
+                  : `EN ${nextBirthday.days} DÍAS`
+                : undefined
+            }
+            action="Ver agenda"
+            onClick={() => onNavigate("birthdays")}
+          />
+        </div>
       </section>
       <div className="command-grid">
         <section className="panel today-panel">
@@ -7758,6 +7887,66 @@ function TargetHistory({
     );
     setToDate(input(now));
   };
+  const monthStats = useMemo(() => {
+    const map = new Map<
+      string,
+      { key: string; label: string; surveys: number; answered: number; good: number }
+    >();
+    records.forEach(record => {
+      const date = parseDate(record.timestamp);
+      if (!date) return;
+      const day = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      if ((fromDate && day < fromDate) || (toDate && day > toDate)) return;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const current = map.get(key) ?? {
+        key,
+        label: new Intl.DateTimeFormat("es-PE", {
+          month: "long",
+          year: "numeric",
+        }).format(date),
+        surveys: 0,
+        answered: 0,
+        good: 0,
+      };
+      current.surveys += 1;
+      const quality = clean(record.quality);
+      if (["bueno", "regular", "malo"].includes(quality)) {
+        current.answered += 1;
+        if (quality === "bueno") current.good += 1;
+      }
+      map.set(key, current);
+    });
+    return Array.from(map.values()).sort((a, b) => a.key.localeCompare(b.key));
+  }, [records, fromDate, toDate]);
+  const latestMonth = monthStats[monthStats.length - 1];
+  const previousMonth = monthStats[monthStats.length - 2];
+  const latestPct =
+    latestMonth && latestMonth.answered
+      ? Math.round((latestMonth.good / latestMonth.answered) * 100)
+      : null;
+  const previousPct =
+    previousMonth && previousMonth.answered
+      ? Math.round((previousMonth.good / previousMonth.answered) * 100)
+      : null;
+  const qualityDelta =
+    latestPct !== null && previousPct !== null ? latestPct - previousPct : null;
+  const latestTarget = [...history].sort(
+    (a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime()
+  )[0];
+  const targetPct = latestTarget?.positiveQualityPercent ?? null;
+  const serverTotals = rows.reduce<Record<string, { surveys: number; answered: number; good: number }>>(
+    (acc, row) => {
+      acc[row.server] ??= { surveys: 0, answered: 0, good: 0 };
+      acc[row.server].surveys += row.surveys;
+      acc[row.server].answered += row.answered;
+      acc[row.server].good += row.good;
+      return acc;
+    },
+    {}
+  );
+  const topServer = Object.entries(serverTotals).sort(
+    (a, b) => b[1].surveys - a[1].surveys
+  )[0];
   const exportHistory = () =>
     downloadGenericCsv(
       `historial-metas-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
@@ -7798,6 +7987,90 @@ function TargetHistory({
           </span>
         </div>
       </div>
+      <section className="insights-section">
+        <div className="insights-head">
+          <div>
+            <p className="eyebrow">INSIGHTS DE HISTORIAL</p>
+            <h2>Cómo va el negocio</h2>
+          </div>
+          <p>Sin tablas primero: conclusión, evidencia y contexto.</p>
+        </div>
+        <div className="insights-grid">
+          <InsightCard
+            label="CALIDAD VS META"
+            tone={
+              latestPct === null
+                ? "neutral"
+                : targetPct === null || latestPct >= targetPct
+                  ? "positive"
+                  : "warning"
+            }
+            icon={Sparkles}
+            title={
+              latestPct === null
+                ? "Sin calidad en el período"
+                : `${latestPct}% de clientes satisfechos`
+            }
+            evidence={
+              latestMonth
+                ? `${latestMonth.label} · ${
+                    targetPct === null
+                      ? "sin meta registrada"
+                      : `meta ${targetPct}%`
+                  } · ${latestMonth.answered} respuestas calificadas.`
+                : "No hay respuestas calificadas en el rango seleccionado."
+            }
+            action="Ver resultados"
+            onClick={() =>
+              document
+                .getElementById("history-results")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
+          <InsightCard
+            label="TENDENCIA"
+            tone={
+              qualityDelta === null
+                ? "neutral"
+                : qualityDelta >= 0
+                  ? "positive"
+                  : "critical"
+            }
+            icon={Clock3}
+            title={
+              qualityDelta === null
+                ? "Sin mes anterior comparable"
+                : `${qualityDelta >= 0 ? "+" : ""}${qualityDelta} puntos vs. mes anterior`
+            }
+            evidence={
+              latestPct !== null && previousPct !== null
+                ? `Pasó de ${previousPct}% a ${latestPct}% entre ${previousMonth?.label} y ${latestMonth?.label}.`
+                : "Se necesitan al menos dos meses con respuestas para medir tendencia."
+            }
+          />
+          <InsightCard
+            label="QUIÉN ATIENDE MÁS"
+            tone={topServer ? "neutral" : "warning"}
+            icon={UserRoundCheck}
+            title={topServer?.[0] || "Sin volumen por mesero"}
+            evidence={
+              topServer
+                ? `${topServer[1].surveys} encuestas · ${
+                    topServer[1].answered
+                      ? Math.round((topServer[1].good / topServer[1].answered) * 100)
+                      : 0
+                  }% positivo.`
+                : "No hay encuestas asociadas a meseros en el período."
+            }
+            action="Ver tabla"
+            onClick={() =>
+              document
+                .getElementById("history-results")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
+        </div>
+      </section>
       <section className="panel team-date-filter target-history-filter">
         <div className="panel-head">
           <div>
@@ -8104,6 +8377,9 @@ function Voice({
     });
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }, [requestComments]);
+  const topPositive = positiveHighlights[0];
+  const topNegative = negativeHighlights[0];
+  const topRequest = requestTags[0];
   const wordCard = (
     item: SentimentHighlight,
     tone: "positive" | "negative"
@@ -8133,6 +8409,75 @@ function Voice({
         </div>
         <QualityFace percent={positive} count={positiveCount} />
       </div>
+      <section className="insights-section">
+        <div className="insights-head">
+          <div>
+            <p className="eyebrow">INSIGHTS DE VOZ</p>
+            <h2>Lo que dicen los clientes</h2>
+          </div>
+          <p>Primero la conclusión; abajo el detalle.</p>
+        </div>
+        <div className="insights-grid">
+          <InsightCard
+            label="LO QUE FUNCIONA"
+            tone="positive"
+            icon={Sparkles}
+            title={
+              topPositive
+                ? `“${topPositive.word}” es la señal más positiva`
+                : "Aún sin muestra suficiente"
+            }
+            evidence={
+              topPositive
+                ? `${topPositive.count} menciones en ${comments.length} comentarios con texto.`
+                : "Cuando haya más comentarios, aquí aparecerá lo que más valoran."
+            }
+            action={topPositive ? "Ver menciones" : undefined}
+            onClick={topPositive ? () => setSelected(topPositive) : undefined}
+          />
+          <InsightCard
+            label="LO QUE MEJORAR"
+            tone="critical"
+            icon={AlertTriangle}
+            title={
+              topNegative
+                ? `“${topNegative.word}” es lo que más se repite`
+                : "Sin señales negativas repetidas"
+            }
+            evidence={
+              topNegative
+                ? `${topNegative.count} menciones. Revisa esos comentarios antes de actuar.`
+                : "No hay suficientes comentarios negativos para sacar una conclusión."
+            }
+            action={topNegative ? "Ver comentarios" : undefined}
+            onClick={topNegative ? () => setSelected(topNegative) : undefined}
+          />
+          <InsightCard
+            label="LO QUE PIDEN"
+            tone="warning"
+            icon={MessageSquareText}
+            title={
+              topRequest
+                ? `“${topRequest[0]}” es el pedido más frecuente`
+                : "Aún no hay pedidos detectados"
+            }
+            evidence={
+              topRequest
+                ? `${topRequest[1]} comentarios con esta petición.`
+                : "Las sugerencias aparecerán aquí cuando se repitan."
+            }
+            action={topRequest ? "Ver pedidos" : undefined}
+            onClick={
+              topRequest
+                ? () =>
+                    document
+                      .getElementById("voice-requests")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                : undefined
+            }
+          />
+        </div>
+      </section>
       <div className="stats-grid">
         <Stat
           label="COMENTARIOS"
@@ -8205,7 +8550,7 @@ function Voice({
             aparece.
           </p>
         </section>
-        <section className="panel">
+        <section className="panel" id="voice-requests">
           <div className="panel-head">
             <div>
               <p className="eyebrow">LO QUE PIDEN</p>
@@ -8850,9 +9195,16 @@ function Team({
     };
   });
   const lowSampleServers = qualityByServer.filter(server => server.answered < 20);
+  const rankedServers = [...qualityByServer]
+    .filter(server => server.answered > 0)
+    .sort((a, b) => b.pct - a.pct);
+  const bestServer =
+    rankedServers.find(server => server.answered >= 20) ?? rankedServers[0];
   const salonRecords = periodRecords.filter(
     r => displayServer(r.registeredBy) !== "DELIVERY / WEB"
   );
+  const deliveryCount = periodRecords.length - salonRecords.length;
+  const deliveryGap = deliveryCount - deliveryGoal;
   const setQuickPeriod = (period: "7d" | "month" | "clear") => {
     const now = new Date();
     if (period === "clear") {
@@ -8926,6 +9278,79 @@ function Team({
           </span>
         </div>
       </div>
+      <section className="insights-section">
+        <div className="insights-head">
+          <div>
+            <p className="eyebrow">INSIGHTS DE EQUIPO</p>
+            <h2>Quién destaca y qué falta</h2>
+          </div>
+          <p>El período se aplica a estas tarjetas.</p>
+        </div>
+        <div className="insights-grid">
+          <InsightCard
+            label="MEJOR PORCENTAJE"
+            tone={bestServer ? "positive" : "neutral"}
+            icon={UserRoundCheck}
+            title={bestServer?.name || "Sin muestra suficiente"}
+            evidence={
+              bestServer
+                ? `${Math.round(bestServer.pct)}% positivo · n=${bestServer.answered}${
+                    bestServer.ci
+                      ? ` · IC95 ${Math.round(bestServer.ci[0] * 100)}–${Math.round(bestServer.ci[1] * 100)}%`
+                      : ""
+                  }`
+                : "Todavía no hay encuestas calificadas en el período."
+            }
+            meta={bestServer ? "DENTRO DEL PERÍODO" : undefined}
+            action="Ver scorecard"
+            onClick={() =>
+              document
+                .getElementById("team-scorecard")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
+          <InsightCard
+            label="CONFIANZA DEL RANKING"
+            tone={lowSampleServers.length ? "warning" : "positive"}
+            icon={AlertTriangle}
+            title={
+              lowSampleServers.length
+                ? `${lowSampleServers.length} mesero${lowSampleServers.length === 1 ? "" : "s"} con muestra baja`
+                : "Muestra suficiente para comparar"
+            }
+            evidence={
+              lowSampleServers.length
+                ? `${lowSampleServers
+                    .map(server => `${server.name} (n=${server.answered})`)
+                    .join(", ")}. No los compares como definitivos.`
+                : "Todos los meseros con datos tienen al menos 20 encuestas calificadas."
+            }
+            action="Ver detalle"
+            onClick={() =>
+              document
+                .getElementById("team-scorecard")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
+          <InsightCard
+            label="DELIVERY WEB"
+            tone={deliveryGap >= 0 ? "positive" : "warning"}
+            icon={MessageSquareText}
+            title={`${deliveryCount} de ${deliveryGoal} encuestas`}
+            evidence={
+              deliveryGap >= 0
+                ? `Va ${deliveryGap} encuesta${deliveryGap === 1 ? "" : "s"} por encima de la meta del período.`
+                : `Faltan ${Math.abs(deliveryGap)} encuesta${Math.abs(deliveryGap) === 1 ? "" : "s"} para la meta.`
+            }
+            action="Ver delivery"
+            onClick={() =>
+              document
+                .getElementById("delivery-scorecard")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
+        </div>
+      </section>
       <section className="panel team-date-filter">
         <div className="panel-head">
           <div>
