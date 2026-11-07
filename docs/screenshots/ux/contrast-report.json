@@ -1,0 +1,1621 @@
+{
+  "report": {
+    "overview": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Cumpleaños",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > div.filter-bar.global-filter-bar > label.filter-select-wrap > span",
+        "text": "Calidad",
+        "color": "rgb(175, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.78,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.onboarding-panel > div.onboarding-head > div > p.eyebrow",
+        "text": "PRIMEROS PASOS",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.onboarding-panel > div.onboarding-head > div > p.muted",
+        "text": "Empieza por lo urgente y registra el contacto para que el seguimiento ",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.hero-strip > div.quality-face > div > p.eyebrow",
+        "text": "SENTIMIENTO DE CALIDAD",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.quality-face > div > p.muted > b",
+        "text": "91",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.hero-strip > div.quality-face > div > p.muted",
+        "text": "106",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.alert-banner > div.alert-banner-title > div > p.eyebrow",
+        "text": "ALERTAS QUE REQUIEREN ACCIÓN",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(246, 250, 247)",
+        "ratio": 4.48,
+        "size": 10,
+        "threshold": 4.5
+      }
+    ],
+    "voice": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.dashboard-grid.voice-grid > section.panel > div.voice-tag-row > span.voice-tag",
+        "text": "Promos",
+        "color": "rgb(255, 209, 139)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.42,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel > div.comment-list > div.comment-row > small",
+        "text": "Pollo",
+        "color": "rgb(189, 206, 222)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.61,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.dashboard-grid.voice-grid > section.panel.topics-panel > div.word-cloud > span.word.word-1",
+        "text": "bueno agradable",
+        "color": "rgb(255, 191, 81)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.64,
+        "size": 22,
+        "threshold": 3
+      },
+      {
+        "selector": "div.dashboard-grid.voice-grid > section.panel.topics-panel > div.word-cloud > span.word.word-4",
+        "text": "estoy contenta",
+        "color": "rgb(55, 219, 167)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.77,
+        "size": 22,
+        "threshold": 3
+      },
+      {
+        "selector": "div.content > div.filter-bar.global-filter-bar > label.filter-select-wrap > span",
+        "text": "Calidad",
+        "color": "rgb(175, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.78,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.dashboard-grid.voice-grid > section.panel.topics-panel > div.word-cloud > span.word.word-0",
+        "text": "resto bueno",
+        "color": "rgb(66, 196, 236)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 2.03,
+        "size": 22,
+        "threshold": 3
+      },
+      {
+        "selector": "div.dashboard-grid.voice-grid > section.panel.topics-panel > div.word-cloud > span.word.word-2",
+        "text": "buena atencion",
+        "color": "rgb(176, 158, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 2.29,
+        "size": 22,
+        "threshold": 3
+      },
+      {
+        "selector": "div.dashboard-grid.voice-grid > section.panel.topics-panel > div.word-cloud > span.word.word-3",
+        "text": "mucha higiene",
+        "color": "rgb(255, 109, 137)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 2.69,
+        "size": 22,
+        "threshold": 3
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro > div.quality-face > div > p.eyebrow",
+        "text": "SENTIMIENTO DE CALIDAD",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.quality-face > div > p.muted > b",
+        "text": "91",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro > div.quality-face > div > p.muted",
+        "text": "106",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ],
+    "team": [
+      {
+        "selector": "div.server-bar > div.server-label > span.server-person > b",
+        "text": "SHIRLEY",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section#delivery-scorecard > div.delivery-target-number",
+        "text": "25",
+        "color": "rgb(242, 234, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.17,
+        "size": 34,
+        "threshold": 3
+      },
+      {
+        "selector": "section#team-scorecard > div.score-row > span > b",
+        "text": "SHIRLEY",
+        "color": "rgb(228, 238, 248)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.17,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section#team-targets > button.targets-toggle > span.targets-toggle-action",
+        "text": "Editar objetivos",
+        "color": "rgb(114, 219, 248)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 1.45,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.team-date-filter > div.date-filter-controls > label",
+        "text": "Desde",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 1.61,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section#team-scorecard > div.score-row > span > small",
+        "text": "37",
+        "color": "rgb(189, 206, 222)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.61,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > div.filter-bar.global-filter-bar > label.filter-select-wrap > span",
+        "text": "Calidad",
+        "color": "rgb(175, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.78,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section#delivery-scorecard > div.delivery-target-number > small",
+        "text": "encuestas recibidas ·",
+        "color": "rgb(195, 182, 220)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.9,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro > div.intro-note > span > small",
+        "text": "3 meseros en la pestaña Meseros.",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.team-date-filter > div.panel-head > div > p.eyebrow",
+        "text": "PERÍODO DE EVALUACIÓN",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.team-date-filter > div.panel-head > div > small.muted",
+        "text": "Período aplicado:",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.period-comparison > div > p.eyebrow",
+        "text": "COMPARACIÓN AUTOMÁTICA",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.period-comparison > div > small.muted",
+        "text": "Elige las fechas Desde y Hasta para comparar contra el tramo inmediata",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section#team-targets > button.targets-toggle > span > p.eyebrow",
+        "text": "OBJETIVOS DEL EQUIPO",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section#team-targets > button.targets-toggle > span > small",
+        "text": "Editar metas compartidas y registrar el cambio en el historial.",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 12,
+        "threshold": 4.5
+      }
+    ],
+    "birthdays": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.bw-panel > div.bw-filters > button.bw-templates-button",
+        "text": "Editar mensajes de WhatsApp",
+        "color": "rgb(139, 231, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.bw-panel > div.bw-footer > small",
+        "text": "Responsable sugerido:",
+        "color": "rgb(143, 166, 189)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 2.51,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.bw-panel > div.bw-footer > small > b",
+        "text": "cajera",
+        "color": "rgb(143, 166, 189)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 2.51,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.bw-panel > div.bw-metrics > div.bw-metric.bw-metric-today > small",
+        "text": "Hoy",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(255, 243, 241)",
+        "ratio": 4.35,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.bw-panel > div.bw-metrics > div.bw-metric.bw-metric-today > span",
+        "text": "felicitar y activar",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(255, 243, 241)",
+        "ratio": 4.35,
+        "size": 10.5,
+        "threshold": 4.5
+      }
+    ],
+    "clients": [
+      {
+        "selector": "section.panel.loyalty-call-panel > div.star-row.featured-star-row > span > b",
+        "text": "Sara Adelina",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 251, 245)",
+        "ratio": 1.03,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.loyalty-call-panel > div.star-row.featured-star-row > span > small",
+        "text": "encuestas ·",
+        "color": "rgb(193, 210, 225)",
+        "bg": "rgb(255, 251, 245)",
+        "ratio": 1.5,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.dashboard-grid.clients-grid > section.panel > div.empty > span",
+        "text": "Registra la primera llamada desde cualquier cliente.",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.76,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > div.filter-bar.global-filter-bar > label.filter-select-wrap > span",
+        "text": "Calidad",
+        "color": "rgb(175, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.78,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > div.segment-tabs > button.selected > span",
+        "text": "109",
+        "color": "rgb(159, 179, 200)",
+        "bg": "rgb(230, 244, 248)",
+        "ratio": 1.91,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > div.segment-tabs > button > span",
+        "text": "96",
+        "color": "rgb(159, 179, 200)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 2.15,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "tbody > tr > td > button.table-call",
+        "text": "Llamar",
+        "color": "rgb(199, 91, 46)",
+        "bg": "rgb(255, 240, 233)",
+        "ratio": 3.81,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro > div.intro-note > span > small",
+        "text": "No mezcla visitas ni tickets: cada respuesta repetida identifica una n",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "table > thead > tr > th",
+        "text": "Fecha",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ],
+    "priorities": [
+      {
+        "selector": "div.priority-list > div.priority-item.priority-top > span.priority-copy > b",
+        "text": "URGENTE",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1,
+        "size": 15,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.priority-list > div.priority-item.priority-top > span.priority-copy > small",
+        "text": "991824570 · Malo · El tallarín saltado no tiene gusto hay más fideo qu",
+        "color": "rgb(227, 237, 247)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.18,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.priority-list > div.priority-item.priority-top > span.priority-copy > small.priority-meta",
+        "text": "Límite:",
+        "color": "rgb(216, 229, 240)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.28,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.priority-item.priority-top > span.priority-copy > span.priority-edit-row > label",
+        "text": "Responsable",
+        "color": "rgb(213, 227, 239)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.31,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.priority-panel > div.priority-filters > span",
+        "text": "Tipo",
+        "color": "rgb(209, 222, 235)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.37,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.priority-panel > div.priority-filters > span.priority-filter-divider",
+        "text": "Estado",
+        "color": "rgb(209, 222, 235)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.37,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.priority-list > div.priority-item.priority-top > span.priority-copy > em",
+        "text": "Ver todas sus encuestas",
+        "color": "rgb(255, 211, 106)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.42,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.priority-panel > div.priority-pagination > span",
+        "text": "Página",
+        "color": "rgb(203, 217, 230)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.44,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.priority-item.priority-top > span.priority-copy > div.priority-history > button.history-toggle",
+        "text": "Ver historial",
+        "color": "rgb(142, 223, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.48,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.priority-list > div.priority-item.priority-top > span.priority-copy > small.priority-meta",
+        "text": "VENCIDA ·",
+        "color": "rgb(255, 179, 191)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.69,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > div.filter-bar.global-filter-bar > label.filter-select-wrap > span",
+        "text": "Calidad",
+        "color": "rgb(175, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.78,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.priority-panel > div.priority-filters > small.priority-status-help",
+        "text": "El botón avanza: Pendiente → En seguimiento → Atendido.",
+        "color": "rgb(169, 197, 213)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.81,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.page-intro.priority-intro > div.intro-note.priority-rule > span > small",
+        "text": "Malo, cumpleaños próximos, seguimientos programados y luego Regular. C",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ],
+    "promotions": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.admin-add-panel > div.admin-form-grid > label",
+        "text": "Nombre",
+        "color": "rgb(214, 228, 239)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.3,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.audit-panel > div.empty > span",
+        "text": "Todavía no hay cambios registrados en este módulo.",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.76,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro.admin-page-intro > div.intro-note > span > small",
+        "text": "Las modificaciones se guardan en la base de datos y se reflejan en tod",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ],
+    "calls": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.calls-history-panel > div.calls-filter-row > label",
+        "text": "Desde",
+        "color": "rgb(215, 229, 240)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.28,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.calls-history-panel > div.empty-state-block > div.empty > span",
+        "text": "Todavía no hay llamadas registradas con estos filtros.",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.76,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro.admin-page-intro > div.intro-note > span > small",
+        "text": "0 registros visibles",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ],
+    "responsibles": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.admin-add-panel > div.admin-form-grid > label",
+        "text": "Nombre",
+        "color": "rgb(214, 228, 239)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.3,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.audit-panel > div.empty > span",
+        "text": "Todavía no hay cambios registrados en este módulo.",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.76,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro.admin-page-intro > div.intro-note > span > small",
+        "text": "Agregar, editar o pausar usuarios requiere el PIN de administrador.",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ],
+    "targetHistory": [
+      {
+        "selector": "section.panel.target-chart-panel > div.target-bar-chart > button.target-bar-row > b",
+        "text": "30",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.target-chart-panel > div.target-bar-chart > button.target-bar-row > span.target-bar-name",
+        "text": "SHIRLEY",
+        "color": "rgb(231, 243, 255)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.13,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.target-chart-panel > div.target-bar-chart > button.target-bar-row > small",
+        "text": "93%",
+        "color": "rgb(185, 213, 230)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.53,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.team-date-filter > div.date-filter-controls > label",
+        "text": "Desde",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 1.61,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro.admin-page-intro > div.intro-note > span > small",
+        "text": "“Calidad respondida” cuenta únicamente Bueno, Regular o Malo. Los camb",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "table > thead > tr > th",
+        "text": "Mes",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.team-date-filter > div.panel-head > div > p.eyebrow",
+        "text": "PERÍODO DEL HISTORIAL",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "section.panel.team-date-filter > div.panel-head > div > small.muted",
+        "text": "combinación(es) equipo/mes visibles.",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(238, 247, 241)",
+        "ratio": 4.32,
+        "size": 14,
+        "threshold": 4.5
+      }
+    ],
+    "profile": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.profile-panel > div.profile-details > p",
+        "text": "contrast-1794014049156@coronel.local",
+        "color": "rgb(203, 217, 230)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.44,
+        "size": 16,
+        "threshold": 4.5
+      },
+      {
+        "selector": "main.main-area > div.content > section.panel.profile-security > p",
+        "text": "El dashboard utiliza el inicio de sesión seguro de OAuth. No guarda co",
+        "color": "rgb(203, 217, 230)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.44,
+        "size": 16,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro.profile-intro > div.intro-note > span > small",
+        "text": "Los cambios administrativos quedarán asociados a tu usuario.",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ],
+    "administracion": [
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > b",
+        "text": "Conectado",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.08,
+        "size": 12,
+        "threshold": 4.5
+      },
+      {
+        "selector": "nav.grouped-sidebar-nav > div.nav-section > button.nav-item > span",
+        "text": "Centro de acción",
+        "color": "rgb(215, 236, 223)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.14,
+        "size": 14,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.access-user-list > div.access-user-card > div.access-user-heading > div.profile-avatar.small-avatar",
+        "text": "🦁",
+        "color": "rgb(7, 21, 37)",
+        "bg": "rgb(16, 36, 58)",
+        "ratio": 1.17,
+        "size": 30,
+        "threshold": 3
+      },
+      {
+        "selector": "div.app-shell > aside.sidebar > div.brand > span.brand-tagline",
+        "text": "Sistema de gestión",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div#root > div.app-shell > aside.sidebar > div.side-label",
+        "text": "REPORTE",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > div.sidebar-bottom > div > span",
+        "text": "Google Sheets",
+        "color": "rgb(185, 217, 199)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 1.4,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.admin-session-panel > div.priority-pagination > span",
+        "text": "Página",
+        "color": "rgb(203, 217, 230)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.44,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.access-summary > div.access-summary-stats > span",
+        "text": "activas",
+        "color": "rgb(185, 204, 220)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.65,
+        "size": 10,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.access-requests-panel > div.empty > span",
+        "text": "No hay solicitudes pendientes de aprobación.",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.76,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.content > section.panel.audit-panel > div.empty > span",
+        "text": "Todavía no hay cambios registrados en este módulo.",
+        "color": "rgb(181, 197, 216)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 1.76,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "aside.sidebar > nav.grouped-sidebar-nav > div.nav-section > div.nav-section-label",
+        "text": "OPERACIÓN",
+        "color": "rgb(111, 139, 167)",
+        "bg": "rgb(242, 247, 244)",
+        "ratio": 3.27,
+        "size": 9,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.page-intro.admin-page-intro > div.intro-note > span > small",
+        "text": "Los cambios requieren tu credencial administrativa y una sesión de adm",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 13,
+        "threshold": 4.5
+      },
+      {
+        "selector": "table > thead > tr > th",
+        "text": "Fecha",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      },
+      {
+        "selector": "div.app-shell > main.main-area > footer.footer > span",
+        "text": "Fuente: hoja Encuestas de Google Sheets ·",
+        "color": "rgb(92, 122, 107)",
+        "bg": "rgb(234, 246, 239)",
+        "ratio": 4.25,
+        "size": 11,
+        "threshold": 4.5
+      }
+    ]
+  },
+  "hoverReport": [
+    {
+      "selector": ".nav-item",
+      "before": {
+        "color": "rgb(18, 59, 38)",
+        "bg": "rgb(172, 211, 182)",
+        "border": "rgb(18, 59, 38)"
+      },
+      "after": {
+        "color": "rgb(18, 59, 38)",
+        "bg": "rgb(172, 211, 182)",
+        "border": "rgb(18, 59, 38)"
+      }
+    },
+    {
+      "selector": ".pill",
+      "before": {
+        "color": "rgb(165, 42, 28)",
+        "bg": "rgb(253, 233, 230)",
+        "border": "rgb(165, 42, 28)"
+      },
+      "after": {
+        "color": "rgb(165, 42, 28)",
+        "bg": "rgb(253, 233, 230)",
+        "border": "rgb(165, 42, 28)"
+      }
+    },
+    {
+      "selector": ".onboarding-steps > button",
+      "before": {
+        "color": "rgb(23, 59, 43)",
+        "bg": "rgb(255, 255, 255)",
+        "border": "rgb(207, 228, 216)"
+      },
+      "after": {
+        "color": "rgb(23, 59, 43)",
+        "bg": "rgb(247, 252, 249)",
+        "border": "rgb(172, 211, 182)"
+      }
+    },
+    {
+      "selector": ".stat-card",
+      "before": {
+        "color": "rgb(23, 59, 43)",
+        "bg": "rgb(255, 255, 255)",
+        "border": "rgb(215, 232, 221)"
+      },
+      "after": {
+        "color": "rgb(23, 59, 43)",
+        "bg": "rgb(255, 255, 255)",
+        "border": "rgb(215, 232, 221)"
+      }
+    }
+  ]
+}
