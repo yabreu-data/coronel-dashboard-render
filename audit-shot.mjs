@@ -34,9 +34,9 @@ try {
     ["team", "Equipo"],
     ["targetHistory", "Historial de metas"],
     ["promotions", "Promociones"],
-    ["responsibles", "Responsables"],
-    ["profile", "Mi perfil"],
-    ["administracion", "Administración"],
+    ["responsibles", "Encargados"],
+    ["profile", "Mi cuenta"],
+    ["administracion", "Cuentas y accesos"],
   ];
   for (const [id, label] of pages) {
     await page.click(`button.nav-item:has-text('${label}')`);

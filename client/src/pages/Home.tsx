@@ -7407,8 +7407,7 @@ function CallsHistory({
               <button onClick={() => setEditLog(null)}>×</button>
             </div>
             <p className="bw-modal-hint">
-              El cambio queda registrado en auditoría. Se pedirá la credencial
-              administrativa al guardar.
+              El cambio queda guardado. Te pediremos la clave de administrador.
             </p>
             <div className="calls-edit-grid">
               <label>
@@ -7712,7 +7711,7 @@ function ResponsibleAdmin({
             />
           </label>
           <Button disabled={!name.trim() || save.isPending} onClick={submit}>
-            Agregar usuario
+            Agregar encargado
           </Button>
         </div>
         {save.error && <p className="form-error">{save.error.message}</p>}
@@ -8214,10 +8213,10 @@ function AuditPanel({ audit }: { audit: AuditItem[] }) {
     <section className="panel audit-panel">
       <div className="panel-head">
         <div>
-          <p className="eyebrow">AUDITORÍA</p>
-          <h3>Últimos cambios registrados</h3>
+          <p className="eyebrow">CAMBIOS RECIENTES</p>
+          <h3>Qué se cambió y quién lo hizo</h3>
         </div>
-        <Pill tone="neutral">{audit.length} registros</Pill>
+        <Pill tone="neutral">{plural(audit.length, "cambio", "cambios")}</Pill>
       </div>
       {audit.length ? (
         <div className="audit-list">
@@ -9893,7 +9892,7 @@ function AccessAdmin({
       setEditing(null);
       setNotice({
         tone: "success",
-        text: "Cuenta y permisos guardados correctamente; el cambio quedó registrado en auditoría.",
+        text: "Permisos guardados. El cambio quedó registrado.",
       });
     },
     onError: error => setNotice({ tone: "error", text: error.message }),
@@ -9921,7 +9920,7 @@ function AccessAdmin({
       });
       setNotice({
         tone: "success",
-        text: `Acceso aprobado para ${data.email}. Comparte la contraseña temporal por un canal privado.`,
+        text: `Acceso aprobado para ${data.email}. Comparte la clave temporal por un canal privado.`,
       });
       await Promise.all([
         utils.accessRequests.list.invalidate(),
@@ -10379,21 +10378,21 @@ function AccessAdmin({
                           className="secondary-action"
                           onClick={() => startEdit(account)}
                         >
-                          <Settings2 size={14} /> Editar acceso
+                          <Settings2 size={14} /> Cambiar permisos
                         </button>
                         <button
                           className={`account-action ${account.active ? "disable" : "recover"}`}
                           onClick={() => toggleAccount(account)}
                         >
                           {account.active
-                            ? "Desactivar cuenta"
-                            : "Recuperar cuenta"}
+                            ? "Quitar acceso"
+                            : "Devolver acceso"}
                         </button>
                         <button
                           className="secondary-action"
                           onClick={() => resetAccountPassword(account)}
                         >
-                          Contraseña temporal
+                          Nueva clave temporal
                         </button>
                       </>
                     )}
@@ -10403,7 +10402,7 @@ function AccessAdmin({
             })}
           </div>
         ) : (
-          <Empty text="No hay usuarios del sistema registrados todavía." />
+          <Empty text="Todavía no hay personas con cuenta." />
         )}
       </section>
       <section className="panel admin-session-panel">

@@ -3275,3 +3275,18 @@ button[class*="bg-transparent"][class*="border"] {
   border-radius: 9px !important;
 }
 button[class*="bg-transparent"][class*="border"]:hover { background: #eef5ef !important; border-color: #acd3b6 !important; }
+
+/* Ajustes móviles de configuración */
+@media (max-width: 760px) {
+  .admin-promotion-row { gap: 8px !important; }
+  .admin-promotion-row > .pill { justify-self: start; width: auto !important; }
+  .admin-row-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+  .admin-row-actions button { width: 100%; min-height: 38px; }
+  .admin-user-row > .pill { justify-self: start; width: auto !important; }
+  .admin-user-row > button { width: 100%; }
+  .access-summary-stats span { min-width: 0; flex: 1 1 30%; }
+  .access-user-actions { display: grid; grid-template-columns: 1fr; gap: 7px; }
+  .access-user-actions > * { width: 100%; justify-content: center; }
+  .profile-tabs { overflow-x: auto; }
+  .profile-tabs button { white-space: nowrap; flex: 0 0 auto; }
+}
