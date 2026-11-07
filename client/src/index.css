@@ -2608,3 +2608,12 @@ td { font-size: 13px !important; }
   .clients-row-main > small, .priority-queue-copy > small { font-size: 12px !important; }
   .business-guide-body li { font-size: 12px !important; }
 }
+
+/* Correcciones de color para la tipografía serif */
+.pulse-card .pulse-percent, .pulse-card .pulse-percent small { color: #ffffff !important; }
+.pulse-card .eyebrow { color: #b9d9c7 !important; }
+.bw-date, .bw-date b, .bw-date small,
+.agenda-date, .agenda-date b, .agenda-date small { color: #ffffff !important; }
+.face { flex-shrink: 0 !important; }
+.face-sm { width: 30px !important; height: 30px !important; min-width: 30px !important; }
+.risk-row .face, .today-client .face, .clients-priority-row .face { flex: 0 0 30px !important; }
