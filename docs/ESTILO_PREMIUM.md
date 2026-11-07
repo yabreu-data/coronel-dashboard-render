@@ -86,9 +86,9 @@ instalados. Todo el refresh vive en `client/src/index.css`.
 
 - Splash inicial en marfil cálido, sin sombra en el logo.
 - Bienvenida: “Bienvenido a Coronel”.
-- Mensaje: “Cada cliente cuenta. Estamos preparando tu día con todo en orden.”
+- Mensaje: “Cada cliente cuenta. Tu día empieza aquí.”
 - Indicador de tres puntos ocre, sin spinner técnico.
-- Estados internos: “Un momento…” y “Preparando tu día”.
+- Estados internos: “Un momento…” y “Tu día empieza aquí”.
 - Respeta `prefers-reduced-motion`.
 
 Capturas:

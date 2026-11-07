@@ -896,7 +896,7 @@ export default function Home() {
           alt="Coronel"
         />
         <span className="loading-kicker">Pollos y Parrillas</span>
-        <h2>Preparando tu día</h2>
+        <h2>Tu día empieza aquí</h2>
         <p>Cada cliente cuenta. En un momento tendrás todo listo.</p>
         <div className="loading-dots" aria-hidden="true">
           <span />
