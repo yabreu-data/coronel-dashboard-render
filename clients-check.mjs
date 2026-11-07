@@ -32,7 +32,7 @@ try {
   await mp.fill("#email", email); await mp.fill("#password", password);
   await mp.click('button[type="submit"]');
   await mp.waitForURL(`${BASE}/`, { timeout: 60000 });
-  await mp.locator('button:has-text("Clientes")').first().click();
+  await mp.locator('.mobile-bottom-nav button:has-text("Clientes")').click();
   await mp.waitForTimeout(1800);
   await mp.screenshot({ path: `${OUT}/clients-redesign-mobile.png`, fullPage: true });
   console.log("CLIENTS OK");

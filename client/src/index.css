@@ -2308,3 +2308,7 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
   .clients-row-meta { gap: 5px; }
   .clients-row-meta span + span::before { margin-right: 5px; }
 }
+
+/* Evitar que el emoji del cliente en riesgo se estire como bloque */
+.clients-priority-row > .face { flex: 0 0 auto !important; width: 28px !important; height: 28px !important; }
+.clients-priority-row > span:not(.face) { flex: 1; min-width: 0; }
