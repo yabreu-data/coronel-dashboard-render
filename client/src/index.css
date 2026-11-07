@@ -1519,3 +1519,21 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) bright
 .sample-warning { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 12px; padding: 10px 12px; border: 1px solid #b7791f; border-radius: 10px; background: #2a1f0c; color: #ffe9b8; }
 .sample-warning b { display: block; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
 .sample-warning span { display: block; margin-top: 2px; font-size: 11px; line-height: 1.45; }
+
+/* ===== Correcciones UX rápidas ===== */
+/* Todos los KPI visibles en móvil/tablet: antes se ocultaban 4.º y 5.º */
+.stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+@media (max-width: 1100px) {
+  .stat-card:nth-child(4), .stat-card:nth-child(5) { display: flex; }
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+}
+@media (max-width: 760px) {
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Logo y barra superior más compactos en móvil */
+@media (max-width: 760px) {
+  .brand-logo { width: 42px; }
+  .top-actions { gap: 8px; }
+  .sync-status { font-size: 11px; }
+  .source-selector select { max-width: 160px; }
+}

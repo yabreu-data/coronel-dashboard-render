@@ -646,7 +646,7 @@ export default function Home() {
     [birthdays, persistedPriorities, profiles, records]
   );
   const priorityCount = Math.min(5, riskCount + birthdays.length);
-  const overdueCount = Math.min(priorityCount, rawOverdueCount);
+  const overdueCount = rawOverdueCount;
   const pendingTaskCount = persistedPriorities.filter(
     priority => priority.status !== "done"
   ).length;
@@ -2751,10 +2751,10 @@ function BirthdayWorkspace({
       <div className="bw-filters">
         <div className="bw-chips">
           {chipButton("todos", "Todos")}
-          {chipButton("dia", "Día")}
-          {chipButton("semana", "Semana")}
-          {chipButton("mes", "Mes")}
-          {chipButton("seguimiento", "Seguimiento")}
+          {chipButton("dia", "0–3 d")}
+          {chipButton("semana", "4–7 d")}
+          {chipButton("mes", "8–30 d")}
+          {chipButton("seguimiento", "Pasadas")}
           {counts.vencidas > 0 && chipButton("vencidas", "Vencidas")}
           {counts.reintentar > 0 &&
             chipButton("reintentar", "Reintentar")}
@@ -4993,7 +4993,7 @@ function Clients({
   const displayBirthdays =
     birthdayView === "month"
       ? birthdayRecordsWithin(allRecords, 0, 30)
-      : birthdays;
+      : birthdayRecordsWithin(allRecords, 0, 7);
   const lastWeekBirthdays = birthdayRecordsWithin(allRecords, -7, -1);
   const wasCalled = (record: RecordItem) =>
     logs.some(
