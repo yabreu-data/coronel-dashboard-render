@@ -14,7 +14,7 @@ Base visual del dashboard después de la migración a tema claro.
 | `--red-600` | `#d93a2b` | Acción primaria y alertas críticas |
 | `--red-50` | `#fff1ef` | Fondo de alertas |
 | `--ink` | `#173b2b` | Texto principal |
-| `--muted` | `#5c7a6b` | Texto secundario |
+| `--muted` | `#4f6f5e` | Texto secundario |
 | `--line` | `#d7e8dd` | Bordes |
 
 Reglas:

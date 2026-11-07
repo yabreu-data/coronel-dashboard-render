@@ -407,7 +407,35 @@ la incertidumbre debe ser visible y comprensible.
 - Migrar las tablas restantes (clientes, historial, auditoría) al patrón de
   cards en móvil.
 
-## 11. Siguiente paso recomendado
+## 11. Auditoría automática de contraste y superficies (2026-11-06)
+
+Se recorrieron las 12 pantallas en producción calculando el ratio de contraste
+de cada texto visible y detectando superficies oscuras que hubieran quedado del
+tema anterior.
+
+Corregido:
+
+- Etiquetas de filtros, fechas y formularios que seguían en gris claro.
+- Textos blancos sobre tarjetas blancas en Prioridades, Equipo, Voz, Clientes,
+  Historial, Perfil y Administración.
+- Filas de Promociones, Responsables y Auditoría que conservaban fondo azul
+  oscuro.
+- Botones de acciones secundarias y paginación con fondo oscuro.
+- Etiquetas VENCIDA/atrasada y metadatos de prioridades.
+- Barras de Historial que conservaban gradiente cian/azul del tema anterior.
+- Tags de Voz del cliente y nube de palabras con colores claros sobre blanco.
+- Aviso de muestra insuficiente en Equipo con fondo oscuro.
+- Hovers inconsistentes: tarjetas, chips, botones de acción, tablas y
+  paginación ahora cambian a salvia/blanco con texto oscuro.
+- El texto secundario se oscureció de `#5c7a6b` a `#4f6f5e` para superar 4.5:1
+  sobre fondos salvia.
+
+Resultado: la auditoría automática queda **sin incidencias reales de contraste**
+en las 12 pantallas; las únicas superficies oscuras que permanecen son
+intencionales (navegación verde, chips seleccionados, fecha de cumpleaños y CTA
+de WhatsApp).
+
+## 12. Siguiente paso recomendado
 
 Empezar por **P0 móvil + navegación + tarjeta de cumpleaños**, porque concentra
 la mayor fricción diaria. Después, la consolidación de IA (P1) evita tener que
