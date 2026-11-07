@@ -229,10 +229,10 @@ const tabs: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "team", label: "Equipo", icon: UserRoundCheck },
   { id: "promotions", label: "Promociones", icon: Sparkles },
   { id: "calls", label: "Llamadas", icon: Phone },
-  { id: "responsibles", label: "Responsables", icon: Users },
+  { id: "responsibles", label: "Encargados", icon: Users },
   { id: "targetHistory", label: "Historial de metas", icon: Clock3 },
-  { id: "profile", label: "Mi perfil", icon: Users },
-  { id: "administracion", label: "Administración", icon: Settings2 },
+  { id: "profile", label: "Mi cuenta", icon: Users },
+  { id: "administracion", label: "Cuentas y accesos", icon: Settings2 },
 ];
 const promotionCatalog = [
   "15% de descuento + bebida",
@@ -1481,11 +1481,10 @@ function Profile({
     <>
       <div className="page-intro profile-intro">
         <div>
-          <Pill tone="blue">CUENTA</Pill>
-          <h2>Mi perfil</h2>
+          <Pill tone="blue">MI CUENTA</Pill>
+          <h2>Mi cuenta</h2>
           <p>
-            Consulta tu identidad, imagen, permisos y actividad reciente en
-            Coronel.
+            Tu nombre, tu imagen y la forma en que entras al sistema.
           </p>
         </div>
         <div className="intro-note">
@@ -1494,7 +1493,7 @@ function Profile({
             <b>{user ? "Sesión autenticada" : "Sin sesión"}</b>
             <small>
               {user
-                ? "Los cambios administrativos quedarán asociados a tu usuario."
+                ? "Lo que hagas quedará registrado con tu nombre."
                 : "Inicia sesión para registrar cambios con tu nombre."}
             </small>
           </span>
@@ -1506,14 +1505,14 @@ function Profile({
           onClick={() => setTab("account")}
         >
           <ShieldCheck size={16} />
-          Cuenta y acceso
+          Mis datos
         </button>
         <button
           className={tab === "sessions" ? "active" : ""}
           onClick={() => setTab("sessions")}
         >
           <History size={16} />
-          Historial de sesiones <Pill tone="neutral">{sessions.length}</Pill>
+          Historial de entradas <Pill tone="neutral">{sessions.length}</Pill>
         </button>
       </div>
       {tab === "account" ? (
@@ -1523,7 +1522,7 @@ function Profile({
               {avatarSymbol(user?.avatarPreset)}
             </div>
             <div className="profile-details">
-              <p className="eyebrow">DATOS DE LA CUENTA</p>
+              <p className="eyebrow">TUS DATOS</p>
               <h3>{user?.name || "Usuario no identificado"}</h3>
               <p>
                 {user?.email ||
@@ -1558,14 +1557,13 @@ function Profile({
             <section className="panel avatar-picker-panel">
               <div className="panel-head">
                 <div>
-                  <p className="eyebrow">IDENTIDAD VISUAL</p>
-                  <h3>Elige tu imagen de perfil</h3>
+                  <p className="eyebrow">TU IMAGEN</p>
+                  <h3>Cómo te ves</h3>
                   <small className="muted">
-                    Selecciona una imagen prediseñada para identificarte en el
-                    dashboard.
+                    Elige un avatar para reconocerte dentro del sistema.
                   </small>
                 </div>
-                <Pill tone="blue">Sin contraseña local</Pill>
+                <Pill tone="blue">Acceso con correo</Pill>
               </div>
               <button
                 className="avatar-open-button"
@@ -1573,8 +1571,8 @@ function Profile({
               >
                 <span>{avatarSymbol(user.avatarPreset)}</span>
                 <span>
-                  <b>Cambiar imagen de perfil</b>
-                  <small>Selecciona una identidad prediseñada</small>
+                  <b>Cambiar mi imagen</b>
+                  <small>Elige un avatar</small>
                 </span>
                 <ChevronRight size={16} />
               </button>
@@ -1599,10 +1597,10 @@ function Profile({
                   >
                     <div className="modal-head">
                       <div>
-                        <p className="eyebrow">IDENTIDAD VISUAL</p>
-                        <h3>Elige tu imagen</h3>
+                        <p className="eyebrow">TU IMAGEN</p>
+                        <h3>Elige un avatar</h3>
                         <p className="muted">
-                          La ventana se cerrará al guardar tu selección.
+                          Se guardará y la ventana se cerrará.
                         </p>
                       </div>
                       <button
@@ -1647,18 +1645,17 @@ function Profile({
             </section>
           )}
           <section className="panel profile-security">
-            <p className="eyebrow">SEGURIDAD Y ACCESO</p>
-            <h3>Contraseña y recuperación</h3>
+            <p className="eyebrow">CÓMO ENTRAS</p>
+            <h3>Tu contraseña</h3>
             <p>
-              El dashboard utiliza el inicio de sesión seguro de OAuth. No
-              guarda contraseñas locales ni puede verlas; la activación,
-              recuperación y cambio de contraseña se gestionan en el proveedor
-              de tu cuenta.
+              Entras con tu correo y contraseña. Si olvidaste la contraseña, en
+              la pantalla de inicio usa “¿Olvidaste tu contraseña?” y te
+              enviaremos un enlace para cambiarla.
             </p>
             {user?.role === "admin" && (
               <p className="muted">
-                Puedes gestionar roles, permisos y estado de las cuentas desde{" "}
-                <b>Administración</b>.
+                Para dar acceso a otra persona, entra a{" "}
+                <b>Cuentas y accesos</b>.
               </p>
             )}
           </section>
@@ -1667,11 +1664,10 @@ function Profile({
         <section className="panel session-history-panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">TRAZABILIDAD DE ACCESO</p>
-              <h3>Últimos inicios y cierres de sesión</h3>
+              <p className="eyebrow">HISTORIAL</p>
+              <h3>Cuándo entraste y saliste</h3>
               <small className="muted">
-                Se registra la fecha, acción, navegador y dirección técnica
-                disponible.
+                Guardamos la fecha, el navegador y el tipo de conexión.
               </small>
             </div>
             <Pill tone="blue">{sessions.length} eventos</Pill>
@@ -3279,7 +3275,7 @@ function BirthdayWorkspace({
                           className="bw-action"
                           onClick={() => setCallKey(row.key)}
                         >
-                          <Phone size={13} /> Anotar llamada
+                          <Phone size={13} /> Registrar llamada
                         </button>
                         <details className="bw-more">
                           <summary className="bw-action">⋯ Más</summary>
@@ -4049,7 +4045,7 @@ function BirthdayPage({
         title="Cómo felicitar a tus clientes"
         steps={[
           "Mira los cumpleaños de hoy o de esta semana.",
-          "Pulsa WhatsApp o Anotar llamada.",
+          "Pulsa WhatsApp o Registrar llamada.",
           "Vuelve y marca si vino, si usó la promo o si no contestó.",
         ]}
       />
@@ -6355,10 +6351,10 @@ function PromotionManager({ promotions }: { promotions: PromotionItem[] }) {
             setCategory(e.target.value as PromotionItem["category"])
           }
         >
-          <option value="recuperacion">Recuperación</option>
-          <option value="cumpleanos">Cumpleaños</option>
-          <option value="fidelidad">Cliente fiel</option>
-          <option value="general">General</option>
+          <option value="recuperacion">Para recuperar clientes</option>
+          <option value="cumpleanos">Para cumpleaños</option>
+          <option value="fidelidad">Para clientes fieles</option>
+          <option value="general">Para cualquier cliente</option>
         </select>
         <Button disabled={save.isPending || !name.trim()} onClick={add}>
           Agregar
@@ -6724,12 +6720,12 @@ function adminPin() {
 }
 function categoryLabel(category: PromotionItem["category"]) {
   return category === "recuperacion"
-    ? "Recuperación"
+    ? "Para recuperar clientes"
     : category === "cumpleanos"
-      ? "Cumpleaños"
+      ? "Para cumpleaños"
       : category === "fidelidad"
-        ? "Cliente fiel"
-        : "General";
+        ? "Para clientes fieles"
+        : "Para cualquier cliente";
 }
 function PromotionsAdmin({
   promotions,
@@ -6793,20 +6789,20 @@ function PromotionsAdmin({
     <>
       <div className="page-intro admin-page-intro">
         <div>
-          <Pill tone="purple">ADMINISTRACIÓN</Pill>
-          <h2>Catálogo persistente de promociones.</h2>
+          <Pill tone="purple">PROMOCIONES</Pill>
+          <h2>Tus promociones.</h2>
           <p>
-            Edita el texto, clasifica el motivo y activa o pausa opciones que
-            aparecerán en el seguimiento de llamadas.
+            Elige qué ofrecer cuando llamas o escribes a un cliente. Puedes
+            cambiarlas en cualquier momento.
           </p>
         </div>
         <div className="intro-note">
           <Sparkles size={17} />
           <span>
-            <b>Protegido por PIN</b>
+            <b>Solo el administrador puede cambiarlas</b>
             <small>
-              Las modificaciones se guardan en la base de datos y se reflejan en
-              todos los dispositivos.
+              Al guardar te pediremos la clave. El cambio se ve en todos los
+              dispositivos.
             </small>
           </span>
         </div>
@@ -6814,12 +6810,12 @@ function PromotionsAdmin({
       <section className="panel admin-table-panel">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">PROMOCIONES PROGRAMABLES</p>
-            <h3>Editar catálogo</h3>
+            <p className="eyebrow">PROMOCIONES DISPONIBLES</p>
+            <h3>Lo que puedes ofrecer</h3>
           </div>
           <Pill tone="purple">
-            {promotions.filter(item => item.active).length} activas ·{" "}
-            {promotions.length} totales
+            {promotions.filter(item => item.active).length} activas de{" "}
+            {promotions.length}
           </Pill>
         </div>
         <div className="admin-promotion-list">
@@ -6867,10 +6863,10 @@ function PromotionsAdmin({
                       }))
                     }
                   >
-                    <option value="recuperacion">Recuperación</option>
-                    <option value="cumpleanos">Cumpleaños</option>
-                    <option value="fidelidad">Cliente fiel</option>
-                    <option value="general">General</option>
+                    <option value="recuperacion">Para recuperar clientes</option>
+                    <option value="cumpleanos">Para cumpleaños</option>
+                    <option value="fidelidad">Para clientes fieles</option>
+                    <option value="general">Para cualquier cliente</option>
                   </select>
                 ) : (
                   <Pill tone={item.active ? "green" : "neutral"}>
@@ -6894,7 +6890,7 @@ function PromotionsAdmin({
                         Editar
                       </button>
                       <button onClick={() => toggle(item)}>
-                        {item.active ? "Pausar" : "Activar"}
+                        {item.active ? "Desactivar" : "Activar"}
                       </button>
                     </>
                   )}
@@ -6905,8 +6901,7 @@ function PromotionsAdmin({
         </div>
         {(save.isSuccess || update.isSuccess) && (
           <div className="success-notice">
-            ✓ Promoción guardada correctamente. El catálogo ya está
-            sincronizado.
+            ✓ Promoción guardada. Ya está disponible para ofrecer.
           </div>
         )}
       </section>
@@ -6914,12 +6909,12 @@ function PromotionsAdmin({
         <div className="panel-head">
           <div>
             <p className="eyebrow">NUEVA PROMOCIÓN</p>
-            <h3>Agregar al catálogo</h3>
+            <h3>Crear una promoción</h3>
           </div>
         </div>
         <div className="admin-form-grid">
           <label>
-            Nombre
+            ¿Qué ofreces?
             <input
               value={name}
               onChange={event => setName(event.target.value)}
@@ -6927,17 +6922,17 @@ function PromotionsAdmin({
             />
           </label>
           <label>
-            Categoría
+            ¿Para quién es?
             <select
               value={category}
               onChange={event =>
                 setCategory(event.target.value as PromotionItem["category"])
               }
             >
-              <option value="recuperacion">Recuperación</option>
-              <option value="cumpleanos">Cumpleaños</option>
-              <option value="fidelidad">Cliente fiel</option>
-              <option value="general">General</option>
+              <option value="recuperacion">Para recuperar clientes</option>
+              <option value="cumpleanos">Para cumpleaños</option>
+              <option value="fidelidad">Para clientes fieles</option>
+              <option value="general">Para cualquier cliente</option>
             </select>
           </label>
           <Button
@@ -6947,7 +6942,7 @@ function PromotionsAdmin({
                 save.mutate({ name: name.trim(), category, adminPin: "5956" });
             }}
           >
-            {save.isPending ? "Guardando…" : "Agregar promoción"}
+            {save.isPending ? "Guardando…" : "Crear promoción"}
           </Button>
         </div>
         {(save.error || update.error) && (
@@ -7152,11 +7147,11 @@ function CallsHistory({
     <>
       <div className="page-intro admin-page-intro">
         <div>
-          <Pill tone="blue">CRM</Pill>
-          <h2>Historial de llamadas realizadas.</h2>
+          <Pill tone="blue">SEGUIMIENTO</Pill>
+          <h2>Llamadas y seguimientos.</h2>
           <p>
-            Consulta cada contacto, promoción ofrecida, redención, resultado y
-            próxima acción. El buscador superior también filtra esta vista.
+            Aquí ves a quién llamaste, qué le ofreciste y cuándo volver a
+            contactarlo. El buscador de arriba también filtra esta lista.
           </p>
         </div>
         <div className="calls-page-note">
@@ -7225,20 +7220,20 @@ function CallsHistory({
         <Stat
           label="LLAMADAS"
           value={visible.length}
-          detail="según filtros"
+          detail="en este período"
           icon={Phone}
         />
         <Stat
           label="CONTACTADOS"
           value={contacted}
-          detail="resultado Contactado"
+          detail="con contacto logrado"
           accent="green"
           icon={Users}
         />
         <Stat
           label="RECUPERADOS"
           value={recovered}
-          detail="resultado registrado"
+          detail="con recuperación registrada"
           accent="purple"
           icon={Sparkles}
         />
@@ -7398,12 +7393,7 @@ function CallsHistory({
             </table>
           </div>
         ) : (
-          <div className="empty-state-block">
-            <Empty text="Todavía no hay llamadas registradas con estos filtros." />
-            <button className="btn-borde" onClick={() => onRegisterCall()}>
-              <Phone size={14} /> Registrar una llamada
-            </button>
-          </div>
+          <Empty text="Todavía no hay llamadas registradas con estos filtros." />
         )}
       </section>
       {editLog && (
@@ -7679,20 +7669,19 @@ function ResponsibleAdmin({
     <>
       <div className="page-intro admin-page-intro">
         <div>
-          <Pill tone="orange">CONFIGURACIÓN</Pill>
-          <h2>Usuarios responsables del sistema.</h2>
+          <Pill tone="orange">EQUIPO</Pill>
+          <h2>Encargados de seguimiento.</h2>
           <p>
-            Administra quién puede aparecer como responsable de prioridades y
-            próximos seguimientos.
+            Elige quién aparece como responsable cuando asignas una llamada o un
+            pendiente.
           </p>
         </div>
         <div className="intro-note">
           <Users size={17} />
           <span>
-            <b>Acceso protegido</b>
+            <b>Solo el administrador puede cambiarlo</b>
             <small>
-              Agregar, editar o pausar usuarios requiere el PIN de
-              administrador.
+              Para agregar o editar un encargado te pediremos la clave.
             </small>
           </span>
         </div>
@@ -7700,8 +7689,8 @@ function ResponsibleAdmin({
       <section className="panel admin-add-panel">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">NUEVO RESPONSABLE</p>
-            <h3>Agregar usuario operativo</h3>
+            <p className="eyebrow">NUEVO ENCARGADO</p>
+            <h3>Agregar encargado</h3>
           </div>
         </div>
         <div className="admin-form-grid">
@@ -7714,7 +7703,7 @@ function ResponsibleAdmin({
             />
           </label>
           <label>
-            Correo opcional
+            Correo (opcional)
             <input
               value={email}
               onChange={event => setEmail(event.target.value)}
@@ -7729,15 +7718,15 @@ function ResponsibleAdmin({
         {save.error && <p className="form-error">{save.error.message}</p>}
         {(save.isSuccess || update.isSuccess) && (
           <div className="success-notice">
-            ✓ Responsable guardado correctamente. La lista ya está sincronizada.
+            ✓ Encargado guardado. Ya está disponible para asignar.
           </div>
         )}
       </section>
       <section className="panel admin-table-panel">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">LISTA DE RESPONSABLES</p>
-            <h3>Usuarios disponibles</h3>
+            <p className="eyebrow">ENCARGADOS</p>
+            <h3>Quiénes pueden recibir seguimientos</h3>
           </div>
           <Pill tone="orange">
             {users.filter(user => user.active).length} activos
@@ -7775,7 +7764,7 @@ function ResponsibleAdmin({
                       <small>{user.email || "Sin correo"}</small>
                     </span>
                     <Pill tone={user.active ? "green" : "neutral"}>
-                      {user.active ? "Activo" : "Pausado"}
+                      {user.active ? "Disponible" : "No disponible"}
                     </Pill>
                     <button
                       onClick={() => {
@@ -7786,14 +7775,14 @@ function ResponsibleAdmin({
                       Editar
                     </button>
                     <button onClick={() => toggle(user)}>
-                      {user.active ? "Pausar" : "Activar"}
+                      {user.active ? "No disponible" : "Disponible"}
                     </button>
                   </>
                 )}
               </div>
             ))
           ) : (
-            <Empty text="Aún no hay responsables configurados." />
+            <Empty text="Aún no hay encargados. Agrega el primero arriba." />
           )}
         </div>
       </section>
@@ -7980,20 +7969,20 @@ function TargetHistory({
     <>
       <div className="page-intro admin-page-intro">
         <div>
-          <Pill tone="green">CONTROL DE GESTIÓN</Pill>
-          <h2>Historial de metas del equipo.</h2>
+          <Pill tone="green">METAS</Pill>
+          <h2>Cómo han cambiado las metas.</h2>
           <p>
-            Consulta el desempeño por período, equipo y mesero, y compara los
-            cambios de metas registrados.
+            Mira cómo cambió el desempeño por mes y por persona, y qué metas se
+            ajustaron en el camino.
           </p>
         </div>
         <div className="intro-note">
           <Clock3 size={17} />
           <span>
-            <b>Lectura histórica</b>
+            <b>Cómo leer los datos</b>
             <small>
-              “Calidad respondida” cuenta únicamente Bueno, Regular o Malo. Los
-              cambios de meta quedan auditados con fecha y usuario.
+              Solo contamos respuestas Bueno, Regular o Malo. Cada cambio de
+              meta queda guardado con fecha y persona.
             </small>
           </span>
         </div>
@@ -8085,10 +8074,10 @@ function TargetHistory({
       <section className="panel team-date-filter target-history-filter">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">PERÍODO DEL HISTORIAL</p>
-            <h3>Filtrar desempeño por fechas</h3>
+            <p className="eyebrow">PERÍODO</p>
+            <h3>Elegir fechas</h3>
             <small className="muted">
-              {rows.length} combinación(es) equipo/mes visibles.
+              {plural(rows.length, "grupo equipo/mes visible", "grupos equipo/mes visibles")}.
             </small>
           </div>
         </div>
@@ -8310,7 +8299,7 @@ function TargetPerformanceChart({
           <p className="eyebrow">COMPARATIVA VISUAL</p>
           <h3>Encuestas por mesero y mes</h3>
           <small className="muted">
-            Selecciona un mes para comparar el volumen entre meseros.
+            Elige un mes para ver cuántas encuestas hizo cada persona.
           </small>
         </div>
         <select
@@ -8497,7 +8486,7 @@ function Voice({
           icon={MessageSquareText}
         />
         <Stat
-          label="FRASES DETECTADAS"
+          label="FRASES REPETIDAS"
           value={topicPhrases.length}
           detail="2+ apariciones"
           accent="purple"
@@ -8515,14 +8504,14 @@ function Voice({
           icon={Clock3}
         />
         <Stat
-          label="REVISAR"
+          label="PARA REVISAR"
           value={reviewCount}
           detail="asociados a alerta"
           accent="red"
           icon={AlertTriangle}
         />
         <Stat
-          label="REPETIDOS"
+          label="COMENTARIOS REPETIDOS"
           value={repeatedComments.length}
           detail="frases que se repiten"
           accent="purple"
@@ -8624,7 +8613,7 @@ function Voice({
         <section className="panel voice-negative-panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">SEÑALES DE MEJORA</p>
+              <p className="eyebrow">LO QUE HAY QUE MEJORAR</p>
               <h3>Lo malo que más se repite</h3>
             </div>
             <Pill tone="red">Contexto completo</Pill>
@@ -8984,8 +8973,8 @@ function PeriodComparison({
           <p className="eyebrow">COMPARACIÓN AUTOMÁTICA</p>
           <h3>Selecciona un período completo</h3>
           <small className="muted">
-            Elige las fechas Desde y Hasta para comparar contra el tramo
-            inmediatamente anterior con la misma duración.
+            Elige Desde y Hasta. Compararemos con el tramo anterior de la misma
+            duración.
           </small>
         </div>
       </section>
@@ -9270,21 +9259,21 @@ function Team({
     <>
       <div className="page-intro">
         <div>
-          <Pill tone="orange">EQUIPO Y OPERACIÓN</Pill>
-          <h2>Meseros vs. delivery web.</h2>
+          <Pill tone="orange">EQUIPO</Pill>
+          <h2>Cómo va el equipo.</h2>
           <p>
-            El ranking y los indicadores se calculan únicamente con el período
-            elegido.
+            Elige un período y mira cómo trabaja cada persona, con una muestra
+            clara antes de comparar.
           </p>
         </div>
         <div className="intro-note">
           <UserRoundCheck size={17} />
           <span>
-            <b>Catálogo maestro conectado</b>
+            <b>Lista del equipo cargada</b>
             <small>
               {catalog.length
-                ? `${catalog.length} meseros en la pestaña Meseros.`
-                : "Sin catálogo disponible; se muestran los IDs."}
+                ? `${catalog.length} personas en la pestaña Meseros.`
+                : "Sin lista disponible; se muestran los códigos."}
             </small>
           </span>
         </div>
@@ -9313,7 +9302,7 @@ function Team({
                 : "Todavía no hay encuestas calificadas en el período."
             }
             meta={bestServer ? "DENTRO DEL PERÍODO" : undefined}
-            action="Ver scorecard"
+            action="Ver detalle"
             onClick={() =>
               document
                 .getElementById("team-scorecard")
@@ -9365,8 +9354,8 @@ function Team({
       <section className="panel team-date-filter">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">PERÍODO DE EVALUACIÓN</p>
-            <h3>Filtrar rendimiento por fechas</h3>
+            <p className="eyebrow">PERÍODO</p>
+            <h3>Elegir fechas</h3>
             <small className="muted">
               Período aplicado: {periodLabel} · {periodRecords.length}{" "}
               encuesta(s)
@@ -9413,8 +9402,8 @@ function Team({
           aria-expanded={targetsOpen}
         >
           <span>
-            <p className="eyebrow">OBJETIVOS DEL EQUIPO</p>
-            <h3>Objetivos del equipo</h3>
+            <p className="eyebrow">METAS</p>
+            <h3>Metas del equipo</h3>
             <small>
               Editar metas compartidas y registrar el cambio en el historial.
             </small>
@@ -10113,10 +10102,10 @@ function AccessAdmin({
     string,
   ][] = [
     ["canViewCustomers", "Ver clientes"],
-    ["canManageCalls", "Gestionar llamadas"],
-    ["canManageTargets", "Gestionar metas"],
-    ["canManageUsers", "Gestionar usuarios"],
-    ["canViewAudit", "Ver auditoría"],
+    ["canManageCalls", "Llamar y registrar"],
+    ["canManageTargets", "Editar metas"],
+    ["canManageUsers", "Administrar accesos"],
+    ["canViewAudit", "Ver historial de cambios"],
   ];
   const sessionRows = (sessionsQuery.data?.rows ?? []) as AdminSessionEvent[];
   const sessionTotal = sessionsQuery.data?.total ?? 0;
@@ -10131,20 +10120,18 @@ function AccessAdmin({
     <>
       <div className="page-intro admin-page-intro">
         <div>
-          <Pill tone="purple">ADMINISTRACIÓN</Pill>
-          <h2>Roles, cuentas y actividad.</h2>
+          <Pill tone="purple">CUENTAS</Pill>
+          <h2>Quién puede entrar.</h2>
           <p>
-            Gestiona accesos, desactiva o recupera cuentas y revisa las sesiones
-            de todo el equipo desde un mismo lugar.
+            Decide qué personas usan el sistema y qué puede ver o hacer cada una.
           </p>
         </div>
         <div className="intro-note">
           <ShieldCheck size={17} />
           <span>
-            <b>Panel protegido</b>
+            <b>Solo para administradores</b>
             <small>
-              Los cambios requieren tu credencial administrativa y una sesión de
-              administrador.
+              Para aprobar o cambiar permisos te pediremos la clave.
             </small>
           </span>
         </div>
@@ -10188,12 +10175,11 @@ function AccessAdmin({
       <section className="panel access-requests-panel">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">SOLICITUDES DE ACCESO</p>
-            <h3>Altas pendientes de aprobación</h3>
+            <p className="eyebrow">SOLICITUDES</p>
+            <h3>Personas que piden entrar</h3>
             <small className="muted">
-              Las cuentas nuevas no pueden entrar hasta que apruebes su
-              solicitud. Al aprobar se crea el usuario en Supabase Auth y se
-              genera una contraseña temporal.
+              Revisa la solicitud. Si la apruebas, se crea su acceso y te damos
+              una clave temporal para compartirle.
             </small>
           </div>
           <Pill tone={pendingRequests.length ? "orange" : "green"}>
@@ -10240,19 +10226,19 @@ function AccessAdmin({
       </section>
       <section className="panel access-summary">
         <div>
-          <p className="eyebrow">CONTROL DE CUENTAS</p>
-          <h3>{users.length} usuario(s) registrados</h3>
+          <p className="eyebrow">RESUMEN</p>
+          <h3>{plural(users.length, "persona con cuenta", "personas con cuenta")}</h3>
           <p className="muted">
-            Las cuentas desactivadas no pueden iniciar una nueva sesión ni
-            consultar el dashboard. Recuperarlas las vuelve a habilitar.
+            Quien no tenga acceso no puede entrar. Puedes devolverle el acceso
+            cuando quieras.
           </p>
         </div>
         <div className="access-summary-stats">
           <span>
-            <b>{users.filter(item => item.active).length}</b> activas
+            <b>{users.filter(item => item.active).length}</b> con acceso
           </span>
           <span>
-            <b>{users.filter(item => !item.active).length}</b> desactivadas
+            <b>{users.filter(item => !item.active).length}</b> sin acceso
           </span>
           <span>
             <b>{users.filter(item => item.role === "admin").length}</b>{" "}
@@ -10263,10 +10249,10 @@ function AccessAdmin({
       <section className="panel access-users-panel">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">USUARIOS Y PERMISOS</p>
-            <h3>Asignar rol y capacidades</h3>
+            <p className="eyebrow">PERMISOS</p>
+            <h3>Qué puede hacer cada persona</h3>
           </div>
-          <Pill tone="purple">Credencial al guardar</Pill>
+          <Pill tone="purple">Clave al guardar</Pill>
         </div>
         {users.length ? (
           <div className="access-user-list">
@@ -10309,7 +10295,7 @@ function AccessAdmin({
                           }))
                         }
                       >
-                        <option value="user">Usuario</option>
+                        <option value="user">Equipo</option>
                         <option value="admin">Administrador</option>
                       </select>
                     ) : (
@@ -10319,10 +10305,10 @@ function AccessAdmin({
                         >
                           {account.role === "admin"
                             ? "Administrador"
-                            : "Usuario"}
+                            : "Equipo"}
                         </Pill>
                         <Pill tone={account.active ? "green" : "red"}>
-                          {account.active ? "Activa" : "Desactivada"}
+                          {account.active ? "Con acceso" : "Sin acceso"}
                         </Pill>
                       </div>
                     )}
@@ -10346,14 +10332,14 @@ function AccessAdmin({
                             <b>{label}</b>
                             <small>
                               {field === "canViewCustomers"
-                                ? "Clientes y datos de contacto"
+                                ? "Nombres, teléfonos y cumpleaños"
                                 : field === "canManageCalls"
-                                  ? "Registrar y consultar CRM"
+                                  ? "Registrar llamadas y seguimientos"
                                   : field === "canManageTargets"
-                                    ? "Editar objetivos del equipo"
+                                    ? "Cambiar las metas del equipo"
                                     : field === "canManageUsers"
-                                      ? "Responsables y accesos"
-                                      : "Cambios y trazabilidad"}
+                                      ? "Crear y quitar accesos"
+                                      : "Ver quién cambió qué"}
                             </small>
                           </span>
                         </label>

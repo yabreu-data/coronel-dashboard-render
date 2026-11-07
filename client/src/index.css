@@ -3185,3 +3185,93 @@ button:active:not(:disabled) { transform: scale(.985); }
 @media (prefers-reduced-motion: reduce) {
   .loading-dots span { animation: none; opacity: .6; }
 }
+
+/* ===== Configuración, cuenta y accesos en el tema cálido ===== */
+.profile-tabs {
+  background: #fffdf8 !important;
+  border: 1px solid #e5ddcf !important;
+  border-radius: 10px !important;
+  padding: 4px !important;
+}
+.profile-tabs button { color: #5d685f !important; border-radius: 7px !important; }
+.profile-tabs button.active { background: #1b3b2a !important; color: #ffffff !important; }
+.profile-tabs button .pill { background: #f3eee4 !important; color: #1b3b2a !important; }
+.profile-tabs button.active .pill { background: rgba(255,255,255,.16) !important; color: #ffffff !important; }
+.avatar-open-button {
+  background: #f7f2e7 !important;
+  border-color: #e5ddcf !important;
+  color: #1e2e24 !important;
+}
+.avatar-open-button:hover { background: #eef5ef !important; border-color: #acd3b6 !important; }
+.avatar-open-button > span:first-child { background: #eaf3ec !important; color: #1b3b2a !important; }
+.avatar-open-button small { color: #67736a !important; }
+.avatar-choice { background: #fffdf8 !important; border-color: #e5ddcf !important; color: #1e2e24 !important; }
+.avatar-choice:hover, .avatar-choice.selected { background: #eef5ef !important; border-color: #acd3b6 !important; }
+.avatar-choice small { color: #67736a !important; }
+.avatar-choice.selected small { color: #1b3b2a !important; }
+.avatar-picker-modal { background: #fffdf8 !important; border-color: #e5ddcf !important; color: #1e2e24 !important; }
+.avatar-picker-modal h3 { color: #1e2e24 !important; }
+.session-row { border-top-color: #eee7da !important; }
+.session-row b { color: #1e2e24 !important; }
+.session-row small { color: #67736a !important; }
+.session-event-icon.login { background: #e3f2ea !important; color: #1b3b2a !important; }
+.session-event-icon.logout { background: #f3eee4 !important; color: #67736a !important; }
+.session-empty { color: #67736a !important; }
+.profile-security { border-color: #e5ddcf !important; }
+
+.access-summary {
+  background: #fffdf8 !important;
+  border-color: #e5ddcf !important;
+  color: #1e2e24 !important;
+}
+.access-summary h3 { color: #1e2e24 !important; }
+.access-summary .eyebrow { color: #8a998e !important; }
+.access-summary .muted { color: #67736a !important; }
+.access-summary-stats span {
+  background: #f7f2e7 !important;
+  border-color: #e5ddcf !important;
+  color: #67736a !important;
+}
+.access-summary-stats b { color: #1b3b2a !important; font-size: 20px !important; }
+.access-user-card { background: #fffdf8 !important; border-color: #e5ddcf !important; }
+.access-user-card.editing { border-color: #acd3b6 !important; box-shadow: 0 0 0 3px rgba(172,211,182,.2) !important; }
+.access-user-heading b { color: #1e2e24 !important; }
+.access-user-heading small { color: #67736a !important; }
+.permission-toggle { background: #fffdf8 !important; border-color: #e5ddcf !important; }
+.permission-toggle:has(input:checked) { background: #eef5ef !important; border-color: #acd3b6 !important; }
+.permission-toggle b { color: #1e2e24 !important; }
+.permission-toggle small { color: #67736a !important; }
+.permission-chips .enabled { background: #e3f2ea !important; border-color: #acd3b6 !important; color: #1b3b2a !important; }
+.permission-chips .disabled { background: #f3eee4 !important; border-color: #e5ddcf !important; color: #67736a !important; }
+.secondary-action, .text-button {
+  background: #fffdf8 !important;
+  border-color: #d8cdbb !important;
+  color: #1b3b2a !important;
+}
+.secondary-action:hover, .text-button:hover { background: #eef5ef !important; border-color: #acd3b6 !important; color: #1b3b2a !important; }
+.session-admin-filters { background: #f7f2e7 !important; border-color: #e5ddcf !important; }
+.session-admin-filters label { color: #5d685f !important; }
+.admin-session-panel td { color: #4d5c52 !important; }
+.admin-session-panel td b { color: #1e2e24 !important; }
+.admin-session-panel .table-sub { color: #67736a !important; }
+.account-action.disable { background: #fff1ef !important; color: #a8422f !important; border-color: #efb8b1 !important; }
+.account-action.recover { background: #e3f2ea !important; color: #1b3b2a !important; border-color: #acd3b6 !important; }
+
+/* Botones del sistema de componentes (shadcn) sin tema oscuro */
+button[class*="bg-primary"] {
+  background: #1b3b2a !important;
+  border: 1px solid #1b3b2a !important;
+  color: #ffffff !important;
+  border-radius: 9px !important;
+  min-height: 38px;
+  padding-inline: 14px;
+  font-weight: 800;
+}
+button[class*="bg-primary"]:hover { background: #133023 !important; border-color: #133023 !important; }
+button[class*="bg-transparent"][class*="border"] {
+  background: #fffdf8 !important;
+  color: #1b3b2a !important;
+  border-color: #d8cdbb !important;
+  border-radius: 9px !important;
+}
+button[class*="bg-transparent"][class*="border"]:hover { background: #eef5ef !important; border-color: #acd3b6 !important; }
