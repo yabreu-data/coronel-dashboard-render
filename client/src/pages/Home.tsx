@@ -373,6 +373,16 @@ const formatBirthday = (value: string) => {
 };
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count === 1 ? one : many}`;
+const segmentLabelFor = (value?: string) =>
+  value === "En riesgo"
+    ? "Por recuperar"
+    : value === "Fiel"
+      ? "Frecuente"
+      : value === "Recurrente"
+        ? "Repite"
+        : value === "Nuevo"
+          ? "Primera vez"
+          : value || "Sin grupo";
 const formatDateTime = (value: string | Date | null | undefined) => {
   if (!value) return "—";
   const date = value instanceof Date ? value : new Date(value);
@@ -905,7 +915,7 @@ export default function Home() {
         <header className="topbar">
           <div>
             <p className="breadcrumb">
-              RESTAURANTE CORONEL <span>/</span> REPORTE ANALÍTICO
+              RESTAURANTE CORONEL
             </p>
             <h1>{title}</h1>
             <p className="muted">
@@ -1244,8 +1254,8 @@ export default function Home() {
       </main>
       <nav className="mobile-bottom-nav" aria-label="Navegación principal">
         {[
-          { id: "overview" as Page, label: "Hoy", icon: LayoutDashboard },
-          { id: "birthdays" as Page, label: "Cumples", icon: Cake },
+          { id: "overview" as Page, label: "Inicio", icon: LayoutDashboard },
+          { id: "birthdays" as Page, label: "Cumpleaños", icon: Cake },
           { id: "clients" as Page, label: "Clientes", icon: Users },
           { id: "calls" as Page, label: "Llamadas", icon: Phone },
         ].map(item => {
@@ -3043,7 +3053,7 @@ function BirthdayWorkspace({
                                   : "blue"
                               }
                             >
-                              {item.profile.segment}
+                              {segmentLabelFor(item.profile.segment)}
                             </Pill>
                           )}
                           <span className="bw-days">
@@ -3147,7 +3157,7 @@ function BirthdayWorkspace({
                           className="bw-action"
                           onClick={() => setCallKey(row.key)}
                         >
-                          <Phone size={13} /> Llamar
+                          <Phone size={13} /> Anotar llamada
                         </button>
                         <details className="bw-more">
                           <summary className="bw-action">⋯ Más</summary>
@@ -3321,7 +3331,7 @@ function BirthdayWorkspace({
                   className="bw-action bw-action-whatsapp"
                   href={`tel:+${callRow.item.record.phone.replace(/\D/g, "").length === 9 ? "51" : ""}${callRow.item.record.phone.replace(/\D/g, "")}`}
                 >
-                  <Phone size={13} /> Llamar ahora
+                  <Phone size={13} /> Registrar llamada
                 </a>
                 <button
                   className="bw-action"
@@ -3917,7 +3927,7 @@ function BirthdayPage({
         title="Cómo felicitar a tus clientes"
         steps={[
           "Mira los cumpleaños de hoy o de esta semana.",
-          "Pulsa WhatsApp o Llamar.",
+          "Pulsa WhatsApp o Anotar llamada.",
           "Vuelve y marca si vino, si usó la promo o si no contestó.",
         ]}
       />
@@ -5518,7 +5528,7 @@ function Clients({
             <h2>{focusedProfile.name}</h2>
             <p>
               {focusedProfile.phone || "Sin teléfono"} ·{" "}
-              {focusedProfile.segment} · {focusedProfile.count} encuesta(s).
+              {segmentLabelFor(focusedProfile.segment)} · {focusedProfile.count} encuesta(s).
               Aquí puedes revisar todo lo que el cliente comentó antes de
               llamar.
             </p>
@@ -5897,7 +5907,7 @@ function Clients({
                                       : "blue"
                               }
                             >
-                              {profile.segment}
+                              {segmentLabelFor(profile.segment)}
                             </Pill>
                           </span>
                           <small>
