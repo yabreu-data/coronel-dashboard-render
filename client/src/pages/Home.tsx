@@ -2755,6 +2755,23 @@ function BirthdayWorkspace({
     window.setTimeout(() => setSavedKey(null), 1800);
   };
 
+  const setStatus = (
+    row: (typeof rows)[number],
+    value:
+      | "pending"
+      | "contacted"
+      | "accepted"
+      | "redeemed"
+      | "rejected"
+      | "noanswer"
+  ) => {
+    if (value === "pending") {
+      persist(row, { progressStatus: "pending" });
+      return;
+    }
+    registerCall(row, value);
+  };
+
   const copyMessage = async (row: (typeof rows)[number]) => {
     try {
       await navigator.clipboard.writeText(messageFor(row));
@@ -2806,63 +2823,91 @@ function BirthdayWorkspace({
 
   return (
     <section className="panel bw-panel">
-      <div className="bw-metrics">
-        <div className="bw-metric bw-metric-total">
-          <small>Cumpleaños en {monthName}</small>
-          <b>{counts.todos}</b>
-          <span>{pendingCount} sin contactar</span>
+      <div className="birthday-command">
+        <div className="birthday-command-copy">
+          <p className="eyebrow">CAMPAÑA · {monthName.toUpperCase()}</p>
+          <h3>
+            {pendingCount
+              ? `${pendingCount} clientes sin contactar`
+              : "Campaña al día"}
+          </h3>
+          <p className="muted">
+            {todayCount
+              ? `${plural(todayCount, "cumpleaños hoy", "cumpleaños hoy")}. Empieza por ellos y registra la respuesta.`
+              : weekCount
+                ? `No hay cumpleaños hoy. Tienes ${plural(weekCount, "cumpleaños esta semana", "cumpleaños esta semana")}.`
+                : "No hay cumpleaños próximos en el mes seleccionado. Puedes revisar otro mes."}
+          </p>
+          <div className="birthday-command-actions">
+            <button
+              className="btn-rojo"
+              onClick={() => {
+                setFilter(todayCount ? "dia" : "semana");
+                setOnlyPending(true);
+              }}
+            >
+              <MessageSquareText size={15} />
+              {todayCount ? `Contactar ${todayCount} de hoy` : "Preparar la semana"}
+            </button>
+            <button className="btn-borde" onClick={openTemplates}>
+              Mensajes de WhatsApp
+            </button>
+            {overdueCount > 0 && (
+              <button
+                className="birthday-overdue-chip"
+                onClick={() => setFilter("vencidas")}
+              >
+                ⚠ {plural(overdueCount, "acción vencida", "acciones vencidas")}
+              </button>
+            )}
+          </div>
         </div>
-        <div className="bw-metric bw-metric-week">
-          <small>Esta semana</small>
-          <b>{weekCount}</b>
-          <span>lunes a domingo</span>
-        </div>
-        <div className="bw-metric bw-metric-today">
-          <small>Hoy</small>
-          <b>{todayCount}</b>
-          <span>felicitar y activar</span>
-        </div>
-        <div className="bw-metric bw-metric-contact">
-          <small>Contactados</small>
-          <b>{contactedCount}</b>
-          <span>de {counts.todos} del mes</span>
-        </div>
-        <div className="bw-metric bw-metric-redeem">
-          <small>Redimidos</small>
-          <b>{redeemedCount}</b>
-          <span>beneficio usado</span>
+        <div className="birthday-command-stats">
+          <div>
+            <small>HOY</small>
+            <b>{todayCount}</b>
+            <span>por felicitar</span>
+          </div>
+          <div>
+            <small>ESTA SEMANA</small>
+            <b>{weekCount}</b>
+            <span>lunes a domingo</span>
+          </div>
+          <div>
+            <small>SIN CONTACTAR</small>
+            <b>{pendingCount}</b>
+            <span>de {counts.todos} del mes</span>
+          </div>
         </div>
       </div>
 
-      <div className="bw-funnel">
-        <div className="bw-funnel-step">
-          <small>Base del mes</small>
-          <b>{counts.todos}</b>
-          <span className="bw-bar"><i style={{ width: "100%" }} /></span>
-        </div>
-        <div className="bw-funnel-step">
-          <small>Contactados</small>
-          <b>{contactedCount}</b>
-          <span className="bw-bar"><i style={{ width: `${counts.todos ? Math.round((contactedCount / counts.todos) * 100) : 0}%` }} /></span>
-        </div>
-        <div className="bw-funnel-step">
-          <small>Aceptaron</small>
-          <b>{acceptedCount}</b>
-          <span className="bw-bar"><i style={{ width: `${counts.todos ? Math.round((acceptedCount / counts.todos) * 100) : 0}%` }} /></span>
-        </div>
-        <div className="bw-funnel-step">
-          <small>Redimieron</small>
-          <b>{redeemedCount}</b>
-          <span className="bw-bar"><i style={{ width: `${counts.todos ? Math.round((redeemedCount / counts.todos) * 100) : 0}%` }} /></span>
-        </div>
-        {overdueCount > 0 && (
-          <button
-            className="bw-funnel-alert"
-            onClick={() => setFilter("vencidas")}
-          >
-            ⚠ {overdueCount} próxima(s) acción(es) vencida(s) · ver cuáles
-          </button>
-        )}
+      <div className="birthday-funnel-compact" aria-label="Avance de la campaña">
+        {[
+          { label: "Base", value: counts.todos },
+          { label: "Contactados", value: contactedCount },
+          { label: "Aceptaron", value: acceptedCount },
+          { label: "Redimieron", value: redeemedCount },
+        ].map((stage, index) => {
+          const pct = counts.todos
+            ? Math.round((stage.value / counts.todos) * 100)
+            : 0;
+          return (
+            <div className="birthday-stage" key={stage.label}>
+              <div className="birthday-stage-head">
+                <span>{stage.label}</span>
+                <b>{stage.value}</b>
+              </div>
+              <div className="birthday-stage-track">
+                <i
+                  style={{
+                    width: index === 0 ? "100%" : `${Math.max(pct, 3)}%`,
+                  }}
+                />
+              </div>
+              <small>{index === 0 ? "Punto de partida" : `${pct}% de la base`}</small>
+            </div>
+          );
+        })}
       </div>
 
       <div className="bw-filters">
@@ -2976,16 +3021,47 @@ function BirthdayWorkspace({
                           <span className="bw-days">
                             {daysLabel(item.days)}
                           </span>
+                        </div>
+                        <div className="bw-meta">
+                          {item.record.phone || "Sin teléfono"} ·{" "}
+                          {promoteFor(row)}
+                          {campaign?.responsible
+                            ? ` · ${campaign.responsible}`
+                            : ""}
+                        </div>
+                        <div className="bw-card-foot">
+                          <select
+                            className="bw-status-select"
+                            value={row.progress}
+                            disabled={createCall.isPending}
+                            aria-label={`Estado de ${item.record.clientName || "cliente"}`}
+                            onChange={event =>
+                              setStatus(
+                                row,
+                                event.target.value as
+                                  | "pending"
+                                  | "contacted"
+                                  | "accepted"
+                                  | "redeemed"
+                                  | "rejected"
+                                  | "noanswer"
+                              )
+                            }
+                          >
+                            <option value="pending">Pendiente</option>
+                            <option value="contacted">Contactado</option>
+                            <option value="accepted">Aceptó</option>
+                            <option value="redeemed">Redimió</option>
+                            <option value="rejected">No redimió</option>
+                            <option value="noanswer">No contestó</option>
+                          </select>
                           {campaign?.nextActionAt ? (
                             <button
                               className={`bw-next ${nextActionOverdue ? "overdue" : ""}`}
                               onClick={() => setExpandedKey(row.key)}
                               title="Editar próxima acción"
                             >
-                              ⏰{" "}
-                              {campaign.nextActionLabel ||
-                                "Próxima acción"}
-                              :{" "}
+                              ⏰ {campaign.nextActionLabel || "Próxima acción"}:{" "}
                               {new Date(campaign.nextActionAt).toLocaleDateString(
                                 "es-PE",
                                 { day: "2-digit", month: "short" }
@@ -2997,20 +3073,13 @@ function BirthdayWorkspace({
                               className="bw-next empty"
                               onClick={() => setExpandedKey(row.key)}
                             >
-                              + Programar próxima acción
+                              + Próxima acción
                             </button>
                           )}
                           <span className="bw-attempts">
                             {row.callAttempts > 0
-                              ? `☎ ${row.callAttempts} intento${row.callAttempts === 1 ? "" : "s"}${
-                                  row.lastAttemptAt
-                                    ? ` · último ${row.lastAttemptAt.toLocaleDateString(
-                                        "es-PE",
-                                        { day: "2-digit", month: "short" }
-                                      )}`
-                                    : ""
-                                }`
-                              : "Sin llamadas registradas"}
+                              ? `☎ ${row.callAttempts} intento${row.callAttempts === 1 ? "" : "s"}`
+                              : "Sin llamadas"}
                           </span>
                           <button
                             className="bw-history-link"
@@ -3019,51 +3088,7 @@ function BirthdayWorkspace({
                               setHistorySection("contacts");
                             }}
                           >
-                            Ver historial
-                          </button>
-                        </div>
-                        <div className="bw-meta">
-                          {item.record.phone || "Sin teléfono"} ·{" "}
-                          {promoteFor(row)}
-                          {campaign?.responsible
-                            ? ` · ${campaign.responsible}`
-                            : ""}
-                        </div>
-                        <div className="bw-status">
-                          <button
-                            className={row.contacted ? "active" : ""}
-                            disabled={createCall.isPending}
-                            onClick={() => registerCall(row, "contacted")}
-                          >
-                            ✓ Contactado
-                          </button>
-                          <button
-                            className={row.accepted ? "active" : ""}
-                            disabled={createCall.isPending}
-                            onClick={() => registerCall(row, "accepted")}
-                          >
-                            ★ Aceptó
-                          </button>
-                          <button
-                            className={row.redeemed ? "active" : ""}
-                            disabled={createCall.isPending}
-                            onClick={() => registerCall(row, "redeemed")}
-                          >
-                            ● Redimió
-                          </button>
-                          <button
-                            className={campaign?.noRedeemReason ? "warn" : ""}
-                            disabled={createCall.isPending}
-                            onClick={() => registerCall(row, "rejected")}
-                          >
-                            ✕ No redimió
-                          </button>
-                          <button
-                            className={row.noanswer ? "warn active" : ""}
-                            disabled={createCall.isPending}
-                            onClick={() => registerCall(row, "noanswer")}
-                          >
-                            ☎ No contestó
+                            Historial
                           </button>
                         </div>
                         {campaign?.noRedeemReason && (
