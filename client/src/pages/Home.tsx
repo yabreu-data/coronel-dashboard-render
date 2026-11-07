@@ -4150,7 +4150,7 @@ function Overview({
           </div>
           <div className="weekly-caption">
             <span>ÚLTIMOS 7 DÍAS</span>
-            <b>{weeklyVolume.reduce((sum, day) => sum + day.count, 0)} encuestas</b>
+            <b>{plural(weeklyVolume.reduce((sum, day) => sum + day.count, 0), "encuesta", "encuestas")}</b>
           </div>
           {weeklyVolume.some(day => day.count > 0) ? (
             <div className="weekly-trend" aria-label="Encuestas de los últimos 7 días">
