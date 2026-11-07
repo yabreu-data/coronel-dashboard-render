@@ -2465,12 +2465,12 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
 }
 
 /* ============================================================
-   Tipografía editorial — Fraunces + Source Serif 4
+   Tipografía A — Manrope + Lora
    Cálida, serif y legible, con un guiño Ghibli.
    ============================================================ */
 :root {
-  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --font-body: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-display: "Lora", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body: "Manrope", "Segoe UI", ui-sans-serif, sans-serif;
   --canvas: #f7f2e7;
   --surface: #fffdf8;
   --ink: #20372a;

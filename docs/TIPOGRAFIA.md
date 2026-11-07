@@ -1,18 +1,24 @@
-# Tipografía editorial — Fraunces + Source Serif 4
+# Tipografía A — Manrope + Lora
 
-## Dirección
+## Dirección elegida
 
-Una tipografía **serif cálida y editorial**, con aire de libro ilustrado y
-restaurante de barrio: moderna, legible y con un guiño Ghibli sin convertirse en
-un tema infantil.
+Una tipografía **cálida y de restaurante**, pero con lectura rápida para el día a
+día:
+
+- **Manrope** para operar: texto, botones, tablas, listas y formularios.
+- **Lora** para la marca: títulos, cifras y momentos editoriales.
+- Respaldo: Segoe UI / Georgia si Google Fonts no carga.
+
+La decisión busca el equilibrio entre lo agradable y lo usable: una cajera o el
+dueño deben leer rápido, pero la app no debe sentirse como un software genérico.
 
 ## Familias
 
-| Uso | Fuente | Por qué |
-|---|---|---|
-| Títulos y cifras | **Fraunces** | Serif contemporánea, curvas suaves y personalidad; funciona como letrero de restaurante. |
-| Texto, botones y UI | **Source Serif 4** | Serif de lectura, clara en tamaños pequeños; evita el contraste duro de una sans. |
-| Respaldo | Georgia, Palatino, serif | Si Google Fonts no carga, la app conserva el carácter serif. |
+| Uso | Fuente |
+|---|---|
+| Títulos H1–H3, cifras KPI, fechas destacadas | **Lora** |
+| Cuerpo, navegación, botones, tablas, etiquetas | **Manrope** |
+| Respaldo | Segoe UI / Georgia |
 
 Cargadas desde Google Fonts en `client/index.html` con `display=swap`.
 
@@ -30,41 +36,41 @@ Cargadas desde Google Fonts en `client/index.html` con `display=swap`.
 | Cifras KPI | 30 px | 27 px |
 
 - Interlineado 1.55 en cuerpo y 1.05–1.12 en títulos.
-- `letter-spacing` negativo solo en títulos; etiquetas con tracking amplio.
-- Números con `lining-nums tabular-nums`.
-- Se eliminaron tamaños de 8–9 px en textos operativos.
+- Manrope con pesos 400–700; Lora 500–700.
+- Números KPI con cifras tabulares y Lora para darles presencia.
+- Se eliminaron tamaños operativos de 8–9 px.
 
 ## Toque Ghibli
 
-- Fondo **papel cálido** (`#f7f2e7`) en lugar de blanco frío.
+- Fondo **papel cálido** (`#f7f2e7`).
 - Tarjetas **marfil** (`#fffdf8`).
-- Verde bosque y salvia se mantienen como base de marca.
-- Serif con curvas suaves en títulos; texto de lectura en lugar de sans.
-- Bordes y sombras suaves, sin exceso de gradientes ni efectos.
+- Verde bosque y salvia como base de marca.
+- Lora aporta el aire de libro ilustrado; Manrope mantiene la interfaz ágil.
+- Bordes y sombras suaves, sin efectos excesivos.
 - La identidad Coronel (verde, rojo, salvia) no cambia.
 
 ## Antes / después
 
 | Antes | Ahora |
 |---|---|
-| Inter sans en todo | Fraunces para títulos y cifras; Source Serif 4 para lectura |
-| Títulos genéricos | Títulos con carácter editorial |
-| Etiquetas de 8–10 px | Etiquetas de 10–11 px |
-| Números con sans | Cifras serif alineadas |
+| Fraunces + Source Serif 4 en todo | Lora para títulos; Manrope para lectura |
+| Texto serif en listas largas | Texto sans legible en la operación |
+| Interfaz sentida como “libro” | Interfaz de restaurante moderna |
+| Etiquetas pequeñas | Escala mínima normalizada |
 | Fondo blanco frío | Papel cálido con tarjetas marfil |
-| Tipografía sin jerarquía | Escala fija de 6 niveles |
 
 ## Cuidados
 
-- No usar Fraunces en párrafos largos: se reserva para títulos y cifras.
-- No bajar de 10 px en etiquetas.
-- Mantener contraste AA; el serif fino necesita fondos claros.
-- Evitar mayúsculas sostenidas largas: se usan solo en eyebrows y pills.
+- Lora solo en títulos, cifras y fechas destacadas; no en párrafos.
+- Manrope no debe bajar de 10 px en etiquetas.
+- Mantener contraste AA.
+- Evitar mayúsculas sostenidas largas: solo eyebrows y pills.
 
 ## Capturas
 
-- [Centro de acción](screenshots/ux/fonts-overview.png)
-- [Cumpleaños](screenshots/ux/fonts-birthdays.png)
-- [Clientes](screenshots/ux/fonts-clients.png)
-- [Prioridades](screenshots/ux/fonts-priorities.png)
-- [Móvil](screenshots/ux/fonts-mobile.png)
+- [Centro de acción](screenshots/ux/typography-a-overview.png)
+- [Cumpleaños](screenshots/ux/typography-a-birthdays.png)
+- [Clientes](screenshots/ux/typography-a-clients.png)
+- [Prioridades](screenshots/ux/typography-a-priorities.png)
+- [Móvil](screenshots/ux/typography-a-mobile.png)
+- [Comparación A/B/C que se usó para decidir](screenshots/ux/typography-comparison.png)
