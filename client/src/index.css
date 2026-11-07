@@ -3055,3 +3055,66 @@ button:active:not(:disabled) { transform: scale(.985); }
 .insight-card:active, .clients-row:active, .today-task:active, .priority-queue-item:active { transform: scale(.995) !important; }
 .btn-rojo:focus-visible, .btn-borde:focus-visible, .quick-call-button:focus-visible,
 .insight-card:focus-visible, .nav-item:focus-visible { outline: 2px solid #1b3b2a !important; outline-offset: 2px; }
+
+/* Bienvenida cálida y logo limpio, sin sombra */
+.auth-logo-wrap {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  margin: 0 auto 10px;
+  padding: 6px 0 2px;
+  background: radial-gradient(ellipse at center, #f4efe3 0%, rgba(244,239,227,0) 68%);
+}
+.auth-wall-card .loading-logo {
+  width: min(235px, 68vw) !important;
+  margin: 0 auto !important;
+  -webkit-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+.auth-wall-card .auth-brand-caption {
+  color: #8a998e !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .22em !important;
+  margin: 0 0 14px !important;
+}
+.auth-wall-card .auth-badge {
+  background: #1b3b2a !important;
+  color: #f8f4ea !important;
+  border-radius: 6px !important;
+  letter-spacing: .13em !important;
+}
+.auth-wall-card h1 {
+  font-size: clamp(32px, 4vw, 42px) !important;
+  letter-spacing: -.045em !important;
+  margin: 12px 0 8px !important;
+}
+.auth-wall-card .auth-lead {
+  max-width: 390px;
+  margin: 0 auto 22px !important;
+  color: #6b756c !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+.auth-wall-card .auth-wall-button {
+  min-height: 46px;
+  border-radius: 9px !important;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+.auth-wall-card .auth-help {
+  margin-top: 20px !important;
+  color: #7d877e !important;
+  font-size: 10.5px !important;
+  line-height: 1.55 !important;
+}
+.auth-wall-card .auth-inline-row { border-top: 1px solid #eee7da; padding-top: 14px; }
+.auth-wall-card .auth-link { color: #1b3b2a !important; font-weight: 700; }
+.auth-wall-card .auth-link:hover { color: #c4513b !important; }
+.auth-wall-card form { margin-top: 2px; }
+@media (max-width: 760px) {
+  .auth-wall-card { padding: 26px 20px !important; }
+  .auth-wall-card h1 { font-size: 32px !important; }
+  .auth-wall-card .auth-lead { font-size: 13px !important; }
+}

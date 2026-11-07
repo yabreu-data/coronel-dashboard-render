@@ -140,11 +140,13 @@ export default function Login() {
   return (
     <div className="auth-wall">
       <div className="auth-wall-card">
-        <img className="loading-logo" src="/manus-storage/logo-coronel.png" alt="Coronel · Pollos y Parrillas" />
-        <span className="auth-brand-caption">Sistema de gestión</span>
+        <div className="auth-logo-wrap">
+          <img className="loading-logo" src="/manus-storage/logo-coronel.png" alt="Coronel · Pollos y Parrillas" />
+        </div>
+        <span className="auth-brand-caption">Pollos y Parrillas · Sistema de gestión</span>
         <span className="auth-badge">
           {mode === "login"
-            ? "ACCESO RESTRINGIDO"
+            ? "PARA EL EQUIPO DE CORONEL"
             : mode === "request"
               ? "SOLICITUD DE ACCESO"
               : "RECUPERAR CONTRASEÑA"}
@@ -152,8 +154,8 @@ export default function Login() {
 
         {mode === "login" && (
           <>
-            <h1>Inicia sesión para continuar</h1>
-            <p>El reporte contiene información de clientes, llamadas y desempeño interno. Necesitas una cuenta autorizada para consultar el dashboard.</p>
+            <h1>Bienvenido a Coronel</h1>
+            <p className="auth-lead">Cada cliente cuenta. Entra para cuidar a los tuyos y empezar el día con todo en orden.</p>
 
             <form onSubmit={handleLogin} style={{ display: "grid", gap: 14 }}>
               <div>
@@ -168,7 +170,7 @@ export default function Login() {
               {error && <p role="alert" className="auth-error">{error}</p>}
 
               <button type="submit" className="auth-wall-button" disabled={submitting} style={{ opacity: submitting ? 0.7 : 1, cursor: submitting ? "wait" : "pointer" }}>
-                {submitting ? "Verificando…" : "Iniciar sesión"}
+                {submitting ? "Entrando…" : "Entrar"}
               </button>
             </form>
 
@@ -238,7 +240,7 @@ export default function Login() {
         )}
 
         <p className="auth-help">
-          El acceso es aprobado por un administrador de Coronel. Si ya tienes cuenta, usa tu contraseña o la opción de recuperación.
+          Solo para el equipo autorizado de Coronel. Si necesitas acceso, pídelo aquí y un administrador lo aprueba.
         </p>
       </div>
     </div>
