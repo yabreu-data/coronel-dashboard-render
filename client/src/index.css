@@ -1997,3 +1997,34 @@ tr:hover td { background: #f7fbf8 !important; }
 .filter-group button:hover, .reset-button:hover { background: #eaf6ef !important; }
 .small-action:hover { background: #ffe4df !important; }
 .bw-chip:hover { background: #eaf6ef !important; border-color: #acd3b6 !important; }
+
+/* Últimos textos sobre fondos claros y hovers */
+.voice-highlight-panel .sentiment-word.sentiment-positive b,
+.voice-highlight-panel .sentiment-word.sentiment-positive strong,
+.voice-highlight-panel .sentiment-word.sentiment-positive small { color: #1d4a31 !important; }
+.voice-negative-panel .sentiment-word.sentiment-negative b,
+.voice-negative-panel .sentiment-word.sentiment-negative strong,
+.voice-negative-panel .sentiment-word.sentiment-negative small { color: #a52a1c !important; }
+.voice-list-item p { color: #173b2b !important; }
+.priority-item em { color: #8a5a12 !important; }
+.history-toggle { color: #2f6b4f !important; }
+.priority-meta { color: #b52e22 !important; }
+.priority-status-help { color: #4f6f5e !important; }
+.session-admin-filters label { color: #4f6f5e !important; }
+.permission-chips span.disabled { color: #4f6f5e !important; }
+.nav-section-label { color: #b9d9c7 !important; }
+.admin-user-row > button { background: #eaf6ef !important; color: #1d4a31 !important; border: 1px solid #acd3b6 !important; }
+.admin-user-row > button:hover { background: #dcefe4 !important; }
+
+/* Hovers consistentes */
+button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voice-list-item, .table-call {
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+.bw-action:hover { background: #eaf6ef !important; border-color: #acd3b6 !important; color: #123b26 !important; }
+.bw-action-whatsapp:hover { background: #153b28 !important; color: #ffffff !important; border-color: #153b28 !important; }
+.btn-rojo:hover { background: #bd2f22 !important; }
+.btn-borde:hover { background: #eaf6ef !important; }
+.segment-tabs button:hover, .birthday-range-controls button:hover, .priority-pagination button:hover { background: #eaf6ef !important; }
+.table-call:hover { background: #ffe4df !important; }
+.bw-chip:hover { background: #eaf6ef !important; color: #123b26 !important; }
+.filter-group button:hover { color: #1d4a31 !important; }
