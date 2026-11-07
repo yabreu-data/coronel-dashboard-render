@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Cake,
+  CheckCircle2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -608,6 +609,12 @@ export default function Home() {
     const saved = localStorage.getItem("coronel.lastPage") as Page | null;
     return saved && tabs.some(tab => tab.id === saved) ? saved : "overview";
   });
+  const [quickCallOpen, setQuickCallOpen] = useState(false);
+  const [quickCallQuery, setQuickCallQuery] = useState("");
+  const [quickCallProfile, setQuickCallProfile] = useState<ClientProfile | null>(
+    null
+  );
+  const [callSavedNotice, setCallSavedNotice] = useState("");
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
@@ -923,6 +930,16 @@ export default function Home() {
             </p>
           </div>
           <div className="top-actions">
+            <button
+              className="quick-call-button"
+              onClick={() => {
+                setQuickCallQuery("");
+                setQuickCallOpen(true);
+              }}
+            >
+              <Phone size={15} />
+              <span>Registrar llamada</span>
+            </button>
             <label className="source-selector">
               <span>Datos</span>
               <select
@@ -1210,6 +1227,10 @@ export default function Home() {
                   search={search}
                   isAdmin={isAdmin}
                   onNavigate={navigate}
+                  onRegisterCall={(query?: string) => {
+                    setQuickCallQuery(query || "");
+                    setQuickCallOpen(true);
+                  }}
                   promotions={
                     (promotionsAdminQuery.data ?? []) as PromotionItem[]
                   }
@@ -1334,6 +1355,35 @@ export default function Home() {
         areaLabel={title || "Centro de acción"}
         filterLabel={`Calidad: ${qualityFilter} · Búsqueda: ${search || "sin búsqueda"}`}
       />
+      {quickCallOpen && (
+        <QuickCallPicker
+          profiles={profiles}
+          initialQuery={quickCallQuery}
+          onClose={() => setQuickCallOpen(false)}
+          onSelect={profile => {
+            setQuickCallOpen(false);
+            setQuickCallProfile(profile);
+          }}
+        />
+      )}
+      {quickCallProfile && (
+        <CallLogForm
+          profile={quickCallProfile}
+          logs={(callsQuery.data ?? []) as CallLog[]}
+          onClose={() => setQuickCallProfile(null)}
+          onSaved={profile => {
+            setCallSavedNotice(
+              `Llamada de ${profile.name} guardada. Si programaste una próxima llamada, ya aparece en Prioridades.`
+            );
+            window.setTimeout(() => setCallSavedNotice(""), 5000);
+          }}
+        />
+      )}
+      {callSavedNotice && (
+        <div className="app-toast" role="status">
+          <CheckCircle2 size={17} /> {callSavedNotice}
+        </div>
+      )}
     </div>
   );
 }
@@ -6159,6 +6209,99 @@ function PromotionManager({ promotions }: { promotions: PromotionItem[] }) {
   );
 }
 
+function QuickCallPicker({
+  profiles,
+  onClose,
+  onSelect,
+  initialQuery = "",
+}: {
+  profiles: ClientProfile[];
+  onClose: () => void;
+  onSelect: (profile: ClientProfile) => void;
+  initialQuery?: string;
+}) {
+  const [query, setQuery] = useState(initialQuery);
+  const dialogRef = useDialogFocus(true, onClose);
+  const search = normalizeText(query.trim());
+  const results = profiles
+    .filter(profile => {
+      if (!search) return true;
+      return normalizeText(
+        `${profile.name} ${profile.phone || ""} ${profile.segment}`
+      ).includes(search);
+    })
+    .sort((a, b) => {
+      const rank = (value: string) => (value === "En riesgo" ? 0 : 1);
+      return rank(a.segment) - rank(b.segment) || b.count - a.count;
+    })
+    .slice(0, 10);
+
+  return (
+    <div className="quick-call-backdrop" onClick={onClose}>
+      <div
+        className="quick-call-modal"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Elegir cliente para registrar llamada"
+        onClick={event => event.stopPropagation()}
+      >
+        <div className="quick-call-head">
+          <div>
+            <p className="eyebrow">REGISTRAR LLAMADA</p>
+            <h3>¿A quién llamaste?</h3>
+            <p className="muted">
+              Busca por nombre o teléfono. Primero aparecen los clientes por
+              recuperar.
+            </p>
+          </div>
+          <button className="icon-button" onClick={onClose} aria-label="Cerrar">
+            <X size={18} />
+          </button>
+        </div>
+        <label className="quick-call-search">
+          <Search size={15} />
+          <input
+            autoFocus
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            placeholder="Nombre o teléfono del cliente…"
+          />
+        </label>
+        <div className="quick-call-results">
+          {results.map(profile => (
+            <button
+              className="quick-call-result"
+              key={profile.key}
+              onClick={() => onSelect(profile)}
+            >
+              <span className="clients-avatar">
+                {profile.name
+                  .split(" ")
+                  .slice(0, 2)
+                  .map(part => part.charAt(0))
+                  .join("")
+                  .toUpperCase() || "?"}
+              </span>
+              <span>
+                <b>{profile.name}</b>
+                <small>
+                  {profile.phone || "Sin teléfono"} ·{" "}
+                  {segmentLabelFor(profile.segment)}
+                </small>
+              </span>
+              <span className="quick-call-pick">Elegir</span>
+            </button>
+          ))}
+          {!results.length && (
+            <Empty text="No encontré un cliente con ese nombre o teléfono." />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CallLogForm({
   profile,
   onClose,
@@ -6166,6 +6309,7 @@ function CallLogForm({
   campaignStage,
   campaignChannel,
   logs = [],
+  onSaved,
 }: {
   profile: ClientProfile;
   onClose: () => void;
@@ -6173,6 +6317,7 @@ function CallLogForm({
   campaignStage?: CampaignStage;
   campaignChannel?: CampaignChannel;
   logs?: CallLog[];
+  onSaved?: (profile: ClientProfile) => void;
 }) {
   const utils = trpc.useUtils();
   const promotionsQuery = trpc.promotions.list.useQuery();
@@ -6180,6 +6325,7 @@ function CallLogForm({
   const create = trpc.calls.create.useMutation({
     onSuccess: async () => {
       await utils.calls.list.invalidate();
+      onSaved?.(profile);
       onClose();
     },
   });
@@ -6228,8 +6374,14 @@ function CallLogForm({
             <p className="eyebrow">SEGUIMIENTO DE CONTACTO</p>
             <h3>{profile.name}</h3>
             <p className="muted">
-              {profile.phone || "Sin teléfono"} · {profile.segment} ·{" "}
-              {profile.count} encuesta(s)
+              {profile.phone ? (
+                <a className="call-phone-link" href={`tel:${profile.phone.replace(/[^\d+]/g, "")}`}>
+                  ☎ {profile.phone}
+                </a>
+              ) : (
+                "Sin teléfono"
+              )}{" "}
+              · {segmentLabelFor(profile.segment)} · {profile.count} encuesta(s)
             </p>
             {campaignStage && (
               <small className="campaign-context-note">
@@ -6635,12 +6787,14 @@ function CallsHistory({
   promotions,
   isAdmin,
   onNavigate,
+  onRegisterCall,
 }: {
   logs: CallLog[];
   search: string;
   promotions: PromotionItem[];
   isAdmin: boolean;
   onNavigate: (page: Page) => void;
+  onRegisterCall: (query?: string) => void;
 }) {
   const [outcome, setOutcome] = useState("Todos");
   const [redeemed, setRedeemed] = useState("Todos");
@@ -6751,6 +6905,18 @@ function CallsHistory({
       normalizeText(log.recoveryResult || "").includes("recuperado") &&
       !normalizeText(log.recoveryResult || "").includes("no recuperado")
   ).length;
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const scheduledCalls = logs
+    .flatMap(log => {
+      if (!log.nextCallDate) return [];
+      const date = new Date(log.nextCallDate);
+      if (Number.isNaN(date.getTime())) return [];
+      return [{ log, date }];
+    })
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  const upcomingCalls = scheduledCalls.filter(item => item.date >= todayStart);
+  const overdueCalls = scheduledCalls.filter(item => item.date < todayStart);
   const exportCalls = () =>
     downloadGenericCsv(
       `historial-llamadas-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
@@ -6795,16 +6961,71 @@ function CallsHistory({
             próxima acción. El buscador superior también filtra esta vista.
           </p>
         </div>
-        <div className="intro-note">
-          <Phone size={17} />
-          <span>
-            <b>Seguimiento trazable</b>
-            <small>
-              {plural(visible.length, "registro visible", "registros visibles")} de {logs.length} guardados.
-            </small>
-          </span>
+        <div className="calls-page-actions">
+          <button className="btn-rojo" onClick={() => onRegisterCall()}>
+            <Phone size={15} /> Registrar llamada
+          </button>
+          <small>
+            {plural(visible.length, "registro visible", "registros visibles")} de{" "}
+            {logs.length} guardados
+          </small>
         </div>
       </div>
+      <section className="panel calls-agenda-panel">
+        <div className="panel-head">
+          <div>
+            <p className="eyebrow">AGENDA</p>
+            <h3>Próximas llamadas</h3>
+          </div>
+          <Pill tone={overdueCalls.length ? "red" : "green"}>
+            {overdueCalls.length
+              ? `${overdueCalls.length} atrasadas`
+              : `${upcomingCalls.length} programadas`}
+          </Pill>
+        </div>
+        {overdueCalls.length > 0 && (
+          <div className="calls-overdue-note">
+            Tienes {plural(overdueCalls.length, "llamada atrasada", "llamadas atrasadas")}.
+            Empieza por ellas.
+          </div>
+        )}
+        {scheduledCalls.length ? (
+          <div className="calls-agenda-list">
+            {[...overdueCalls, ...upcomingCalls].slice(0, 4).map(({ log, date }) => (
+              <div className={`calls-agenda-row ${date < todayStart ? "is-overdue" : ""}`} key={log.id}>
+                <span className="calls-agenda-date">
+                  <b>{String(date.getDate()).padStart(2, "0")}</b>
+                  <small>
+                    {new Intl.DateTimeFormat("es-PE", { month: "short" })
+                      .format(date)
+                      .replace(".", "")}
+                  </small>
+                </span>
+                <span className="calls-agenda-copy">
+                  <b>{log.clientName || "Cliente sin nombre"}</b>
+                  <small>
+                    {log.phone || "Sin teléfono"} ·{" "}
+                    {log.nextCallDate
+                      ? formatDateTime(log.nextCallDate)
+                      : "Sin fecha"}
+                  </small>
+                </span>
+                <button
+                  className="calls-agenda-action"
+                  onClick={() => onRegisterCall(log.clientName)}
+                >
+                  <Phone size={13} /> Registrar
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Empty text="No tienes llamadas programadas. Registra una cuando termines un contacto." />
+        )}
+        <button className="panel-link" onClick={() => onRegisterCall()}>
+          Registrar una llamada <ChevronRight size={15} />
+        </button>
+      </section>
       <div className="stats-grid">
         <Stat
           label="LLAMADAS"
@@ -6984,8 +7205,8 @@ function CallsHistory({
         ) : (
           <div className="empty-state-block">
             <Empty text="Todavía no hay llamadas registradas con estos filtros." />
-            <button className="btn-borde" onClick={() => onNavigate("clients")}>
-              Ir a Clientes para registrar una llamada
+            <button className="btn-borde" onClick={() => onRegisterCall()}>
+              <Phone size={14} /> Registrar una llamada
             </button>
           </div>
         )}

@@ -2617,3 +2617,58 @@ td { font-size: 13px !important; }
 .face { flex-shrink: 0 !important; }
 .face-sm { width: 30px !important; height: 30px !important; min-width: 30px !important; }
 .risk-row .face, .today-client .face, .clients-priority-row .face { flex: 0 0 30px !important; }
+
+/* ===== Flujo rápido de llamada ===== */
+.quick-call-button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 1px solid #d93a2b; border-radius: 9px; background: #d93a2b; color: #ffffff; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.quick-call-button:hover { background: #bd2f22; border-color: #bd2f22; }
+.call-phone-link { color: #1d4a31; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.quick-call-backdrop { position: fixed; inset: 0; z-index: 65; display: grid; place-items: center; padding: 18px; background: rgba(23,59,43,.42); }
+.quick-call-modal { width: min(560px, 100%); max-height: 82vh; overflow: auto; padding: 20px; border: 1px solid #e3ddcc; border-radius: 18px; background: #fffdf8; box-shadow: 0 24px 60px rgba(29,74,49,.22); }
+.quick-call-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.quick-call-head h3 { margin: 4px 0 4px; font-size: 24px; }
+.quick-call-head p { margin: 0; max-width: 430px; }
+.quick-call-head .icon-button { flex-shrink: 0; }
+.quick-call-search { display: flex; align-items: center; gap: 7px; margin: 14px 0 10px; padding: 0 10px; min-height: 39px; border: 1px solid #cfe4d8; border-radius: 9px; background: #ffffff; color: #5d6d5c; }
+.quick-call-search input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: #20372a; font-size: 14px; }
+.quick-call-results { display: flex; flex-direction: column; gap: 5px; }
+.quick-call-result { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 7px; border: 0; border-top: 1px solid #eee8da; background: transparent; color: #20372a; text-align: left; }
+.quick-call-result:first-child { border-top: 0; }
+.quick-call-result:hover { background: #eaf6ef; border-radius: 8px; }
+.quick-call-result > span:nth-child(2) { min-width: 0; flex: 1; }
+.quick-call-result b { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-call-result small { display: block; margin-top: 2px; color: #5d6d5c; font-size: 11px; }
+.quick-call-pick { flex-shrink: 0; padding: 5px 7px; border-radius: 5px; background: #fff1ef; color: #b52e22; font-size: 10px; font-weight: 700; }
+.app-toast { position: fixed; right: 22px; bottom: 22px; z-index: 75; display: flex; align-items: flex-start; gap: 8px; max-width: 380px; padding: 12px 14px; border: 1px solid #acd3b6; border-radius: 12px; background: #eaf6ef; color: #1d4a31; font-size: 12.5px; line-height: 1.4; box-shadow: 0 12px 28px rgba(29,74,49,.16); }
+.app-toast svg { flex-shrink: 0; margin-top: 1px; }
+
+/* Agenda de llamadas */
+.calls-page-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.calls-page-actions small { color: #5d6d5c; font-size: 10.5px; text-align: right; }
+.calls-agenda-panel { margin: 12px 0 14px; padding-top: 15px; }
+.calls-overdue-note { margin: -3px 0 8px; padding: 7px 9px; border-radius: 7px; background: #fff1ef; color: #b52e22; font-size: 11px; font-weight: 700; }
+.calls-agenda-list { display: flex; flex-direction: column; gap: 5px; }
+.calls-agenda-row { display: flex; align-items: center; gap: 9px; padding: 8px 7px; border: 1px solid #e8e2d5; border-left: 3px solid #acd3b6; border-radius: 10px; background: #ffffff; }
+.calls-agenda-row.is-overdue { border-left-color: #d93a2b; background: #fffaf9; }
+.calls-agenda-date { width: 38px; flex: 0 0 38px; padding: 4px 0; border-radius: 7px; background: #1d4a31; color: #ffffff; text-align: center; }
+.calls-agenda-date b { display: block; color: #ffffff; font-family: var(--font-display) !important; font-size: 16px; line-height: 1; }
+.calls-agenda-date small { display: block; margin-top: 2px; color: #d7ecdf; font-size: 8px; text-transform: uppercase; }
+.calls-agenda-copy { min-width: 0; flex: 1; }
+.calls-agenda-copy b { display: block; color: #20372a; font-size: 12px; }
+.calls-agenda-copy small { display: block; margin-top: 2px; color: #5d6d5c; font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.calls-agenda-action { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 29px; padding: 0 8px; border: 1px solid #efb8b1; border-radius: 7px; background: #fff1ef; color: #b52e22; font-size: 10px; font-weight: 700; }
+.calls-agenda-action:hover { background: #ffe4df; }
+@media (max-width: 760px) {
+  .quick-call-button { width: 36px; min-height: 34px; padding: 0; justify-content: center; }
+  .quick-call-button span { display: none; }
+  .quick-call-backdrop { padding: 12px; }
+  .quick-call-modal { padding: 16px; max-height: 88vh; }
+  .quick-call-head h3 { font-size: 21px; }
+  .quick-call-result { padding: 9px 4px; }
+  .quick-call-result b { font-size: 12.5px; }
+  .app-toast { left: 12px; right: 12px; bottom: 82px; max-width: none; }
+  .calls-page-actions { align-items: stretch; width: 100%; margin-top: 8px; }
+  .calls-page-actions .btn-rojo { justify-content: center; }
+  .calls-page-actions small { text-align: left; }
+  .calls-agenda-row { gap: 7px; }
+  .calls-agenda-action { min-height: 34px; }
+}
