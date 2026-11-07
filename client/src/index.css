@@ -2207,3 +2207,30 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
 }
 
 .birthday-toolbar-month { text-transform: none !important; }
+
+/* Calendario de cumpleaños en tema claro */
+.birthday-calendar-day { background: #ffffff !important; border: 1px solid #d7e8dd !important; color: #173b2b !important; }
+.birthday-calendar-day:hover { background: #eaf6ef !important; border-color: #acd3b6 !important; }
+.birthday-calendar-day.has-birthdays { background: #fff8e8 !important; border-color: #e8c98a !important; color: #8a5a12 !important; }
+.birthday-calendar-day.has-birthdays strong, .birthday-calendar-day.has-birthdays small { color: #8a5a12 !important; }
+.birthday-calendar-day.today { background: #e3f2ea !important; border-color: #2f6b4f !important; color: #1d4a31 !important; }
+.birthday-calendar-day.selected { background: #1d4a31 !important; border-color: #1d4a31 !important; color: #ffffff !important; }
+.birthday-calendar-day.selected strong, .birthday-calendar-day.selected small { color: #ffffff !important; }
+.birthday-calendar-day.selected .birthday-calendar-dot { background: #acd3b6 !important; }
+.birthday-calendar-weekdays span { color: #4f6f5e !important; }
+.birthday-calendar-empty { background: transparent !important; border-color: transparent !important; }
+.birthday-calendar-legend span { color: #4f6f5e !important; }
+.birthday-calendar-legend .legend-today { background: #e3f2ea !important; color: #1d4a31 !important; }
+.birthday-calendar-legend .legend-birthday { background: #fff8e8 !important; color: #8a5a12 !important; }
+.birthday-calendar-legend .legend-selected { background: #1d4a31 !important; color: #ffffff !important; }
+
+@media (max-width: 760px) {
+  .birthday-page-intro { padding: 14px !important; }
+  .birthday-page-intro h2 { font-size: 22px !important; }
+  .birthday-page-intro > div:first-child > p { display: none; }
+  .birthday-page-intro .birthday-toolbar { margin-top: 8px; }
+  .bw-card-foot .bw-attempts { display: none !important; }
+  .birthday-command-copy > p { font-size: 11.5px; }
+  .birthday-funnel-compact { padding: 10px 11px; }
+  .birthday-funnel-compact .birthday-stage:nth-child(n+3) { margin-top: 2px; }
+}
