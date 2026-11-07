@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   Settings2,
   History,
+  HelpCircle,
 } from "lucide-react";
 import { isBirthdayInNextDays } from "@shared/customerUtils";
 import { hasScoredQuality, wilsonInterval } from "@shared/metricsUtils";
@@ -513,6 +514,33 @@ function Pill({
 }) {
   return <span className={`pill pill-${tone}`}>{children}</span>;
 }
+function BusinessGuide({
+  title,
+  steps,
+}: {
+  title: string;
+  steps: string[];
+}) {
+  return (
+    <details className="business-guide">
+      <summary>
+        <HelpCircle size={15} /> ¿Cómo uso esta página?
+      </summary>
+      <div className="business-guide-body">
+        <b>{title}</b>
+        <ol>
+          {steps.map((step, index) => (
+            <li key={step}>
+              <span>{index + 1}</span>
+              {step}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </details>
+  );
+}
+
 function Empty({ text }: { text: string }) {
   return (
     <div className="empty">
@@ -791,7 +819,7 @@ export default function Home() {
           src="/manus-storage/logo-coronel.png"
           alt="Coronel"
         />
-        <p>Cargando datos desde Google Sheets…</p>
+        <p>Cargando tus datos…</p>
       </div>
     );
   if (error)
@@ -869,7 +897,7 @@ export default function Home() {
           <div className="live-dot" />
           <div>
             <b>Conectado</b>
-            <span>Google Sheets</span>
+            <span>Datos al día</span>
           </div>
         </div>
       </aside>
@@ -881,20 +909,20 @@ export default function Home() {
             </p>
             <h1>{title}</h1>
             <p className="muted">
-              Actualización automática cada 5 minutos · {data?.source}
+              {sourceTab === "limpia" ? "Datos reales" : "Datos de prueba"} · actualización automática cada 5 minutos
             </p>
           </div>
           <div className="top-actions">
             <label className="source-selector">
-              <span>Fuente</span>
+              <span>Datos</span>
               <select
                 value={sourceTab}
                 onChange={e =>
                   setSourceTab(e.target.value as "original" | "limpia")
                 }
               >
-                <option value="original">Encuestas (pruebas)</option>
-                <option value="limpia">Encuestas_Limpias</option>
+                <option value="original">Datos de prueba</option>
+                <option value="limpia">Datos reales</option>
               </select>
             </label>
             <span className="sync-status">
@@ -948,8 +976,8 @@ export default function Home() {
               <strong>ESTÁS VIENDO DATOS DE PRUEBA</strong>
               <p>
                 La pestaña <b>Encuestas</b> contiene los registros originales de
-                prueba. Para usar datos reales o limpios, cambia la fuente a{" "}
-                <b>Encuestas_Limpias</b>.
+                prueba. Para usar datos reales, cambia los datos a{" "}
+                <b>Datos reales</b>.
               </p>
             </div>
             <button
@@ -1208,8 +1236,8 @@ export default function Home() {
         </div>
         <footer className="footer">
           <span>
-            Fuente: hoja Encuestas de Google Sheets · {filtered.length}{" "}
-            registros filtrados
+            Encuestas registradas · {filtered.length}{" "}
+            registros
           </span>
           <span>Datos personales: acceso restringido al equipo autorizado</span>
         </footer>
@@ -2159,7 +2187,7 @@ function FilterBar({
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar cliente, comentario, producto, mesero o teléfono…"
+          placeholder="Buscar cliente, teléfono o comentario…"
         />
       </div>
       {search && (
@@ -2278,24 +2306,24 @@ const BIRTHDAY_HORIZONS: {
   when: string;
   hint: string;
 }[] = [
-  { key: "dia", label: "0–3 días", when: "Próximos 3 días", hint: "Confirmar y activar" },
+  { key: "dia", label: "0–3 días", when: "Próximos 3 días", hint: "Confirmar y ofrecer la promo" },
   {
     key: "semana",
     label: "4–7 días",
     when: "Próxima semana",
-    hint: "Sembrar expectativa y reservar",
+    hint: "Recordar y reservar",
   },
   {
     key: "mes",
     label: "8–30 días",
     when: "Este mes",
-    hint: "Validar datos y planificar",
+    hint: "Revisar datos y planificar",
   },
   {
     key: "seguimiento",
     label: "Pasadas",
     when: "Ya pasó",
-    hint: "Agradecer, recuperar y medir",
+    hint: "Agradecer y registrar si vino",
   },
 ];
 
@@ -2825,17 +2853,17 @@ function BirthdayWorkspace({
     <section className="panel bw-panel">
       <div className="birthday-command">
         <div className="birthday-command-copy">
-          <p className="eyebrow">CAMPAÑA · {monthName.toUpperCase()}</p>
+          <p className="eyebrow">CUMPLEAÑOS DE {monthName.toUpperCase()}</p>
           <h3>
             {pendingCount
-              ? `${pendingCount} clientes sin contactar`
-              : "Campaña al día"}
+              ? `${pendingCount} clientes por saludar`
+              : "Todos ya fueron saludados"}
           </h3>
           <p className="muted">
             {todayCount
-              ? `${plural(todayCount, "cumpleaños hoy", "cumpleaños hoy")}. Empieza por ellos y registra la respuesta.`
+              ? `Hoy hay ${plural(todayCount, "cumpleaños", "cumpleaños")}. Felicítalos y registra si vienen.`
               : weekCount
-                ? `No hay cumpleaños hoy. Tienes ${plural(weekCount, "cumpleaños esta semana", "cumpleaños esta semana")}.`
+                ? `Hoy no hay cumpleaños. Tienes ${plural(weekCount, "cumpleaños", "cumpleaños")} esta semana.`
                 : "No hay cumpleaños próximos en el mes seleccionado. Puedes revisar otro mes."}
           </p>
           <div className="birthday-command-actions">
@@ -2847,10 +2875,10 @@ function BirthdayWorkspace({
               }}
             >
               <MessageSquareText size={15} />
-              {todayCount ? `Contactar ${todayCount} de hoy` : "Preparar la semana"}
+              {todayCount ? `Saludar a ${todayCount} de hoy` : `Ver los ${weekCount} de esta semana`}
             </button>
             <button className="btn-borde" onClick={openTemplates}>
-              Mensajes de WhatsApp
+              Mensajes para saludar
             </button>
             {overdueCount > 0 && (
               <button
@@ -2883,10 +2911,10 @@ function BirthdayWorkspace({
 
       <div className="birthday-funnel-compact" aria-label="Avance de la campaña">
         {[
-          { label: "Base", value: counts.todos },
-          { label: "Contactados", value: contactedCount },
-          { label: "Aceptaron", value: acceptedCount },
-          { label: "Redimieron", value: redeemedCount },
+          { label: "Total del mes", value: counts.todos },
+          { label: "Ya saludados", value: contactedCount },
+          { label: "Aceptaron promo", value: acceptedCount },
+          { label: "Usaron promo", value: redeemedCount },
         ].map((stage, index) => {
           const pct = counts.todos
             ? Math.round((stage.value / counts.todos) * 100)
@@ -2904,7 +2932,7 @@ function BirthdayWorkspace({
                   }}
                 />
               </div>
-              <small>{index === 0 ? "Punto de partida" : `${pct}% de la base`}</small>
+              <small>{index === 0 ? "Total de cumpleaños" : `${pct}% del total`}</small>
             </div>
           );
         })}
@@ -2934,7 +2962,7 @@ function BirthdayWorkspace({
           onClick={() => setOnlyPending(value => !value)}
           aria-pressed={onlyPending}
         >
-          Solo sin contactar
+          Solo los que faltan
         </button>
         {selectedDate && (
           <button className="bw-clear-date" onClick={onClearDate}>
@@ -2942,7 +2970,7 @@ function BirthdayWorkspace({
           </button>
         )}
         <button className="bw-templates-button" onClick={openTemplates}>
-          Editar mensajes de WhatsApp
+          Cambiar mensaje
         </button>
       </div>
 
@@ -3048,20 +3076,20 @@ function BirthdayWorkspace({
                               )
                             }
                           >
-                            <option value="pending">Pendiente</option>
-                            <option value="contacted">Contactado</option>
-                            <option value="accepted">Aceptó</option>
-                            <option value="redeemed">Redimió</option>
-                            <option value="rejected">No redimió</option>
+                            <option value="pending">Sin contactar</option>
+                            <option value="contacted">Ya saludado</option>
+                            <option value="accepted">Aceptó promo</option>
+                            <option value="redeemed">Usó promo</option>
+                            <option value="rejected">No vino</option>
                             <option value="noanswer">No contestó</option>
                           </select>
                           {campaign?.nextActionAt ? (
                             <button
                               className={`bw-next ${nextActionOverdue ? "overdue" : ""}`}
                               onClick={() => setExpandedKey(row.key)}
-                              title="Editar próxima acción"
+                              title="Editar próximo paso"
                             >
-                              ⏰ {campaign.nextActionLabel || "Próxima acción"}:{" "}
+                              ⏰ {campaign.nextActionLabel || "Próximo paso"}:{" "}
                               {new Date(campaign.nextActionAt).toLocaleDateString(
                                 "es-PE",
                                 { day: "2-digit", month: "short" }
@@ -3073,7 +3101,7 @@ function BirthdayWorkspace({
                               className="bw-next empty"
                               onClick={() => setExpandedKey(row.key)}
                             >
-                              + Próxima acción
+                              + Próximo paso
                             </button>
                           )}
                           <span className="bw-attempts">
@@ -3850,10 +3878,10 @@ function BirthdayPage({
       <div className="page-intro birthday-page-intro">
         <div>
           <Pill tone="orange">🎂 CUMPLEAÑOS</Pill>
-          <h2>Agenda y seguimiento</h2>
+          <h2>Felicita a tus clientes</h2>
           <p>
-            Prioriza por día, semana y mes: abre WhatsApp o llama, registra la
-            promoción, la próxima acción y el avance de cada cliente.
+            Mira quién cumple años, saluda por WhatsApp y registra si vino a
+            usar su promoción. También puedes llamarlo si prefieres.
           </p>
         </div>
         <div className="birthday-toolbar">
@@ -3884,6 +3912,15 @@ function BirthdayPage({
           </button>
         </div>
       </div>
+
+      <BusinessGuide
+        title="Cómo felicitar a tus clientes"
+        steps={[
+          "Mira los cumpleaños de hoy o de esta semana.",
+          "Pulsa WhatsApp o Llamar.",
+          "Vuelve y marca si vino, si usó la promo o si no contestó.",
+        ]}
+      />
 
       {showCalendar && (
         <section className="panel birthday-calendar-panel birthday-calendar-compact">
@@ -4784,7 +4821,7 @@ function Priorities({
           type: "Calidad",
           tone: isBad ? "bad" : "orange",
           icon: isBad ? "😞" : "😐",
-          label: isBad ? "URGENTE" : "MEJORAR",
+          label: isBad ? "CLIENTE MOLESTO" : "CLIENTE REGULAR",
           title: profile.name,
           detail: `${profile.phone || "Sin teléfono"} · ${profile.quality} · ${profile.comment || "Sin comentario"}`,
           defaultDueDate: toDateInput(deadline),
@@ -4812,7 +4849,7 @@ function Priorities({
         type: "Cumpleaños",
         tone: "orange",
         icon: "🎂",
-        label: "CONTACTAR",
+        label: "CUMPLEAÑOS",
         title: profile?.name || record.clientName || "Cliente sin nombre",
         detail: `${record.phone || profile?.phone || "Sin teléfono"} · Cumpleaños ${formatBirthday(record.birthday)}`,
         defaultDueDate: toDateInput(deadline),
@@ -4831,7 +4868,7 @@ function Priorities({
           type: "Seguimiento",
           tone: "orange",
           icon: "📞",
-          label: "SEGUIMIENTO",
+          label: "LLAMADA PENDIENTE",
           title: log.clientName || "Cliente sin nombre",
           detail: `${log.phone || "Sin teléfono"} · ${log.promotion || "Sin promoción"} · próxima llamada ${formatDate(due)}`,
           defaultDueDate: due,
@@ -4908,7 +4945,7 @@ function Priorities({
   const confirmSave = () => {
     if (!pendingSave) return;
     if (pinDraft.trim() !== "5956") {
-      setPinError("PIN incorrecto. Intenta de nuevo.");
+      setPinError("Clave incorrecta. Intenta de nuevo.");
       return;
     }
     const { item, patch } = pendingSave;
@@ -4990,12 +5027,12 @@ function Priorities({
     <>
       <section className="priorities-command">
         <div className="priorities-command-copy">
-          <p className="eyebrow">CENTRO DE PRIORIDADES</p>
-          <h2>Lo que no puede esperar.</h2>
+          <p className="eyebrow">PENDIENTES DEL NEGOCIO</p>
+          <h2>¿Qué hago primero hoy?</h2>
           <p>
             {overdueCount
-              ? `Tienes ${plural(overdueCount, "prioridad vencida", "prioridades vencidas")} y ${plural(followupCount, "seguimiento activo", "seguimientos activos")}. Empieza por lo que ya pasó de fecha.`
-              : "No tienes prioridades vencidas. Revisa los seguimientos programados y cierra los pendientes."}
+              ? `Tienes ${plural(overdueCount, "pendiente atrasado", "pendientes atrasados")}. Primero atiende a los clientes molestos; después los cumpleaños y las llamadas.`
+              : "No tienes pendientes atrasados. Revisa los cumpleaños y las llamadas de esta semana."}
           </p>
           <div className="priorities-command-actions">
             <button
@@ -5006,42 +5043,51 @@ function Priorities({
             >
               <Clock3 size={15} />{" "}
               {overdueCount
-                ? `Atender ${overdueCount} vencidas`
-                : "Revisar pendientes"}
+                ? `Resolver ${overdueCount} atrasadas`
+                : "Ver pendientes"}
             </button>
             <button
               className="btn-borde"
               onClick={() => setStatusFilter("Todos")}
             >
-              Ver toda la cola
+              Ver todos
             </button>
           </div>
           <div className="priorities-command-kpis">
-            <span className="priority-kpi-danger"><b>{overdueCount}</b> vencidas</span>
-            <span><b>{pendingOnlyCount}</b> pendientes</span>
-            <span><b>{followupCount}</b> en seguimiento</span>
-            <span><b>{attendedCount}</b> atendidas</span>
+            <span className="priority-kpi-danger"><b>{overdueCount}</b> atrasadas</span>
+            <span><b>{pendingOnlyCount}</b> para hoy</span>
+            <span><b>{followupCount}</b> en proceso</span>
+            <span><b>{attendedCount}</b> resueltas</span>
           </div>
         </div>
         <aside className="priorities-rule-card">
-          <p className="eyebrow">REGLA DE PRIORIDAD</p>
-          <h3>Cómo se ordena la cola</h3>
+          <p className="eyebrow">ORDEN PARA ATENDER</p>
+          <h3>Qué hacer primero</h3>
           <ol>
-            <li><span>1</span> Calidad Mala: recuperar al cliente.</li>
-            <li><span>2</span> Cumpleaños próximos: contactar.</li>
-            <li><span>3</span> Seguimientos programados.</li>
-            <li><span>4</span> Calidad Regular: mejorar.</li>
+            <li><span>1</span> Cliente molesto: discúlpate y ofrece una solución.</li>
+            <li><span>2</span> Cumpleaños: saluda y ofrece la promo.</li>
+            <li><span>3</span> Llamada pendiente: cumple el seguimiento.</li>
+            <li><span>4</span> Cliente regular: busca mejorar su experiencia.</li>
           </ol>
-          <small>El orden se recalcula con cada actualización de Google Sheets.</small>
+          <small>La lista se actualiza con cada encuesta nueva.</small>
         </aside>
       </section>
 
+      <BusinessGuide
+        title="Cómo usar tus pendientes"
+        steps={[
+          "Empieza por las atrasadas: son las que ya pasaron de fecha.",
+          "Abre al cliente para revisar qué dijo o para llamarlo.",
+          "Cuando termines, marca En proceso o Resuelta. La clave la tiene el encargado.",
+        ]}
+      />
+
       <div className="priority-tabs" role="tablist" aria-label="Estado de prioridades">
         {[
-          { key: "Vencidas" as const, label: "Vencidas", count: overdueCount },
-          { key: "Pendientes" as const, label: "Pendientes", count: pendingOnlyCount },
-          { key: "En seguimiento" as const, label: "En seguimiento", count: followupCount },
-          { key: "Atendidas" as const, label: "Atendidas", count: attendedCount },
+          { key: "Vencidas" as const, label: "Atrasadas", count: overdueCount },
+          { key: "Pendientes" as const, label: "Sin vencer", count: pendingOnlyCount },
+          { key: "En seguimiento" as const, label: "En proceso", count: followupCount },
+          { key: "Atendidas" as const, label: "Resueltas", count: attendedCount },
           { key: "Todos" as const, label: "Todas", count: items.length },
         ].map(tab => (
           <button
@@ -5073,7 +5119,13 @@ function Priorities({
                 className={typeFilter === filter ? "selected" : ""}
                 onClick={() => setTypeFilter(filter)}
               >
-                {filter === "Calidad mala" ? "Mala" : filter}
+                {filter === "Calidad"
+                  ? "Opinión"
+                  : filter === "Calidad mala"
+                    ? "Mala"
+                    : filter === "Seguimiento"
+                      ? "Llamadas"
+                      : filter}
               </button>
             ))}
           </div>
@@ -5082,7 +5134,7 @@ function Priorities({
             <input
               value={priorityQuery}
               onChange={event => setPriorityQuery(event.target.value)}
-              placeholder="Buscar cliente, responsable o detalle…"
+              placeholder="Buscar cliente, encargado o detalle…"
             />
           </label>
           <span className="priority-result-count">
@@ -5092,17 +5144,17 @@ function Priorities({
 
         <div className="panel-head priority-queue-head">
           <div>
-            <p className="eyebrow">COLA DE TRABAJO</p>
+            <p className="eyebrow">PENDIENTES</p>
             <h3>
               {statusFilter === "Todos"
-                ? "Todas las prioridades"
+                ? "Todos los pendientes"
                 : statusFilter === "Vencidas"
-                  ? "Vencidas: atender primero"
+                  ? "Atrasadas: resolver primero"
                   : statusFilter}
             </h3>
           </div>
           <Pill tone={overdueCount ? "red" : "green"}>
-            {overdueCount ? `${overdueCount} vencidas` : "Sin vencidas"}
+            {overdueCount ? `${overdueCount} atrasadas` : "Sin atrasadas"}
           </Pill>
         </div>
 
@@ -5143,18 +5195,21 @@ function Priorities({
                       <span className="priority-queue-title">
                         <span className="priority-type-label">{item.label}</span>
                         <b>{item.title}</b>
-                        {overdue && <span className="priority-overdue-badge">VENCIDA</span>}
+                        {overdue && <span className="priority-overdue-badge">ATRASADA</span>}
                         {dueSoon && <span className="priority-soon-badge">PRÓXIMA</span>}
-                        {done && <span className="priority-done-badge">ATENDIDA</span>}
+                        {done && <span className="priority-done-badge">RESUELTA</span>}
                       </span>
                       <small>{item.detail}</small>
                       <span className="priority-queue-meta">
-                        <span>Límite: {formatDate(state.dueDate)}</span>
-                        <span>Responsable: {state.responsible || "Sin asignar"}</span>
-                        {isFollowup && <span>Seguimiento programado</span>}
+                        <span>Para: {formatDate(state.dueDate)}</span>
+                        <span>Encargado: {state.responsible || "Sin encargado"}</span>
+                        {isFollowup && <span>Llamada pendiente</span>}
                       </span>
                     </button>
                     <div className="priority-queue-actions">
+                      <span className={`priority-state-chip ${done ? "done" : inProgress ? "in-progress" : ""}`}>
+                        {done ? "Resuelta" : inProgress ? "En proceso" : "Sin empezar"}
+                      </span>
                       <button
                         className={`priority-status ${done ? "done" : inProgress ? "in-progress" : ""}`}
                         disabled={saveMutation.isPending}
@@ -5163,13 +5218,9 @@ function Priorities({
                             status: nextPriorityStatus(state.status),
                           })
                         }
-                        title="Avanzar estado: Pendiente → En seguimiento → Atendido"
+                        title="Avanzar el estado de este pendiente"
                       >
-                        {done
-                          ? "Atendida"
-                          : inProgress
-                            ? "En seguimiento"
-                            : "Pendiente"}
+                        {done ? "Reabrir" : inProgress ? "Resolver" : "Empezar"}
                       </button>
                       <button
                         className="priority-edit-toggle"
@@ -5197,7 +5248,7 @@ function Priorities({
                     <div className="priority-expanded">
                       <div className="priority-edit-row">
                         <label>
-                          Responsable
+                          Encargado
                           <select
                             value={state.responsible}
                             onChange={event =>
@@ -5206,7 +5257,7 @@ function Priorities({
                               })
                             }
                           >
-                            <option value="">Sin asignar</option>
+                            <option value="">Sin encargado</option>
                             {systemUsers.map(user => (
                               <option
                                 key={user.id}
@@ -5233,7 +5284,7 @@ function Priorities({
                           </select>
                         </label>
                         <label>
-                          Fecha límite
+                          Para cuándo
                           <input
                             type="date"
                             value={state.dueDate}
@@ -5304,8 +5355,8 @@ function Priorities({
             aria-label="Confirmar cambio de prioridad"
             onClick={event => event.stopPropagation()}
           >
-            <p className="eyebrow">CONFIRMAR CAMBIO</p>
-            <h3>Ingresa el PIN de administrador</h3>
+            <p className="eyebrow">CONFIRMAR</p>
+            <h3>Escribe la clave del administrador</h3>
             <p className="muted">
               Se guardará <b>{pendingSave.item.title}</b> como{" "}
               {pendingSave.patch.status === "done"
@@ -5315,6 +5366,10 @@ function Priorities({
                   : "Pendiente"}
               .
             </p>
+            <small className="priority-pin-help">
+              Es la clave de 4 dígitos que usa el encargado. Si no la tienes,
+              pídesela.
+            </small>
             <input
               type="password"
               inputMode="numeric"
@@ -5328,8 +5383,8 @@ function Priorities({
                 if (event.key === "Enter") confirmSave();
                 if (event.key === "Escape") cancelSave();
               }}
-              placeholder="PIN"
-              aria-label="PIN de administrador"
+              placeholder="Clave"
+              aria-label="Clave del administrador"
             />
             {pinError && <small className="priority-pin-error">{pinError}</small>}
             <div className="priority-pin-actions">
@@ -5344,7 +5399,7 @@ function Priorities({
                 disabled={saveMutation.isPending}
                 onClick={confirmSave}
               >
-                {saveMutation.isPending ? "Guardando…" : "Guardar cambio"}
+                {saveMutation.isPending ? "Guardando…" : "Confirmar"}
               </button>
             </div>
           </div>
@@ -5388,6 +5443,16 @@ function Clients({
   onBackToPriorities: () => void;
 }) {
   const [segment, setSegment] = useState("Todos");
+  const segmentLabel = (value: string) =>
+    value === "En riesgo"
+      ? "Por recuperar"
+      : value === "Fiel"
+        ? "Frecuentes"
+        : value === "Recurrente"
+          ? "Repiten"
+          : value === "Nuevo"
+            ? "Primera vez"
+            : value;
   const [birthdayView, setBirthdayView] = useState<"week" | "month">("week");
   const [showAllClients, setShowAllClients] = useState(false);
   const [selected, setSelected] = useState<ClientProfile | null>(null);
@@ -5691,19 +5756,20 @@ function Clients({
     <>
       <section className="clients-command">
         <div className="clients-command-copy">
-          <p className="eyebrow">CARTERA DE CLIENTES</p>
-          <h2>Clientes que merecen una llamada.</h2>
+          <p className="eyebrow">TUS CLIENTES</p>
+          <h2>¿A quién puedes llamar hoy?</h2>
           <p>
-            La recurrencia sale de encuestas repetidas: <b>Fiel</b> = 3 o más,{" "}
-            <b>Recurrente</b> = 2, <b>Nuevo</b> = 1. “En riesgo” combina una
-            calidad Mala o Regular con un contacto identificable.
+            Cada encuesta es una visita. Si volvió 3 veces o más es{" "}
+            <b>frecuente</b>; si volvió 2, <b>repite</b>; si es su primera vez,{" "}
+            <b>es nuevo</b>. “Por recuperar” significa que calificó Malo o
+            Regular y conviene llamarlo.
           </p>
           <div className="clients-command-actions">
             <button
               className="btn-rojo"
               onClick={() => setSegment("En riesgo")}
             >
-              <Phone size={15} /> Atender {risk.length} en riesgo
+              <Phone size={15} /> Ver {risk.length} por recuperar
             </button>
             <button
               className="btn-borde"
@@ -5713,17 +5779,17 @@ function Clients({
             </button>
           </div>
           <div className="clients-command-kpis">
-            <span><b>{profiles.length}</b> contactos</span>
-            <span><b>{faithful.length}</b> fieles</span>
-            <span><b>{recurrent.length}</b> recurrentes</span>
-            <span><b>{risk.length}</b> en riesgo</span>
+            <span><b>{profiles.length}</b> clientes</span>
+            <span><b>{faithful.length}</b> frecuentes</span>
+            <span><b>{recurrent.length}</b> repiten</span>
+            <span><b>{risk.length}</b> por recuperar</span>
           </div>
         </div>
         <aside className="clients-priority-panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">PRIORIDAD DE HOY</p>
-              <h3>A quién llamar</h3>
+              <p className="eyebrow">LLAMA PRIMERO A</p>
+              <h3>Clientes por recuperar</h3>
             </div>
             <span className="clients-priority-count">{risk.length}</span>
           </div>
@@ -5751,10 +5817,19 @@ function Clients({
             className="panel-link"
             onClick={() => setSegment("En riesgo")}
           >
-            Ver todos los clientes en riesgo <ChevronRight size={15} />
+            Ver todos los clientes por recuperar <ChevronRight size={15} />
           </button>
         </aside>
       </section>
+
+      <BusinessGuide
+        title="Cómo usar tus clientes"
+        steps={[
+          "Elige un grupo: todos, por recuperar, frecuentes, repiten o primera vez.",
+          "Busca al cliente o revisa la lista de prioridad.",
+          "Pulsa Registrar para anotar la llamada y el resultado.",
+        ]}
+      />
 
       <div className="segment-tabs clients-segments">
         {["Todos", "En riesgo", "Fiel", "Recurrente", "Nuevo"].map(s => (
@@ -5766,13 +5841,7 @@ function Clients({
               setShowAllClients(false);
             }}
           >
-            {s === "Fiel"
-              ? "Fieles"
-              : s === "Recurrente"
-                ? "Recurrentes"
-                : s === "Nuevo"
-                  ? "Nuevos"
-                  : s}
+            {segmentLabel(s)}
             <span>
               {s === "Todos"
                 ? profiles.length
@@ -5786,11 +5855,11 @@ function Clients({
         <section className="panel clients-list-panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">CARTERA · {segment.toUpperCase()}</p>
+              <p className="eyebrow">CLIENTES · {segmentLabel(segment).toUpperCase()}</p>
               <h3>{visible.length} clientes</h3>
             </div>
             <span className="clients-list-note">
-              {repeated} con más de una encuesta
+              {repeated} han venido más de una vez
             </span>
           </div>
           {visible.length ? (
@@ -5836,8 +5905,8 @@ function Clients({
                             {profile.comment || "Sin comentario"}
                           </small>
                           <span className="clients-row-meta">
-                            <span>{profile.count} encuesta{profile.count === 1 ? "" : "s"}</span>
-                            <span>{profile.quality || "Sin calidad"}</span>
+                            <span>{profile.count} visita{profile.count === 1 ? "" : "s"}</span>
+                            <span>Última opinión: {profile.quality || "Sin dato"}</span>
                             <span>
                               {lastCall
                                 ? `Última llamada ${formatDate(lastCall.callDate)}`
@@ -5847,7 +5916,7 @@ function Clients({
                         </span>
                         <span className="clients-row-action">
                           <Phone size={14} />
-                          <span className="clients-row-action-label">Llamar</span>
+                          <span className="clients-row-action-label">Registrar</span>
                         </span>
                       </button>
                     );
@@ -5904,7 +5973,7 @@ function Clients({
                         profiles.find(p => p.key === clientKeyOf(r)) ?? null
                       )
                     }
-                    aria-label={`Llamar a ${r.clientName || "cliente"}`}
+                    aria-label={`Registrar llamada de ${r.clientName || "cliente"}`}
                   >
                     <Phone size={13} />
                   </button>
@@ -6245,7 +6314,7 @@ function CallLogForm({
             value={assignedTo}
             onChange={e => setAssignedTo(e.target.value)}
           >
-            <option value="">Sin asignar</option>
+            <option value="">Sin encargado</option>
             {(responsibleQuery.data ?? [])
               .filter(user => user.active)
               .map(user => (
