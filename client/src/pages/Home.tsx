@@ -3809,6 +3809,7 @@ function BirthdayPage({
     month: "long",
     year: "numeric",
   }).format(calendarMonth);
+  const monthLabel = monthName.charAt(0).toUpperCase() + monthName.slice(1);
   const daysInMonth = new Date(
     calendarMonth.getFullYear(),
     calendarMonth.getMonth() + 1,
@@ -3863,7 +3864,7 @@ function BirthdayPage({
           >
             <ChevronLeft size={16} />
           </button>
-          <b className="birthday-toolbar-month">{monthName}</b>
+          <b className="birthday-toolbar-month">{monthLabel}</b>
           <button
             className="birthday-toolbar-arrow"
             onClick={() => changeMonth(1)}

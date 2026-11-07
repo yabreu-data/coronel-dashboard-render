@@ -38,10 +38,7 @@ try {
   await mp.fill("#email", email); await mp.fill("#password", password);
   await mp.click('button[type="submit"]');
   await mp.waitForURL(`${BASE}/`, { timeout: 60000 });
-  await mp.click("button.nav-item:has-text('Cumpleaños')").catch(async () => {
-    await mp.locator('button:has-text("Más")').click();
-    await mp.locator('button:has-text("Cumpleaños")').first().click();
-  });
+  await mp.locator('button:has-text("Cumples")').click();
   await mp.waitForTimeout(1800);
   await mp.screenshot({ path: `${OUT}/birthday-redesign-mobile.png`, fullPage: true });
   console.log("BIRTHDAY OK");

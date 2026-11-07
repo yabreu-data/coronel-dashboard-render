@@ -2205,3 +2205,5 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
   .bw-card-foot { gap: 5px; }
   .bw-status-select { max-width: 118px; }
 }
+
+.birthday-toolbar-month { text-transform: none !important; }
