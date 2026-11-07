@@ -1074,6 +1074,7 @@ export default function Home() {
                   overdueCount={overdueCount}
                   onNavigate={navigate}
                   onOpenClient={openPriorityClient}
+                  userName={user?.name || user?.email || ""}
                 />
               )}
               {page === "birthdays" && (
@@ -3983,6 +3984,7 @@ function Overview({
   overdueCount,
   onNavigate,
   onOpenClient,
+  userName,
 }: {
   records: RecordItem[];
   positive: number;
@@ -4001,6 +4003,7 @@ function Overview({
   overdueCount: number;
   onNavigate: (page: Page, filter?: string, focus?: OverviewFocus) => void;
   onOpenClient: (key: string) => void;
+  userName?: string;
 }) {
   const [onboardingHidden, setOnboardingHidden] = useState(
     () => localStorage.getItem("coronel.onboardingDismissed") === "1"
@@ -4040,94 +4043,297 @@ function Overview({
   const birthdaysToday = birthdayMarketing.filter(item => item.days === 0);
   const answeredCount = good + regular + bad;
   const overallCi = answeredCount ? wilsonInterval(good, answeredCount) : null;
+  const missingQuality = Math.max(0, records.length - answeredCount);
+  const badClients = profiles.filter(p => clean(p.quality) === "malo").length;
+  const todayBirthdayCount = birthdayMarketing.filter(item => item.days === 0).length;
+  const nextBirthdays = birthdayMarketing.slice(0, 3);
+  const firstName = (userName || "equipo").split(" ")[0];
+  const todayLabel = new Intl.DateTimeFormat("es-PE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+  const weeklyVolume = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - (6 - index)
+      );
+      const count = records.filter(record => {
+        const parsed = parseDate(record.timestamp);
+        return parsed?.toDateString() === date.toDateString();
+      }).length;
+      return {
+        label: new Intl.DateTimeFormat("es-PE", { weekday: "narrow" })
+          .format(date)
+          .toUpperCase(),
+        count,
+      };
+    });
+  }, [records]);
+  const maxWeeklyVolume = Math.max(...weeklyVolume.map(day => day.count), 1);
   return (
     <>
-      <section className="alert-banner">
-        <div className="alert-banner-title">
-          <AlertTriangle size={18} />
-          <div>
-            <p className="eyebrow">ALERTAS QUE REQUIEREN ACCIÓN</p>
-            <b>
-              {plural(
-                priorityCount,
-                "asunto prioritario detectado",
-                "asuntos prioritarios detectados"
-              )}
-            </b>
+      <section className="command-center">
+        <div className="command-copy">
+          <p className="eyebrow">CENTRO DE ACCIÓN · {todayLabel}</p>
+          <h2>{firstName}, empieza por lo urgente.</h2>
+          <p className="command-summary">
+            {overdueCount
+              ? `Tienes ${plural(overdueCount, "prioridad vencida", "prioridades vencidas")} y ${plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")} por atender.`
+              : `No hay prioridades vencidas. Tienes ${plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")} y ${plural(missingQuality, "respuesta sin calificar", "respuestas sin calificar")}.`}
+          </p>
+          <div className="command-actions">
+            <button
+              className="btn-rojo command-primary"
+              onClick={() => onNavigate("priorities")}
+            >
+              <Flag size={16} />
+              {overdueCount
+                ? `Atender ${overdueCount} vencidas`
+                : "Revisar prioridades"}
+              <ArrowUpRight size={15} />
+            </button>
+            <button
+              className="btn-borde"
+              onClick={() => onNavigate("birthdays")}
+            >
+              <Cake size={16} /> Ver cumpleaños
+            </button>
+          </div>
+          <div className="command-meta">
+            <span>
+              <span className="live-dot" /> Datos actualizados
+            </span>
+            <span>
+              {records.length} encuestas · {clients} clientes
+            </span>
           </div>
         </div>
-        <div className="alert-actions">
+        <aside className="pulse-card" aria-label="Pulso del negocio">
+          <div className="pulse-top">
+            <div>
+              <p className="eyebrow">CALIDAD POSITIVA</p>
+              <div className="pulse-percent">
+                {Math.round(positive * 100)}<small>%</small>
+              </div>
+            </div>
+            {overallCi && (
+              <Pill tone="green">
+                IC95 {Math.round(overallCi[0] * 100)}–{Math.round(overallCi[1] * 100)}%
+              </Pill>
+            )}
+          </div>
+          <p className="pulse-sample">
+            {good} de {answeredCount} con respuesta · {missingQuality} sin calificar
+          </p>
+          <div className="quality-bar pulse-bar">
+            <span style={{ width: `${positive * 100}%` }} />
+            <i
+              style={{
+                width: `${(regular / Math.max(answeredCount, 1)) * 100}%`,
+              }}
+            />
+          </div>
+          <div className="pulse-legend">
+            <span><i className="dot green" />Bueno {good}</span>
+            <span><i className="dot yellow" />Regular {regular}</span>
+            <span><i className="dot red" />Malo {bad}</span>
+          </div>
+          <div className="weekly-trend" aria-label="Encuestas de los últimos 7 días">
+            {weeklyVolume.map((day, index) => (
+              <div className="weekly-day" key={`${day.label}-${index}`}>
+                <span className="weekly-bar-track">
+                  <i
+                    style={{
+                      height: `${Math.max((day.count / maxWeeklyVolume) * 100, 6)}%`,
+                    }}
+                  />
+                </span>
+                <small>{day.label}</small>
+              </div>
+            ))}
+          </div>
+          <div className="pulse-foot">
+            <span>{records.length} encuestas en el período</span>
+            <button onClick={() => onNavigate("voice")}>
+              Ver análisis <ChevronRight size={14} />
+            </button>
+          </div>
+        </aside>
+      </section>
+      <div className="command-grid">
+        <section className="panel today-panel">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">PLAN DE HOY</p>
+              <h3>Lo que no puede esperar</h3>
+            </div>
+            <span className="today-open-count">{priorityCount} abiertas</span>
+          </div>
+          <div className="today-list">
+            <TodayTask
+              tone={overdueCount ? "critical" : "success"}
+              icon={Clock3}
+              title="Prioridades vencidas"
+              detail="Compromisos que ya pasaron de fecha"
+              count={overdueCount}
+              action="Revisar"
+              onClick={() => onNavigate("priorities")}
+            />
+            <TodayTask
+              tone={badClients ? "critical" : "success"}
+              icon={AlertTriangle}
+              title="Clientes con calidad Mala"
+              detail="Revisar el comentario y llamar con contexto"
+              count={badClients}
+              action="Llamar"
+              onClick={() => onNavigate("clients", "Malo", "bad")}
+            />
+            <TodayTask
+              tone={birthdays.length ? "warning" : "success"}
+              icon={Cake}
+              title="Cumpleaños próximos"
+              detail="Enviar WhatsApp y registrar la respuesta"
+              count={birthdays.length}
+              action="Contactar"
+              onClick={() => onNavigate("birthdays")}
+            />
+            <TodayTask
+              tone={missingQuality ? "info" : "success"}
+              icon={MessageSquareText}
+              title="Encuestas sin calificar"
+              detail="Completar la calidad para no sesgar los indicadores"
+              count={missingQuality}
+              action="Completar"
+              onClick={() => onNavigate("voice")}
+            />
+          </div>
           <button
-            className={
-              overdueCount
-                ? "alert-card overdue-alert"
-                : "alert-card muted-alert"
-            }
+            className="panel-link"
             onClick={() => onNavigate("priorities")}
           >
-            <span>⏰</span>
-            <div>
-              <b>
-                {plural(
-                  overdueCount,
-                  "prioridad vencida",
-                  "prioridades vencidas"
-                )}
-              </b>
-              <small>Atender ahora</small>
-            </div>
-            <ChevronRight size={15} />
+            Ver todas las prioridades <ChevronRight size={15} />
           </button>
+        </section>
+        <section className="panel signal-panel">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">PULSO DEL NEGOCIO</p>
+              <h3>Qué está pasando</h3>
+            </div>
+            <Pill tone="blue">{riskCount} en riesgo</Pill>
+          </div>
+          <div className="signal-stats">
+            <div>
+              <span>EN RIESGO</span>
+              <b>{riskCount}</b>
+              <small>clientes a recuperar</small>
+            </div>
+            <div>
+              <span>SIN CALIFICAR</span>
+              <b>{missingQuality}</b>
+              <small>respuestas pendientes</small>
+            </div>
+            <div>
+              <span>CUMPLEAÑOS HOY</span>
+              <b>{todayBirthdayCount}</b>
+              <small>por felicitar</small>
+            </div>
+          </div>
+          <div className="signal-note">
+            <span className="signal-dot" />
+            {badClients
+              ? `${plural(badClients, "cliente necesita", "clientes necesitan")} una llamada de recuperación.`
+              : "No hay clientes con calidad Mala pendientes."}
+          </div>
           <button
-            className={bad ? "alert-card danger" : "alert-card muted-alert"}
-            onClick={() => onNavigate("clients", "Malo", "bad")}
+            className="panel-link"
+            onClick={() => onNavigate("clients")}
           >
-            <span>😞</span>
-            <div>
-              <b>
-                {plural(
-                  bad,
-                  "cliente con calidad Mala",
-                  "clientes con calidad Mala"
-                )}
-              </b>
-              <small>Revisar comentario y llamar</small>
-            </div>
-            <ChevronRight size={15} />
+            Ver clientes y seguimiento <ChevronRight size={15} />
           </button>
-          <button
-            className={
-              birthdays.length
-                ? "alert-card birthday-alert"
-                : "alert-card muted-alert"
-            }
-            onClick={() => onNavigate("birthdays")}
-          >
-            <span>🎂</span>
+        </section>
+      </div>
+      <div className="command-grid command-secondary">
+        <section className="panel">
+          <div className="panel-head">
             <div>
-              <b>
-                {plural(
-                  birthdays.length,
-                  "cumpleaños próximo",
-                  "cumpleaños próximos"
-                )}
-              </b>
-              <small>Ofrecer promoción esta semana</small>
+              <p className="eyebrow">CLIENTES A LLAMAR</p>
+              <h3>Riesgo con contexto</h3>
             </div>
-            <ChevronRight size={15} />
-          </button>
-        </div>
-      </section>
+            <Pill tone="red">{plural(risks.length, "caso", "casos")}</Pill>
+          </div>
+          {risks.slice(0, 3).map(profile => (
+            <button
+              className="today-client"
+              key={profile.key}
+              onClick={() => onOpenClient(profile.key)}
+            >
+              <Face tone="bad" size="sm" />
+              <span>
+                <b>{profile.name}</b>
+                <small>
+                  {profile.phone || "Sin teléfono"} ·{" "}
+                  {profile.comment || "Sin comentario"}
+                </small>
+              </span>
+              <ChevronRight size={14} />
+            </button>
+          ))}
+          {!risks.length && (
+            <Empty text="No hay clientes en riesgo con el filtro actual." />
+          )}
+        </section>
+        <section className="panel">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">AGENDA</p>
+              <h3>Cumpleaños próximos</h3>
+            </div>
+            <Pill tone="orange">{birthdays.length} en 7 días</Pill>
+          </div>
+          {nextBirthdays.map(item => (
+            <button
+              className="agenda-row"
+              key={item.record.id}
+              onClick={() => onNavigate("birthdays")}
+            >
+              <span className="agenda-date">
+                <b>{String(item.target.getDate()).padStart(2, "0")}</b>
+                <small>
+                  {new Intl.DateTimeFormat("es-PE", { month: "short" })
+                    .format(item.target)
+                    .replace(".", "")}
+                </small>
+              </span>
+              <span>
+                <b>{item.record.clientName || "Cliente sin nombre"}</b>
+                <small>
+                  {item.days === 0
+                    ? "Hoy"
+                    : item.days === 1
+                      ? "Mañana"
+                      : `En ${item.days} días`}{" "}
+                  · {item.promotion || "Sin promoción"}
+                </small>
+              </span>
+              <ChevronRight size={14} />
+            </button>
+          ))}
+          {!nextBirthdays.length && (
+            <Empty text="No hay cumpleaños próximos." />
+          )}
+        </section>
+      </div>
       {!onboardingHidden && (
-        <section className="onboarding-panel">
+        <section className="onboarding-panel compact-onboarding">
           <div className="onboarding-head">
             <div>
               <p className="eyebrow">PRIMEROS PASOS</p>
-              <h3>Tu rutina de hoy, en tres pasos</h3>
-              <p className="muted">
-                Empieza por lo urgente y registra el contacto para que el
-                seguimiento quede trazable.
-              </p>
+              <h3>Tu rutina diaria, en tres pasos</h3>
             </div>
             <button
               className="onboarding-close"
@@ -4141,196 +4347,42 @@ function Overview({
             <button onClick={() => onNavigate("priorities")}>
               <span className="onboarding-num">1</span>
               <div>
-                <b>
-                  {plural(
-                    overdueCount,
-                    "prioridad vencida",
-                    "prioridades vencidas"
-                  )}
-                </b>
-                <small>Atiende primero lo que ya pasó de fecha.</small>
+                <b>Prioriza lo vencido</b>
+                <small>{plural(overdueCount, "prioridad vencida", "prioridades vencidas")}.</small>
               </div>
               <ChevronRight size={16} />
             </button>
             <button onClick={() => onNavigate("birthdays")}>
               <span className="onboarding-num">2</span>
               <div>
-                <b>
-                  {plural(
-                    birthdays.length,
-                    "cumpleaños próximo",
-                    "cumpleaños próximos"
-                  )}
-                </b>
-                <small>Envía WhatsApp y registra la respuesta.</small>
+                <b>Contacta cumpleaños</b>
+                <small>{plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")}.</small>
               </div>
               <ChevronRight size={16} />
             </button>
             <button onClick={() => onNavigate("clients")}>
               <span className="onboarding-num">3</span>
               <div>
-                <b>Registra una llamada</b>
-                <small>Deja contexto, promoción y próxima acción.</small>
+                <b>Registra la llamada</b>
+                <small>Deja contexto y próxima acción.</small>
               </div>
               <ChevronRight size={16} />
             </button>
           </div>
         </section>
       )}
-      <section className="hero-strip">
-        <div>
-          <Pill tone="orange">RESUMEN EJECUTIVO</Pill>
-          <h2>Decisiones claras, en una sola mirada.</h2>
-          <p>
-            La experiencia se ve positiva, con oportunidades concretas en
-            tiempos, producto y seguimiento de clientes.
-          </p>
-        </div>
-        <QualityFace percent={positive} count={good + regular + bad} />
-      </section>
-      <div className="stats-grid">
-        <Stat
-          label="ENCUESTAS"
-          value={records.length}
-          detail="respuestas recibidas"
-          icon={MessageSquareText}
-          onClick={() => onNavigate("voice")}
-        />
-        <Stat
-          label="CALIDAD POSITIVA"
-          value={`${Math.round(positive * 100)}%`}
-          detail={`${good} de ${answeredCount} con respuesta · ${Math.max(0, records.length - answeredCount)} sin calificar${
-            overallCi
-              ? ` · IC95 ${Math.round(overallCi[0] * 100)}–${Math.round(overallCi[1] * 100)}%`
-              : ""
-          }`}
-          accent="green"
-          icon={Sparkles}
-          onClick={() => onNavigate("voice")}
-        />
-        <Stat
-          label="CUMPLEAÑOS"
-          value={birthdays.length}
-          detail="próximos 7 días"
-          accent="orange"
-          icon={Cake}
-          onClick={() => onNavigate("birthdays")}
-        />
-        <Stat
-          label="CLIENTES"
-          value={clients}
-          detail="contactos identificados"
-          accent="purple"
-          icon={Users}
-          onClick={() => onNavigate("clients")}
-        />
-      </div>
       <button
         className="details-toggle-button"
         onClick={() => setShowDetails(value => !value)}
         aria-expanded={showDetails}
       >
         <span>
-          {showDetails
-            ? "Ocultar análisis detallado"
-            : "Ver análisis detallado"}
+          {showDetails ? "Ocultar análisis completo" : "Ver análisis completo"}
         </span>
         <ChevronDown size={17} className={showDetails ? "rotate" : ""} />
       </button>
       {showDetails && (
         <div className="dashboard-details">
-          <div className="dashboard-grid overview-grid">
-            <section className="panel quality-panel">
-              <div className="panel-head">
-                <div>
-                  <p className="eyebrow">CALIDAD DEL PRODUCTO</p>
-                  <h3>¿Cómo se sienten los clientes?</h3>
-                </div>
-                <Pill tone="blue">{good + regular + bad} respuestas</Pill>
-              </div>
-              <div className="faces-row">
-                <QualityResult
-                  tone="great"
-                  label="Bueno"
-                  count={good}
-                  total={good + regular + bad}
-                />
-                <QualityResult
-                  tone="neutral"
-                  label="Regular"
-                  count={regular}
-                  total={good + regular + bad}
-                />
-                <QualityResult
-                  tone="bad"
-                  label="Malo"
-                  count={bad}
-                  total={good + regular + bad}
-                />
-              </div>
-              <div className="quality-bar">
-                <span style={{ width: `${positive * 100}%` }} />
-                <i
-                  style={{
-                    width: `${(regular / Math.max(good + regular + bad, 1)) * 100}%`,
-                  }}
-                />
-              </div>
-              <div className="bar-legend">
-                <span>
-                  <i className="dot green" />
-                  Bueno {good}
-                </span>
-                <span>
-                  <i className="dot yellow" />
-                  Regular {regular}
-                </span>
-                <span>
-                  <i className="dot red" />
-                  Malo {bad}
-                </span>
-              </div>
-            </section>
-            <section className="panel action-panel">
-              <div className="panel-head">
-                <div>
-                  <p className="eyebrow">COLA DE ACCIÓN</p>
-                  <h3>Qué hacer hoy</h3>
-                </div>
-                <AlertTriangle size={19} color="#ef8354" />
-              </div>
-              <div className="action-list">
-                <ActionRow
-                  tone="red"
-                  label="URGENTE"
-                  text={plural(bad, "cliente con calidad “Malo”", "clientes con calidad “Malo”")}
-                  action="Revisar comentarios"
-                  onClick={() => onNavigate("clients", "Malo", "bad")}
-                />
-                <ActionRow
-                  tone="orange"
-                  label="MEJORAR"
-                  text={`${regular} respuesta(s) “Regular”`}
-                  action="Abrir clientes a recuperar"
-                  onClick={() => onNavigate("clients", undefined, "recover")}
-                />
-                <ActionRow
-                  tone="purple"
-                  label="CONTACTAR"
-                  text={`${birthdays.length} cumpleaños próximos`}
-                  action="Llamar y ofrecer promoción"
-                  onClick={() => onNavigate("birthdays")}
-                />
-                <ActionRow
-                  tone="blue"
-                  label="EXPLORAR"
-                  text={`${comments} comentarios disponibles`}
-                  action="Ver voz del cliente"
-                  onClick={() => onNavigate("voice")}
-                />
-              </div>
-            </section>
-          </div>
           <div className="dashboard-grid">
             <section className="panel">
               <div className="panel-head">
@@ -4472,6 +4524,40 @@ function Overview({
     </>
   );
 }
+function TodayTask({
+  tone,
+  icon: Icon,
+  title,
+  detail,
+  count,
+  action,
+  onClick,
+}: {
+  tone: "critical" | "warning" | "info" | "success";
+  icon: typeof Clock3;
+  title: string;
+  detail: string;
+  count: number;
+  action: string;
+  onClick: () => void;
+}) {
+  return (
+    <button className={`today-task today-task-${tone}`} onClick={onClick}>
+      <span className="today-task-icon">
+        <Icon size={17} />
+      </span>
+      <span className="today-task-copy">
+        <b>{title}</b>
+        <small>{detail}</small>
+      </span>
+      <span className="today-task-count">{count}</span>
+      <span className="today-task-cta">
+        {action} <ChevronRight size={14} />
+      </span>
+    </button>
+  );
+}
+
 function ActionRow({
   tone,
   label,
