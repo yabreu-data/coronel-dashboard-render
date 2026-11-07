@@ -5307,16 +5307,27 @@ function Clients({
 }) {
   const [segment, setSegment] = useState("Todos");
   const [birthdayView, setBirthdayView] = useState<"week" | "month">("week");
+  const [showAllClients, setShowAllClients] = useState(false);
   const [selected, setSelected] = useState<ClientProfile | null>(null);
   const repeated = profiles.filter(p => p.count > 1).length;
   const faithful = profiles.filter(p => p.segment === "Fiel");
   const recurrent = profiles.filter(p => p.segment === "Recurrente");
   const newClients = profiles.filter(p => p.segment === "Nuevo");
   const risk = profiles.filter(p => p.segment === "En riesgo");
-  const visible =
-    segment === "Todos"
-      ? profiles
-      : profiles.filter(p => p.segment === segment);
+  const visible = profiles
+    .filter(p => segment === "Todos" || p.segment === segment)
+    .filter(p => {
+      const query = normalizeText(search.trim());
+      if (!query) return true;
+      return normalizeText(`${p.name} ${p.phone} ${p.comment}`).includes(query);
+    })
+    .sort((a, b) => {
+      const segmentRank = (value: string) =>
+        value === "En riesgo" ? 0 : value === "Fiel" ? 1 : value === "Recurrente" ? 2 : 3;
+      const bySegment = segmentRank(a.segment) - segmentRank(b.segment);
+      if (bySegment !== 0) return bySegment;
+      return b.count - a.count;
+    });
   const focusedProfile = focusClientKey
     ? profiles.find(profile => profile.key === focusClientKey)
     : null;
@@ -5340,6 +5351,18 @@ function Clients({
         clientKeyOf({ phone: log.phone || "", clientName: log.clientName }) ===
         clientKeyOf(record)
     );
+  const lastCallFor = (profile: ClientProfile) =>
+    logs
+      .filter(
+        log =>
+          clientKeyOf({ phone: log.phone || "", clientName: log.clientName }) ===
+          profile.key
+      )
+      .sort((a, b) => {
+        const left = new Date(b.callDate).getTime();
+        const right = new Date(a.callDate).getTime();
+        return (Number.isNaN(left) ? 0 : left) - (Number.isNaN(right) ? 0 : right);
+      })[0];
   if (focusedProfile)
     return (
       <>
@@ -5585,76 +5608,90 @@ function Clients({
     );
   return (
     <>
-      <div className="page-intro">
-        <div>
-          <Pill tone="purple">FIDELIZACIÓN POR ENCUESTAS</Pill>
+      <section className="clients-command">
+        <div className="clients-command-copy">
+          <p className="eyebrow">CARTERA DE CLIENTES</p>
           <h2>Clientes que merecen una llamada.</h2>
           <p>
-            La recurrencia se calcula por encuestas repetidas: <b>Fiel</b> = 3 o
-            más, <b>Recurrente</b> = 2, <b>Nuevo</b> = 1. “En riesgo” combina
-            una calidad Mala o Regular con un contacto identificable.
+            La recurrencia sale de encuestas repetidas: <b>Fiel</b> = 3 o más,{" "}
+            <b>Recurrente</b> = 2, <b>Nuevo</b> = 1. “En riesgo” combina una
+            calidad Mala o Regular con un contacto identificable.
           </p>
+          <div className="clients-command-actions">
+            <button
+              className="btn-rojo"
+              onClick={() => setSegment("En riesgo")}
+            >
+              <Phone size={15} /> Atender {risk.length} en riesgo
+            </button>
+            <button
+              className="btn-borde"
+              onClick={() => onNavigate("birthdays")}
+            >
+              <Cake size={15} /> Ver cumpleaños
+            </button>
+          </div>
+          <div className="clients-command-kpis">
+            <span><b>{profiles.length}</b> contactos</span>
+            <span><b>{faithful.length}</b> fieles</span>
+            <span><b>{recurrent.length}</b> recurrentes</span>
+            <span><b>{risk.length}</b> en riesgo</span>
+          </div>
         </div>
-        <div className="intro-note">
-          <Clock3 size={17} />
-          <span>
-            <b>Modelo actual</b>
-            <small>
-              No mezcla visitas ni tickets: cada respuesta repetida identifica
-              una nueva encuesta del cliente.
-            </small>
-          </span>
-        </div>
-      </div>
-      <div className="stats-grid">
-        <Stat
-          label="CONTACTOS"
-          value={profiles.length}
-          detail="nombre o teléfono"
-          icon={Users}
-          onClick={() => setSegment("Todos")}
-        />
-        <Stat
-          label="FIELES"
-          value={faithful.length}
-          detail="3+ encuestas"
-          accent="green"
-          icon={Sparkles}
-          onClick={() => setSegment("Fiel")}
-        />
-        <Stat
-          label="RECURRENTES"
-          value={recurrent.length}
-          detail="2 encuestas"
-          accent="purple"
-          icon={RefreshCw}
-          onClick={() => setSegment("Recurrente")}
-        />
-        <Stat
-          label="NUEVOS"
-          value={newClients.length}
-          detail="1 encuesta"
-          accent="blue"
-          icon={Users}
-          onClick={() => setSegment("Nuevo")}
-        />
-        <Stat
-          label="EN RIESGO"
-          value={risk.length}
-          detail="malo o regular"
-          accent="red"
-          icon={AlertTriangle}
-          onClick={() => setSegment("En riesgo")}
-        />
-      </div>
-      <div className="segment-tabs">
-        {["Todos", "Fiel", "Recurrente", "Nuevo", "En riesgo"].map(s => (
+        <aside className="clients-priority-panel">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">PRIORIDAD DE HOY</p>
+              <h3>A quién llamar</h3>
+            </div>
+            <span className="clients-priority-count">{risk.length}</span>
+          </div>
+          {risk.slice(0, 3).map(profile => (
+            <button
+              className="clients-priority-row"
+              key={profile.key}
+              onClick={() => setSelected(profile)}
+            >
+              <Face
+                tone={clean(profile.quality) === "malo" ? "bad" : "neutral"}
+                size="sm"
+              />
+              <span>
+                <b>{profile.name}</b>
+                <small>{profile.comment || "Sin comentario registrado"}</small>
+              </span>
+              <Phone size={14} />
+            </button>
+          ))}
+          {!risk.length && (
+            <Empty text="No hay clientes en riesgo ahora mismo." />
+          )}
+          <button
+            className="panel-link"
+            onClick={() => setSegment("En riesgo")}
+          >
+            Ver todos los clientes en riesgo <ChevronRight size={15} />
+          </button>
+        </aside>
+      </section>
+
+      <div className="segment-tabs clients-segments">
+        {["Todos", "En riesgo", "Fiel", "Recurrente", "Nuevo"].map(s => (
           <button
             key={s}
             className={segment === s ? "selected" : ""}
-            onClick={() => setSegment(s)}
+            onClick={() => {
+              setSegment(s);
+              setShowAllClients(false);
+            }}
           >
-            {s}
+            {s === "Fiel"
+              ? "Fieles"
+              : s === "Recurrente"
+                ? "Recurrentes"
+                : s === "Nuevo"
+                  ? "Nuevos"
+                  : s}
             <span>
               {s === "Todos"
                 ? profiles.length
@@ -5663,230 +5700,169 @@ function Clients({
           </button>
         ))}
       </div>
-      <div className="dashboard-grid clients-grid">
-        <section className="panel birthday-current-panel">
+
+      <div className="clients-workspace">
+        <section className="panel clients-list-panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">LLAMAR ESTA SEMANA</p>
-              <h3>
-                <Cake size={20} color="#ffbf51" /> Próximos cumpleaños
-              </h3>
+              <p className="eyebrow">CARTERA · {segment.toUpperCase()}</p>
+              <h3>{visible.length} clientes</h3>
             </div>
-            <div className="birthday-range-controls">
-              <button
-                className={birthdayView === "week" ? "selected" : ""}
-                onClick={() => setBirthdayView("week")}
-              >
-                Semana
-              </button>
-              <button
-                className={birthdayView === "month" ? "selected" : ""}
-                onClick={() => setBirthdayView("month")}
-              >
-                Mes
-              </button>
-            </div>
+            <span className="clients-list-note">
+              {repeated} con más de una encuesta
+            </span>
           </div>
-          {displayBirthdays.length ? (
-            displayBirthdays.map(r => (
-              <div className="birthday-row" key={r.id}>
-                <span className="birthday-date">{formatBirthday(r.birthday)}</span>
-                <span>
-                  <b>{r.clientName || "Cliente sin nombre"}</b>
-                  <small>{r.phone || "Sin teléfono"}</small>
-                </span>
-                {wasCalled(r) && <Pill tone="green">Llamado</Pill>}
+          {visible.length ? (
+            <>
+              <div className="clients-list">
+                {visible
+                  .slice(0, showAllClients ? visible.length : 30)
+                  .map(profile => {
+                    const lastCall = lastCallFor(profile);
+                    return (
+                      <button
+                        className={`clients-row ${profile.segment === "En riesgo" ? "is-risk" : ""}`}
+                        key={profile.key}
+                        onClick={() => setSelected(profile)}
+                      >
+                        <span className="clients-avatar">
+                          {profile.name
+                            .split(" ")
+                            .slice(0, 2)
+                            .map(part => part.charAt(0))
+                            .join("")
+                            .toUpperCase() || "?"}
+                        </span>
+                        <span className="clients-row-main">
+                          <span className="clients-row-title">
+                            <b>{profile.name}</b>
+                            <Pill
+                              tone={
+                                profile.segment === "En riesgo"
+                                  ? "red"
+                                  : profile.segment === "Fiel"
+                                    ? "green"
+                                    : profile.segment === "Recurrente"
+                                      ? "purple"
+                                      : "blue"
+                              }
+                            >
+                              {profile.segment}
+                            </Pill>
+                          </span>
+                          <small>
+                            {profile.phone || "Sin teléfono"} ·{" "}
+                            {profile.comment || "Sin comentario"}
+                          </small>
+                          <span className="clients-row-meta">
+                            <span>{profile.count} encuesta{profile.count === 1 ? "" : "s"}</span>
+                            <span>{profile.quality || "Sin calidad"}</span>
+                            <span>
+                              {lastCall
+                                ? `Última llamada ${formatDate(lastCall.callDate)}`
+                                : "Sin llamadas"}
+                            </span>
+                          </span>
+                        </span>
+                        <span className="clients-row-action">
+                          <Phone size={14} /> Llamar
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+              {visible.length > 30 && !showAllClients && (
                 <button
-                  className="small-action"
-                  onClick={() =>
-                    setSelected(
-                      profiles.find(p => p.key === clientKeyOf(r)) ?? null
-                    )
-                  }
+                  className="clients-load-more"
+                  onClick={() => setShowAllClients(true)}
                 >
-                  <Phone size={12} /> Registrar llamada
+                  Ver los {visible.length - 30} restantes <ChevronDown size={15} />
+                </button>
+              )}
+            </>
+          ) : (
+            <Empty text="No hay clientes en este segmento con la búsqueda actual." />
+          )}
+        </section>
+        <aside className="clients-side">
+          <section className="panel clients-birthday-panel">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">AGENDA</p>
+                <h3>Cumpleaños</h3>
+              </div>
+              <div className="birthday-range-controls">
+                <button
+                  className={birthdayView === "week" ? "selected" : ""}
+                  onClick={() => setBirthdayView("week")}
+                >
+                  Semana
+                </button>
+                <button
+                  className={birthdayView === "month" ? "selected" : ""}
+                  onClick={() => setBirthdayView("month")}
+                >
+                  Mes
                 </button>
               </div>
-            ))
-          ) : (
-            <Empty text="No hay cumpleaños próximos con el filtro actual." />
-          )}
-        </section>
-        <section className="panel">
-          <div className="panel-head">
-            <div>
-              <p className="eyebrow">SEGUIMIENTO</p>
-              <h3>Últimas llamadas</h3>
             </div>
-            <Pill tone="blue">{logs.length} guardadas</Pill>
-          </div>
-          {logs.slice(0, 4).map(log => (
-            <div className="call-history-row" key={log.id}>
-              <Phone size={14} />
-              <span>
-                <b>{log.clientName}</b>
-                <small>
-                  {formatDateTime(log.callDate)} · {log.outcome}
-                  {log.promotion ? ` · ${log.promotion}` : ""} ·{" "}
-                  {log.promotionRedeemed ? "Redimida" : "No redimida"}
-                  {log.nextCallDate
-                    ? ` · Próxima: ${formatDateTime(log.nextCallDate)}`
-                    : ""}{" "}
-                  · {log.recoveryResult || "Sin resultado"}
-                </small>
-              </span>
+            {displayBirthdays.length ? (
+              displayBirthdays.slice(0, 4).map(r => (
+                <div className="birthday-row" key={r.id}>
+                  <span className="birthday-date">{formatBirthday(r.birthday)}</span>
+                  <span>
+                    <b>{r.clientName || "Cliente sin nombre"}</b>
+                    <small>{r.phone || "Sin teléfono"}</small>
+                  </span>
+                  {wasCalled(r) && <Pill tone="green">Llamado</Pill>}
+                  <button
+                    className="clients-mini-call"
+                    onClick={() =>
+                      setSelected(
+                        profiles.find(p => p.key === clientKeyOf(r)) ?? null
+                      )
+                    }
+                    aria-label={`Llamar a ${r.clientName || "cliente"}`}
+                  >
+                    <Phone size={13} />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <Empty text="No hay cumpleaños próximos." />
+            )}
+            <button className="panel-link" onClick={() => onNavigate("birthdays")}>
+              Abrir agenda de cumpleaños <ChevronRight size={15} />
+            </button>
+          </section>
+          <section className="panel clients-calls-panel">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">SEGUIMIENTO</p>
+                <h3>Últimas llamadas</h3>
+              </div>
+              <Pill tone="blue">{logs.length}</Pill>
             </div>
-          ))}
-          {!logs.length && (
-            <Empty text="Registra la primera llamada desde cualquier cliente." />
-          )}
-        </section>
+            {logs.slice(0, 3).map(log => (
+              <div className="call-history-row" key={log.id}>
+                <Phone size={14} />
+                <span>
+                  <b>{log.clientName}</b>
+                  <small>
+                    {formatDateTime(log.callDate)} · {log.outcome}
+                    {log.nextCallDate
+                      ? ` · Próxima: ${formatDateTime(log.nextCallDate)}`
+                      : ""}
+                  </small>
+                </span>
+              </div>
+            ))}
+            {!logs.length && (
+              <Empty text="Aún no hay llamadas registradas." />
+            )}
+          </section>
+        </aside>
       </div>
-      <section className="panel birthday-history-panel">
-        <div className="panel-head">
-          <div>
-            <p className="eyebrow">CONTROL DE SEGUIMIENTO</p>
-            <h3>🎂 Cumpleaños de la semana pasada</h3>
-            <small className="muted">
-              Verifica rápidamente quién fue contactado.
-            </small>
-          </div>
-          <Pill tone="neutral">{lastWeekBirthdays.length} clientes</Pill>
-        </div>
-        {lastWeekBirthdays.length ? (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Teléfono</th>
-                  <th>Seguimiento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lastWeekBirthdays.map(r => (
-                  <tr key={`past-${r.id}`}>
-                    <td>{formatBirthday(r.birthday)}</td>
-                    <td>
-                      <b>{r.clientName || "Cliente sin nombre"}</b>
-                    </td>
-                    <td>{r.phone || "—"}</td>
-                    <td>
-                      {wasCalled(r) ? (
-                        <Pill tone="green">Llamado</Pill>
-                      ) : (
-                        <Pill tone="orange">Pendiente</Pill>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <Empty text="No hay cumpleaños registrados en la semana pasada." />
-        )}
-      </section>
-      <section className="panel loyalty-call-panel">
-        <div className="panel-head">
-          <div>
-            <p className="eyebrow">FIDELIZACIÓN POR ENCUESTAS</p>
-            <h3>Clientes que merecen una llamada</h3>
-          </div>
-          <Pill tone="green">
-            {
-              profiles.filter(p => p.count >= 2 && clean(p.quality) === "bueno")
-                .length
-            }{" "}
-            oportunidades
-          </Pill>
-        </div>
-        {profiles
-          .filter(p => p.count >= 2 && clean(p.quality) === "bueno")
-          .slice(0, 4)
-          .map(p => (
-            <div className="star-row featured-star-row" key={p.key}>
-              <span className="star-badge">★</span>
-              <span>
-                <b>{p.name}</b>
-                <small>
-                  {p.count} encuestas · {p.phone || "Sin teléfono"}
-                </small>
-              </span>
-              <button className="small-action" onClick={() => setSelected(p)}>
-                <Phone size={12} /> Llamar
-              </button>
-            </div>
-          ))}
-        {!profiles.some(p => p.count >= 2 && clean(p.quality) === "bueno") && (
-          <Empty text="Aún no hay clientes recurrentes con calidad Bueno." />
-        )}
-      </section>
-      <section className="panel table-panel">
-        <div className="panel-head">
-          <div>
-            <p className="eyebrow">BASE DE CLIENTES</p>
-            <h3>Segmentación accionable</h3>
-          </div>
-          <span className="muted">{repeated} con más de una encuesta</span>
-        </div>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Teléfono</th>
-                <th>Segmento</th>
-                <th>Encuestas</th>
-                <th>Última calidad</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.slice(0, 30).map(p => (
-                <tr key={p.key}>
-                  <td>
-                    <b>{p.name}</b>
-                    <small className="table-sub">
-                      {p.comment || "Sin comentario"}
-                    </small>
-                  </td>
-                  <td>{p.phone || "—"}</td>
-                  <td>
-                    <Pill
-                      tone={
-                        p.segment === "En riesgo"
-                          ? "red"
-                          : p.segment === "Fiel"
-                            ? "green"
-                            : p.segment === "Recurrente"
-                              ? "purple"
-                              : "blue"
-                      }
-                    >
-                      {p.segment}
-                    </Pill>
-                  </td>
-                  <td>{p.count}</td>
-                  <td>{p.quality || "Sin respuesta"}</td>
-                  <td>
-                    <button
-                      className="table-call"
-                      onClick={() => setSelected(p)}
-                    >
-                      <Phone size={13} /> Llamar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {!visible.length && (
-          <Empty text="No hay clientes en este segmento con el filtro actual." />
-        )}
-      </section>
       {selected && (
         <CallLogForm
           profile={selected}

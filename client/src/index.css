@@ -2237,3 +2237,74 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
 
 .birthday-calendar-day.today strong, .birthday-calendar-day.today small { color: #1d4a31 !important; }
 .bw-card-seguimiento .bw-days { color: #8a5a12 !important; }
+
+/* ===== Clientes: cartera accionable ===== */
+.clients-command { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, .9fr); gap: 14px; margin: 2px 0 14px; }
+.clients-command-copy { padding: 22px 24px; border: 1px solid #cfe4d8; border-radius: 18px; background: linear-gradient(135deg, #ffffff, #eef8f2); box-shadow: 0 12px 30px rgba(29,74,49,.06); }
+.clients-command-copy h2 { margin: 5px 0 5px; font-size: 29px; line-height: 1.08; letter-spacing: -.04em; }
+.clients-command-copy > p { max-width: 640px; margin: 0; color: #4f6f5e; font-size: 12px; line-height: 1.5; }
+.clients-command-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+.clients-command-actions .btn-rojo, .clients-command-actions .btn-borde { min-height: 37px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border-radius: 9px; font-size: 11px; font-weight: 800; }
+.clients-command-kpis { display: flex; flex-wrap: wrap; gap: 13px; margin-top: 15px; color: #4f6f5e; font-size: 10.5px; }
+.clients-command-kpis b { color: #1d4a31; font-size: 15px; }
+.clients-priority-panel { padding: 16px 17px; border: 1px solid #efb8b1; border-radius: 18px; background: #fff8f6; }
+.clients-priority-panel .panel-head { align-items: flex-start; border-bottom-color: #f0d4ce !important; }
+.clients-priority-panel .panel-head h3 { font-size: 18px; }
+.clients-priority-count { display: grid; place-items: center; min-width: 27px; height: 27px; border-radius: 50%; background: #d93a2b; color: #ffffff; font-size: 11px; font-weight: 900; }
+.clients-priority-row { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 0; border: 0; border-top: 1px solid #f0d4ce; background: transparent; color: #173b2b; text-align: left; }
+.clients-priority-row:first-of-type { border-top: 0; }
+.clients-priority-row:hover { background: #fff1ef; border-radius: 8px; }
+.clients-priority-row > span { min-width: 0; flex: 1; }
+.clients-priority-row b { display: block; overflow: hidden; color: #173b2b; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.clients-priority-row small { display: block; overflow: hidden; margin-top: 2px; color: #4f6f5e; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.clients-priority-row > svg { flex-shrink: 0; color: #b52e22; }
+.clients-segments { margin: 0 0 12px; }
+.clients-workspace { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, .9fr); gap: 14px; align-items: start; }
+.clients-list-panel { padding-bottom: 14px; }
+.clients-list-note { color: #4f6f5e; font-size: 10px; }
+.clients-list { display: flex; flex-direction: column; gap: 7px; }
+.clients-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 11px; width: 100%; padding: 10px 11px; border: 1px solid #d7e8dd; border-left: 3px solid #acd3b6; border-radius: 12px; background: #ffffff; color: #173b2b; text-align: left; }
+.clients-row:hover { background: #f6fbf8; border-color: #acd3b6; transform: translateX(2px); }
+.clients-row.is-risk { border-left-color: #d93a2b; }
+.clients-avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #e3f2ea; color: #1d4a31; font-size: 11px; font-weight: 900; }
+.clients-row.is-risk .clients-avatar { background: #fff1ef; color: #b52e22; }
+.clients-row-main { min-width: 0; }
+.clients-row-title { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.clients-row-title > b { color: #173b2b; font-size: 12.5px; }
+.clients-row-main > small { display: block; overflow: hidden; margin-top: 2px; color: #4f6f5e; font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
+.clients-row-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; color: #4f6f5e; font-size: 9.5px; }
+.clients-row-meta span + span::before { content: "·"; margin-right: 8px; color: #8ca99a; }
+.clients-row-action { display: inline-flex; align-items: center; gap: 4px; padding: 7px 9px; border-radius: 8px; background: #fff1ef; color: #b52e22; font-size: 10px; font-weight: 800; white-space: nowrap; }
+.clients-row:hover .clients-row-action { background: #ffe4df; }
+.clients-load-more { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; margin-top: 9px; padding: 9px; border: 1px solid #cfe4d8; border-radius: 9px; background: #ffffff; color: #1d4a31; font-size: 11px; font-weight: 800; }
+.clients-load-more:hover { background: #eaf6ef; }
+.clients-side { display: flex; flex-direction: column; gap: 12px; }
+.clients-side .panel { padding: 16px; }
+.clients-side .panel-head { align-items: flex-start; }
+.clients-mini-call { width: 30px; height: 30px; flex-shrink: 0; display: grid; place-items: center; border: 1px solid #efb8b1; border-radius: 8px; background: #fff1ef; color: #b52e22; }
+.clients-mini-call:hover { background: #ffe4df; }
+.clients-birthday-panel .birthday-row { gap: 8px; padding: 8px 0; }
+.clients-birthday-panel .birthday-row > span:nth-child(2) { min-width: 0; flex: 1; }
+.clients-birthday-panel .birthday-row b { font-size: 11.5px; }
+.clients-birthday-panel .birthday-row small { font-size: 10px; }
+.clients-birthday-panel .small-action { display: none; }
+.clients-calls-panel .call-history-row { padding: 8px 0; }
+.clients-calls-panel .call-history-row span { min-width: 0; }
+.clients-calls-panel .call-history-row small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 1100px) {
+  .clients-command, .clients-workspace { grid-template-columns: 1fr; }
+  .clients-priority-panel { order: 2; }
+  .clients-side { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px) {
+  .clients-command-copy { padding: 17px; border-radius: 14px; }
+  .clients-command-copy h2 { font-size: 24px; }
+  .clients-command-actions { display: grid; grid-template-columns: 1fr; }
+  .clients-command-actions .btn-rojo, .clients-command-actions .btn-borde { width: 100%; justify-content: center; }
+  .clients-side { grid-template-columns: 1fr; }
+  .clients-row { grid-template-columns: 32px minmax(0, 1fr); }
+  .clients-row-action { grid-column: 1 / -1; justify-content: center; }
+  .clients-row-main > small { white-space: normal; }
+  .clients-row-meta { gap: 5px; }
+  .clients-row-meta span + span::before { margin-right: 5px; }
+}
