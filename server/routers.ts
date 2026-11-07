@@ -30,6 +30,7 @@ const SURVEY_TIMESTAMP_HEADERS = ["Timestamp", "timestamp"];
 type SurveyRecord = { id: string; timestamp: string; clientName: string; phone: string; birthday: string; dish: string; comment: string; registeredBy: string; quality: string };
 type ServerCatalogItem = { id: string; name: string; active: boolean };
 
+const IGNORED_SURVEY_IDS = new Set(["ENC-000116"]);
 const surveyCache = new Map<string, { at: number; sheet: string; value: { records: SurveyRecord[]; serverCatalog: ServerCatalogItem[] } }>();
 
 function getSheetId() {
@@ -242,6 +243,9 @@ async function getSurveyRecords(sheet: string): Promise<SurveyRecord[]> {
   const seen = new Set<string>();
   return mapped.filter(record => {
     if (!record.id || seen.has(record.id)) return false;
+    // Registro de prueba retirado del sistema; la fila original del Sheet
+    // debe borrarse aparte para que no vuelva a entrar.
+    if (IGNORED_SURVEY_IDS.has(record.id)) return false;
     seen.add(record.id);
     return true;
   });
