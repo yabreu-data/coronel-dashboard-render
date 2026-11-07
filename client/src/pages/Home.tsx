@@ -369,6 +369,8 @@ const formatBirthday = (value: string) => {
       }).format(date)
     : "—";
 };
+const plural = (count: number, one: string, many: string) =>
+  `${count} ${count === 1 ? one : many}`;
 const formatDateTime = (value: string | Date | null | undefined) => {
   if (!value) return "—";
   const date = value instanceof Date ? value : new Date(value);
@@ -567,6 +569,18 @@ export default function Home() {
     const saved = localStorage.getItem("coronel.lastPage") as Page | null;
     return saved && tabs.some(tab => tab.id === saved) ? saved : "overview";
   });
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        document
+          .querySelector<HTMLInputElement>(".search-box input")
+          ?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
   const [qualityFilter, setQualityFilter] = useState("Todos");
   const [search, setSearch] = useState("");
   const [searchScope, setSearchScope] = useState<SearchScope>("all");
@@ -686,13 +700,15 @@ export default function Home() {
     canViewAudit,
   ]);
   const navGroups: { label: string; ids: Page[] }[] = [
-    { label: "ANÁLISIS", ids: ["overview", "voice", "team"] },
-    { label: "CLIENTES Y CRM", ids: ["birthdays", "clients", "priorities"] },
     {
       label: "OPERACIÓN",
-      ids: ["promotions", "calls", "responsibles", "targetHistory"],
+      ids: ["overview", "birthdays", "clients", "priorities", "calls"],
     },
-    { label: "CUENTA", ids: ["profile", "administracion"] },
+    { label: "ANÁLISIS", ids: ["voice", "team", "targetHistory"] },
+    {
+      label: "CONFIGURACIÓN",
+      ids: ["promotions", "responsibles", "profile", "administracion"],
+    },
   ];
   const title = tabs.find(t => t.id === page)?.label;
   const navigate = (
@@ -4006,7 +4022,13 @@ function Overview({
           <AlertTriangle size={18} />
           <div>
             <p className="eyebrow">ALERTAS QUE REQUIEREN ACCIÓN</p>
-            <b>{priorityCount} asunto(s) prioritario(s) detectado(s)</b>
+            <b>
+              {plural(
+                priorityCount,
+                "asunto prioritario detectado",
+                "asuntos prioritarios detectados"
+              )}
+            </b>
           </div>
         </div>
         <div className="alert-actions">
@@ -4020,7 +4042,13 @@ function Overview({
           >
             <span>⏰</span>
             <div>
-              <b>{overdueCount} prioridad(es) vencida(s)</b>
+              <b>
+                {plural(
+                  overdueCount,
+                  "prioridad vencida",
+                  "prioridades vencidas"
+                )}
+              </b>
               <small>Atender ahora</small>
             </div>
             <ChevronRight size={15} />
@@ -4032,11 +4060,11 @@ function Overview({
             <span>😞</span>
             <div>
               <b>
-                {
-                  profiles.filter(profile => clean(profile.quality) === "malo")
-                    .length
-                }{" "}
-                cliente(s) con calidad Mala
+                {plural(
+                  bad,
+                  "cliente con calidad Mala",
+                  "clientes con calidad Mala"
+                )}
               </b>
               <small>Revisar comentario y llamar</small>
             </div>
@@ -4052,7 +4080,13 @@ function Overview({
           >
             <span>🎂</span>
             <div>
-              <b>{birthdays.length} cumpleaños próximo(s)</b>
+              <b>
+                {plural(
+                  birthdays.length,
+                  "cumpleaños próximo",
+                  "cumpleaños próximos"
+                )}
+              </b>
               <small>Ofrecer promoción esta semana</small>
             </div>
             <ChevronRight size={15} />
@@ -4185,7 +4219,7 @@ function Overview({
                 <ActionRow
                   tone="red"
                   label="URGENTE"
-                  text={`${bad} cliente(s) con calidad “Malo”`}
+                  text={plural(bad, "cliente con calidad “Malo”", "clientes con calidad “Malo”")}
                   action="Revisar comentarios"
                   onClick={() => onNavigate("clients", "Malo", "bad")}
                 />
@@ -4253,7 +4287,7 @@ function Overview({
                   <p className="eyebrow">CLIENTES A RECUPERAR</p>
                   <h3>Riesgo con contexto</h3>
                 </div>
-                <Pill tone="red">{risks.length} prioridad(es)</Pill>
+                <Pill tone="red">{plural(risks.length, "prioridad", "prioridades")}</Pill>
               </div>
               {risks.slice(0, 4).map(p => (
                 <button
@@ -5829,7 +5863,7 @@ function CallLogForm({
           <section className="call-history-in-modal">
             <div className="call-history-modal-head">
               <b>Historial de llamadas</b>
-              <span>{clientLogs.length} registro(s)</span>
+              <span>{plural(clientLogs.length, "registro", "registros")}</span>
             </div>
             {clientLogs.slice(0, 5).map(log => (
               <article key={log.id}>
@@ -6384,7 +6418,7 @@ function CallsHistory({
           <span>
             <b>Seguimiento trazable</b>
             <small>
-              {visible.length} registro(s) visibles de {logs.length} guardados.
+              {plural(visible.length, "registro visible", "registros visibles")} de {logs.length} guardados.
             </small>
           </span>
         </div>
@@ -8987,7 +9021,7 @@ function AccessAdmin({
             </small>
           </div>
           <Pill tone={pendingRequests.length ? "orange" : "green"}>
-            {pendingRequests.length} pendiente(s)
+            {plural(pendingRequests.length, "pendiente", "pendientes")}
           </Pill>
         </div>
         {pendingRequests.length ? (

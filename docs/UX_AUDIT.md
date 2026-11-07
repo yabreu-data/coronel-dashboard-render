@@ -354,7 +354,49 @@ la incertidumbre debe ser visible y comprensible.
 - Detalle de KPI ya no se recorta; permite varias líneas.
 - Subtítulo técnico oculto en móvil para reducir cabecera.
 
-## 10. Siguiente paso recomendado
+## 10. Implementación aplicada (2026-11-06)
+
+### Tema claro de marca
+
+- Fondo general blanco verdoso (`#f6faf7`), superficies blancas y sidebar salvia
+  (`#acd3b6`).
+- Verde principal `#1d4a31`; rojo de acento `#d93a2b`.
+- Login, splash, tablas, tarjetas, filtros, modales y navegación móvil migrados
+  al tema claro.
+- Logo con fondo transparente (`logo-coronel.png`) para sidebar y login.
+
+### Navegación y estructura
+
+- Menú consolidado en 3 grupos: **Operación** (Centro de acción, Cumpleaños,
+  Clientes, Prioridades, Llamadas), **Análisis** (Voz, Equipo, Historial) y
+  **Configuración** (Promociones, Responsables, Perfil, Administración).
+- Nuevo **bottom navigation** móvil: Hoy, Cumpleaños, Clientes, Llamadas y “Más”.
+- Hoja “Más opciones” para el resto de pantallas.
+- Cabecera móvil compacta: sin fuente/sincronización/sesión duplicadas; título +
+  actualizar.
+- Filtros móviles reordenados para evitar superposiciones; exportaciones
+  ocultas en móvil para dar prioridad a búsqueda/calidad.
+
+### Contenido y acciones
+
+- Centro de acción con **4 KPIs** (se retiró la tarjeta duplicada de alertas).
+- Tarjeta de cumpleaños con acciones primarias **WhatsApp / Llamar** y menú
+  **“⋯ Más”** para ficha, copiar y ajustar.
+- Estado vacío de Llamadas con CTA a Clientes.
+- Pluralización real: “9 prioridades vencidas”, “3 cumpleaños próximos”,
+  “0 pendientes”.
+- Atajo **Ctrl/Cmd+K** para enfocar la búsqueda.
+- Foco visible y `prefers-reduced-motion` respetados.
+
+### Pendiente de una segunda iteración
+
+- Onboarding de 3 pasos y checklist de primer uso.
+- Conversión de tablas a cards en móvil (requiere reestructurar cada tabla).
+- Foco atrapado/Esc/retorno de foco en todos los modales.
+- Gráficos con n/IC y tooltips en Historial/Equipo.
+- Biblioteca formal de componentes (`PageHeader`, `FilterBar`, `DataTable`).
+
+## 11. Siguiente paso recomendado
 
 Empezar por **P0 móvil + navegación + tarjeta de cumpleaños**, porque concentra
 la mayor fricción diaria. Después, la consolidación de IA (P1) evita tener que

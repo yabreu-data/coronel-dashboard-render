@@ -1825,3 +1825,14 @@ td b { color: #173b2b !important; }
 .bw-more summary { list-style: none; cursor: pointer; }
 .bw-more summary::-webkit-details-marker { display: none; }
 .bw-more-menu { display: flex; flex-direction: column; gap: 5px; margin-top: 5px; }
+
+.client-model, .client-model * { color: #5c7a6b !important; }
+.client-model b { color: #173b2b !important; }
+.account-control .account-status, .account-control .account-status * { color: #5c7a6b !important; }
+.account-control .account-status strong { color: #173b2b !important; }
+@media (max-width: 760px) {
+  .filter-bar .export-group { display: none !important; }
+  .filter-bar { grid-template-columns: 1fr 1fr !important; }
+  .filter-bar .search-box, .filter-bar .filter-group, .filter-bar .reset-button { grid-column: 1 / -1 !important; }
+  .filter-bar .filter-group { display: flex !important; justify-content: space-between !important; }
+}
