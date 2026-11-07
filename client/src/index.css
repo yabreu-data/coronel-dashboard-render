@@ -2463,3 +2463,148 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
   .clients-row-action { min-height: 36px; }
   .bw-status-select { min-height: 34px; }
 }
+
+/* ============================================================
+   Tipografía editorial — Fraunces + Source Serif 4
+   Cálida, serif y legible, con un guiño Ghibli.
+   ============================================================ */
+:root {
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --canvas: #f7f2e7;
+  --surface: #fffdf8;
+  --ink: #20372a;
+  --muted: #5d6d5c;
+  --line: #e3ddcc;
+}
+
+html, body, #root, button, input, select, textarea, table {
+  font-family: var(--font-body) !important;
+}
+body {
+  background: radial-gradient(circle at 18% 0%, #fbf7ec 0%, transparent 38%), #f7f2e7 !important;
+  color: #20372a !important;
+  font-size: 15px;
+  line-height: 1.55;
+  font-optical-sizing: auto;
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.app-shell, .main-area {
+  background: radial-gradient(circle at 90% -10%, #e9f3e8 0%, transparent 34%), #f7f2e7 !important;
+}
+.topbar { background: rgba(247,242,231,.92) !important; border-bottom-color: #e3ddcc !important; }
+.panel, .stat-card, .filter-bar, .quality-face, .hero-strip, .page-intro,
+.clients-command-copy, .priorities-command-copy, .birthday-command,
+.bw-panel, .bw-card, .priority-queue-panel, .clients-workspace .panel,
+.auth-wall-card, .business-guide {
+  background: #fffdf8 !important;
+  border-color: #e3ddcc !important;
+}
+h1, h2, h3, h4, h5, h6,
+.brand b,
+.command-copy h2,
+.clients-command-copy h2,
+.priorities-command-copy h2,
+.birthday-command-copy h3,
+.pulse-percent,
+.stat-card strong,
+.quality-face h2,
+.today-task-count,
+.signal-stats b,
+.bw-metric b,
+.bw-date b,
+.agenda-date b,
+.delivery-target-number,
+.stat-card strong,
+.hero-strip h2,
+.page-intro h2 {
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: -.028em !important;
+  font-optical-sizing: auto;
+  color: #20372a !important;
+  text-wrap: balance;
+}
+body, p, small, .muted, td, th, .nav-item, .pill, .eyebrow, .breadcrumb,
+button, input, select, textarea, label, .business-guide, .footer {
+  font-family: var(--font-body) !important;
+}
+h1 { font-size: 34px !important; line-height: 1.05 !important; }
+h2 { font-size: 28px !important; line-height: 1.12 !important; }
+h3 { font-size: 19px !important; line-height: 1.22 !important; }
+.command-copy h2, .clients-command-copy h2, .priorities-command-copy h2 { font-size: 33px !important; line-height: 1.04 !important; }
+.birthday-command-copy h3 { font-size: 26px !important; }
+.pulse-percent { font-size: 48px !important; line-height: .95 !important; }
+.stat-card strong { font-size: 30px !important; line-height: 1 !important; }
+.quality-face h2 { font-size: 22px !important; }
+.eyebrow, .breadcrumb, .side-label, .nav-section-label {
+  font-size: 10.5px !important;
+  letter-spacing: .13em !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+}
+.muted { font-size: 13px !important; line-height: 1.55 !important; }
+p { line-height: 1.55; text-wrap: pretty; }
+.nav-item { font-size: 13.5px !important; }
+.panel-head h3 { font-size: 19px !important; }
+.panel-head .eyebrow { font-size: 10.5px !important; }
+.pill { font-size: 10px !important; letter-spacing: .05em !important; }
+button { font-size: 12.5px; }
+.search-box input, .filter-bar input, .filter-bar select { font-size: 13.5px !important; }
+.filter-group span, .filter-select-wrap span, .calls-filter-row label, .date-filter-controls label { font-size: 11.5px !important; }
+.today-task-copy b { font-size: 13px !important; }
+.today-task-copy small { font-size: 11.5px !important; }
+.today-task-count { font-size: 25px !important; }
+.today-task-cta { font-size: 10.5px !important; }
+.signal-stats b { font-size: 27px !important; }
+.signal-stats span, .signal-stats small { font-size: 10px !important; }
+.signal-note { font-size: 11.5px !important; }
+.clients-row-title > b { font-size: 14px !important; }
+.clients-row-main > small { font-size: 12.5px !important; }
+.clients-row-meta { font-size: 11px !important; }
+.clients-row-action-label { font-size: 10.5px !important; }
+.priority-queue-title > b { font-size: 14px !important; }
+.priority-queue-copy > small { font-size: 12px !important; }
+.priority-queue-meta { font-size: 11px !important; }
+.priority-type-label, .priority-overdue-badge, .priority-soon-badge, .priority-done-badge { font-size: 9.5px !important; }
+.priority-status, .priority-edit-toggle { font-size: 10.5px !important; }
+.priority-state-chip { font-size: 10px !important; }
+.bw-title > b { font-size: 14px !important; }
+.bw-meta { font-size: 12px !important; }
+.bw-days { font-size: 11px !important; }
+.bw-status-select { font-size: 11px !important; }
+.bw-metric b { font-size: 27px !important; }
+.bw-metric small, .bw-metric span { font-size: 10.5px !important; }
+.bw-card-foot .bw-next, .bw-card-foot .bw-history-link, .bw-attempts { font-size: 10.5px !important; }
+.business-guide summary { font-size: 12.5px !important; }
+.business-guide-body li { font-size: 12.5px !important; }
+th { font-size: 12px !important; letter-spacing: .02em; }
+td { font-size: 13px !important; }
+.footer { font-size: 11.5px !important; }
+.priority-pin-modal p, .priority-pin-modal small { font-size: 12px !important; }
+.priority-pin-modal h3 { font-size: 23px !important; }
+
+/* Números alineados y elegantes */
+.stat-card strong, .pulse-percent, .bw-metric b, .signal-stats b,
+.today-task-count, .clients-command-kpis b, .priorities-command-kpis b,
+.delivery-target-number, .score-row b, .agenda-date b {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+@media (max-width: 760px) {
+  body { font-size: 15px; }
+  h1 { font-size: 29px !important; }
+  h2 { font-size: 24px !important; }
+  h3 { font-size: 18px !important; }
+  .command-copy h2, .clients-command-copy h2, .priorities-command-copy h2 { font-size: 28px !important; }
+  .birthday-command-copy h3 { font-size: 23px !important; }
+  .pulse-percent { font-size: 40px !important; }
+  .stat-card strong { font-size: 27px !important; }
+  .eyebrow, .breadcrumb { font-size: 10px !important; }
+  .muted { font-size: 12.5px !important; }
+  .clients-row-title > b, .priority-queue-title > b { font-size: 13.5px !important; }
+  .clients-row-main > small, .priority-queue-copy > small { font-size: 12px !important; }
+  .business-guide-body li { font-size: 12px !important; }
+}
