@@ -2885,7 +2885,11 @@ function BirthdayWorkspace({
               }}
             >
               <MessageSquareText size={15} />
-              {todayCount ? `Saludar a ${todayCount} de hoy` : `Ver los ${weekCount} de esta semana`}
+              {todayCount
+              ? `Saludar a ${todayCount} de hoy`
+              : weekCount
+                ? `Ver los ${weekCount} de esta semana`
+                : "Ver todos los cumpleaños"}
             </button>
             <button className="btn-borde" onClick={openTemplates}>
               Mensajes para saludar
@@ -5160,7 +5164,13 @@ function Priorities({
                 ? "Todos los pendientes"
                 : statusFilter === "Vencidas"
                   ? "Atrasadas: resolver primero"
-                  : statusFilter}
+                  : statusFilter === "Pendientes"
+                    ? "Sin vencer"
+                    : statusFilter === "En seguimiento"
+                      ? "En proceso"
+                      : statusFilter === "Atendidas"
+                        ? "Resueltas"
+                        : statusFilter}
             </h3>
           </div>
           <Pill tone={overdueCount ? "red" : "green"}>
@@ -5779,7 +5789,10 @@ function Clients({
               className="btn-rojo"
               onClick={() => setSegment("En riesgo")}
             >
-              <Phone size={15} /> Ver {risk.length} por recuperar
+              <Phone size={15} />{" "}
+              {risk.length
+                ? `Ver ${risk.length} por recuperar`
+                : "Ver todos los clientes"}
             </button>
             <button
               className="btn-borde"
