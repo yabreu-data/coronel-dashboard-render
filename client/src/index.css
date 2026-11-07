@@ -2312,3 +2312,13 @@ button, .stat-card, .priority-item, .admin-promotion-row, .admin-user-row, .voic
 /* Evitar que el emoji del cliente en riesgo se estire como bloque */
 .clients-priority-row > .face { flex: 0 0 auto !important; width: 28px !important; height: 28px !important; }
 .clients-priority-row > span:not(.face) { flex: 1; min-width: 0; }
+
+@media (max-width: 760px) {
+  .clients-segments { flex-wrap: wrap !important; gap: 6px !important; }
+  .clients-segments button { flex: 0 0 auto; }
+  .clients-workspace { display: flex !important; flex-direction: column; }
+  .clients-side { order: -1; width: 100%; }
+  .clients-row { grid-template-columns: 32px minmax(0, 1fr) auto !important; }
+  .clients-row-action { grid-column: auto !important; width: 34px; height: 32px; padding: 0 !important; justify-content: center; }
+  .clients-row-action-label { display: none; }
+}

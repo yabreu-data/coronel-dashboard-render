@@ -5344,7 +5344,6 @@ function Clients({
     birthdayView === "month"
       ? birthdayRecordsWithin(allRecords, 0, 30)
       : birthdayRecordsWithin(allRecords, 0, 7);
-  const lastWeekBirthdays = birthdayRecordsWithin(allRecords, -7, -1);
   const wasCalled = (record: RecordItem) =>
     logs.some(
       log =>
@@ -5716,7 +5715,7 @@ function Clients({
             <>
               <div className="clients-list">
                 {visible
-                  .slice(0, showAllClients ? visible.length : 30)
+                  .slice(0, showAllClients ? visible.length : 15)
                   .map(profile => {
                     const lastCall = lastCallFor(profile);
                     return (
@@ -5765,18 +5764,19 @@ function Clients({
                           </span>
                         </span>
                         <span className="clients-row-action">
-                          <Phone size={14} /> Llamar
+                          <Phone size={14} />
+                          <span className="clients-row-action-label">Llamar</span>
                         </span>
                       </button>
                     );
                   })}
               </div>
-              {visible.length > 30 && !showAllClients && (
+              {visible.length > 15 && !showAllClients && (
                 <button
                   className="clients-load-more"
                   onClick={() => setShowAllClients(true)}
                 >
-                  Ver los {visible.length - 30} restantes <ChevronDown size={15} />
+                  Ver los {visible.length - 15} restantes <ChevronDown size={15} />
                 </button>
               )}
             </>

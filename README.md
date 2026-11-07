@@ -141,7 +141,7 @@ Ver [docs/ANALISIS_SISTEMA_GESTION.md](docs/ANALISIS_SISTEMA_GESTION.md): invent
 
 Fuente de datos y revisión del Apps Script: [docs/FUENTE_DATOS_GOOGLE_SHEETS.md](docs/FUENTE_DATOS_GOOGLE_SHEETS.md). Configuración del Apps Script: [integrations/apps-script/README.md](integrations/apps-script/README.md).
 
-Calidad, limpieza y normalización de datos: [docs/ANALISIS_CALIDAD_DATOS.md](docs/ANALISIS_CALIDAD_DATOS.md). Verificación de cálculos de la app: [docs/VERIFICACION_CALCULOS.md](docs/VERIFICACION_CALCULOS.md). Auditoría UX/UI: [docs/UX_AUDIT.md](docs/UX_AUDIT.md). Sistema de diseño: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). Rediseño del Centro de acción: [docs/CENTRO_ACCION.md](docs/CENTRO_ACCION.md). Cumpleaños: [docs/CUMPLEANOS.md](docs/CUMPLEANOS.md).
+Calidad, limpieza y normalización de datos: [docs/ANALISIS_CALIDAD_DATOS.md](docs/ANALISIS_CALIDAD_DATOS.md). Verificación de cálculos de la app: [docs/VERIFICACION_CALCULOS.md](docs/VERIFICACION_CALCULOS.md). Auditoría UX/UI: [docs/UX_AUDIT.md](docs/UX_AUDIT.md). Sistema de diseño: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). Rediseño del Centro de acción: [docs/CENTRO_ACCION.md](docs/CENTRO_ACCION.md). Cumpleaños: [docs/CUMPLEANOS.md](docs/CUMPLEANOS.md). Clientes: [docs/CLIENTES.md](docs/CLIENTES.md).
 
 ## Despliegue
 
