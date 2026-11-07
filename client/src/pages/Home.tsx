@@ -4392,13 +4392,8 @@ function Overview({
             }
             evidence={
               overdueCount
-                ? `De ${priorityCount} prioridades abiertas. Empieza por las que ya pasaron de fecha.`
+                ? "Son las que ya pasaron de fecha. Empieza por ellas."
                 : "La cola está al día. Revisa cumpleaños y seguimientos."
-            }
-            meta={
-              priorityCount
-                ? `${Math.round((overdueCount / Math.max(priorityCount, 1)) * 100)}% de la cola`
-                : undefined
             }
             action="Abrir prioridades"
             onClick={() => onNavigate("priorities")}
@@ -4439,7 +4434,9 @@ function Overview({
               nextBirthday
                 ? nextBirthday.days === 0
                   ? "HOY"
-                  : `EN ${nextBirthday.days} DÍAS`
+                  : nextBirthday.days === 1
+                    ? "EN 1 DÍA"
+                    : `EN ${nextBirthday.days} DÍAS`
                 : undefined
             }
             action="Ver agenda"
@@ -9336,11 +9333,11 @@ function Team({
             label="DELIVERY WEB"
             tone={deliveryGap >= 0 ? "positive" : "warning"}
             icon={MessageSquareText}
-            title={`${deliveryCount} de ${deliveryGoal} encuestas`}
+            title={`${deliveryCount} encuestas`}
             evidence={
               deliveryGap >= 0
-                ? `Va ${deliveryGap} encuesta${deliveryGap === 1 ? "" : "s"} por encima de la meta del período.`
-                : `Faltan ${Math.abs(deliveryGap)} encuesta${Math.abs(deliveryGap) === 1 ? "" : "s"} para la meta.`
+                ? `Meta: ${deliveryGoal} · va ${deliveryGap} encuesta${deliveryGap === 1 ? "" : "s"} por encima.`
+                : `Meta: ${deliveryGoal} · faltan ${Math.abs(deliveryGap)} encuesta${Math.abs(deliveryGap) === 1 ? "" : "s"}.`
             }
             action="Ver delivery"
             onClick={() =>
