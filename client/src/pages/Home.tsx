@@ -4930,7 +4930,7 @@ function Overview({
               <UserRoundCheck size={18} />
               <span>
                 <b>Equipo y operación</b>
-                <small>Meseros vs. delivery web</small>
+                <small>Equipo vs. delivery web</small>
               </span>
               <ChevronRight size={16} />
             </button>
@@ -9036,8 +9036,8 @@ function PeriodComparison({
     return (
       <section className="panel period-comparison">
         <div>
-          <p className="eyebrow">COMPARACIÓN AUTOMÁTICA</p>
-          <h3>Selecciona un período completo</h3>
+          <p className="eyebrow">COMPARAR</p>
+          <h3>Elige fechas para comparar</h3>
           <small className="muted">
             Elige Desde y Hasta. Compararemos con el tramo anterior de la misma
             duración.
@@ -9049,8 +9049,8 @@ function PeriodComparison({
     <section className="panel period-comparison">
       <div className="panel-head">
         <div>
-          <p className="eyebrow">COMPARACIÓN AUTOMÁTICA</p>
-          <h3>Período seleccionado vs. período anterior</h3>
+          <p className="eyebrow">COMPARAR</p>
+          <h3>Contra el período anterior</h3>
           <small className="muted">
             {comparison.currentLabel} vs. {comparison.previousLabel} · misma
             duración
@@ -9532,7 +9532,7 @@ function Team({
                 />
               </label>
               <span className="muted target-summary">
-                Objetivo activo: <b>{surveyGoal} encuestas por mesero</b>,{" "}
+                Meta actual: <b>{surveyGoal} encuestas por mesero</b>,{" "}
                 <b>{deliveryGoal} delivery/web</b> y{" "}
                 <b>{qualityGoal}% de calidad positiva</b>.
               </span>
@@ -9674,7 +9674,7 @@ function Team({
         <section id="team-scorecard" className="panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">SCORECARD</p>
+              <p className="eyebrow">RESULTADOS POR PERSONA</p>
               <h3>Desempeño por mesero</h3>
             </div>
             <Pill tone="green">Meta: {qualityGoal}%</Pill>
