@@ -3519,3 +3519,14 @@ button[class*="bg-transparent"][class*="border"]:hover { background: #eef5ef !im
 /* Ficha alineada arriba y ajustada a su contenido */
 .client-sheet-backdrop { align-items: flex-start !important; }
 @media (max-width: 760px) { .client-sheet-backdrop { align-items: flex-end !important; } }
+
+.client-comment-note {
+  margin: 8px 0 0 !important;
+  padding: 8px 10px;
+  border-left: 2px solid #acd3b6;
+  background: rgba(255,255,255,.55);
+  border-radius: 0 6px 6px 0;
+  color: #4f6f5e !important;
+  font-size: 11px !important;
+  line-height: 1.5 !important;
+}

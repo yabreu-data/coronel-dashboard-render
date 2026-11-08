@@ -397,6 +397,17 @@ const segmentLabelFor = (value?: string) =>
         : value === "Nuevo"
           ? "Primera vez"
           : value || "Sin grupo";
+const clientSignal = (profile: Pick<ClientProfile, "quality" | "comment">) => {
+  const comment = profile.comment?.trim();
+  if (comment) return comment;
+  const quality = profile.quality?.trim();
+  if (!quality || clean(quality) === "sin calificar") {
+    return "Sin calificar · falta completar la encuesta";
+  }
+  return `Calificó ${quality} · no dejó comentario`;
+};
+const noCommentLabel = (profile: Pick<ClientProfile, "comment">) =>
+  profile.comment?.trim() || "No dejó comentario";
 const formatDateTime = (value: string | Date | null | undefined) => {
   if (!value) return "—";
   const date = value instanceof Date ? value : new Date(value);
@@ -1650,8 +1661,7 @@ export default function Home() {
             <div className="client-sheet-signal">
               <span className="eyebrow">CÓMO LLEGÓ</span>
               <p>
-                {detailProfile.comment ||
-                  "Sin comentario registrado en su última encuesta."}
+                {clientSignal(detailProfile)}
               </p>
               {detailLogs[0] && (
                 <small>
@@ -2493,7 +2503,7 @@ function PdfPreviewModal({
                         <tr key={profile.key}>
                           <td>{profile.name}</td>
                           <td>{profile.quality || "—"}</td>
-                          <td>{profile.comment || "Sin comentario"}</td>
+                          <td>{noCommentLabel(profile)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -3799,7 +3809,7 @@ function BirthdayWorkspace({
                     <li key={`${record.id}-${record.timestamp}`}>
                       <span>{record.timestamp}</span>
                       <span>{record.quality || "Sin calidad"}</span>
-                      <em>{record.comment || record.dish || "Sin comentario"}</em>
+                      <em>{record.comment || record.dish || "No dejó comentario"}</em>
                     </li>
                   ))}
                   {!historyRecords.length && <li>Sin visitas registradas.</li>}
@@ -4664,7 +4674,7 @@ function Overview({
             title={topRisk?.name || "Sin clientes en riesgo"}
             evidence={
               topRisk
-                ? `${topRisk.phone || "Sin teléfono"} · ${topRisk.comment || "Sin comentario registrado"}`
+                ? `${topRisk.phone || "Sin teléfono"} · ${clientSignal(topRisk)}`
                 : "No hay clientes con calidad Mala o Regular pendientes."
             }
             meta={topRisk?.quality || undefined}
@@ -4741,7 +4751,7 @@ function Overview({
               tone={badClients ? "critical" : "success"}
               icon={AlertTriangle}
               title="Clientes con calidad Mala"
-              detail="Revisar el comentario y llamar con contexto"
+              detail="Llamar y preguntar qué pasó, haya o no comentario"
               count={badClients}
               action="Llamar"
               onClick={() => onNavigate("clients", "Malo", "bad")}
@@ -4831,7 +4841,7 @@ function Overview({
                 <b>{profile.name}</b>
                 <small>
                   {profile.phone || "Sin teléfono"} ·{" "}
-                  {profile.comment || "Sin comentario"}
+                  {clientSignal(profile)}
                 </small>
               </span>
               <ChevronRight size={14} />
@@ -4996,7 +5006,7 @@ function Overview({
                     <b>{p.name}</b>
                     <small>
                       {p.phone || "Sin teléfono"} ·{" "}
-                      {p.comment || "Sin comentario"}
+                      {clientSignal(p)}
                     </small>
                   </span>
                   <ChevronRight size={14} />
@@ -5290,9 +5300,9 @@ function Priorities({
           type: "Calidad",
           tone: isBad ? "bad" : "orange",
           icon: isBad ? "😞" : "😐",
-          label: isBad ? "CLIENTE MOLESTO" : "CLIENTE REGULAR",
+          label: isBad ? "CALIFICACIÓN MALA" : "CALIFICACIÓN REGULAR",
           title: profile.name,
-          detail: `${profile.phone || "Sin teléfono"} · ${profile.quality} · ${profile.comment || "Sin comentario"}`,
+          detail: `${profile.phone || "Sin teléfono"} · ${clientSignal(profile)}`,
           defaultDueDate: toDateInput(deadline),
           defaultResponsible:
             latest && channelOf(latest) === "Salón"
@@ -5500,7 +5510,7 @@ function Priorities({
           <h2>¿Qué hago primero hoy?</h2>
           <p>
             {overdueCount
-              ? `Tienes ${plural(overdueCount, "pendiente atrasado", "pendientes atrasados")}. Primero atiende a los clientes molestos; después los cumpleaños y las llamadas.`
+              ? `Tienes ${plural(overdueCount, "pendiente atrasado", "pendientes atrasados")}. Primero atiende a los clientes con calificación Mala; después los cumpleaños y las llamadas.`
               : "No tienes pendientes atrasados. Revisa los cumpleaños y las llamadas de esta semana."}
           </p>
           <div className="priorities-command-actions">
@@ -5533,7 +5543,7 @@ function Priorities({
           <p className="eyebrow">ORDEN PARA ATENDER</p>
           <h3>Qué hacer primero</h3>
           <ol>
-            <li><span>1</span> Cliente molesto: discúlpate y ofrece una solución.</li>
+            <li><span>1</span> Calificación Mala: llama y pregunta qué pasó.</li>
             <li><span>2</span> Cumpleaños: saluda y ofrece la promo.</li>
             <li><span>3</span> Llamada pendiente: cumple el seguimiento.</li>
             <li><span>4</span> Cliente regular: busca mejorar su experiencia.</li>
@@ -6032,7 +6042,12 @@ function Clients({
                       {record.quality || "Sin calidad"}
                     </Pill>
                   </div>
-                  <p>{record.comment || "Sin comentario registrado."}</p>
+                  <p>
+              {record.comment ||
+                (record.quality
+                  ? `No dejó comentario. Calificó ${record.quality}.`
+                  : "No dejó comentario.")}
+            </p>
                   <small>
                     Producto o categoría: {record.dish || "No indicado"} ·
                     Registrado por: {displayServer(record.registeredBy)}
@@ -6156,7 +6171,7 @@ function Clients({
                   <b>{p.name}</b>
                   <small>
                     {p.phone || "Sin teléfono"} · {p.quality} ·{" "}
-                    {p.comment || "Sin comentario"}
+                    {noCommentLabel(p)}
                   </small>
                 </span>
                 <button className="small-action" onClick={() => setSelected(p)}>
@@ -6185,8 +6200,8 @@ function Clients({
             <Pill tone="red">ACCIÓN: CALIDAD MALA</Pill>
             <h2>Clasificaciones Mala</h2>
             <p>
-              Esta vista muestra únicamente las respuestas con calidad Mala para
-              revisar el comentario y contactar al cliente.
+              Esta vista muestra las respuestas con calidad Mala. Llama y pide
+              contexto aunque el cliente no haya dejado comentario.
             </p>
           </div>
         </div>
@@ -6206,7 +6221,7 @@ function Clients({
                   <b>{p.name}</b>
                   <small>
                     {p.phone || "Sin teléfono"} ·{" "}
-                    {p.comment || "Sin comentario"}
+                    {clientSignal(p)}
                   </small>
                 </span>
                 <button className="small-action" onClick={() => setSelected(p)}>
@@ -6238,6 +6253,10 @@ function Clients({
             <b>frecuente</b>; si volvió 2, <b>repite</b>; si es su primera vez,{" "}
             <b>es nuevo</b>. “Por recuperar” significa que calificó Malo o
             Regular y conviene llamarlo.
+          </p>
+          <p className="client-comment-note">
+            Un cliente sin comentario no es una queja: solo no dejó texto. La
+            calificación es la que indica si hay que llamar.
           </p>
           <div className="clients-command-actions">
             <button
@@ -6283,7 +6302,7 @@ function Clients({
               />
               <span>
                 <b>{profile.name}</b>
-                <small>{profile.comment || "Sin comentario registrado"}</small>
+                <small>{noCommentLabel(profile)}</small>
               </span>
               <Phone size={14} />
             </button>
@@ -6380,7 +6399,7 @@ function Clients({
                           </span>
                           <small>
                             {profile.phone || "Sin teléfono"} ·{" "}
-                            {profile.comment || "Sin comentario"}
+                            {noCommentLabel(profile)}
                           </small>
                           <span className="clients-row-meta">
                             <span>{profile.count} visita{profile.count === 1 ? "" : "s"}</span>
