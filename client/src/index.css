@@ -3530,3 +3530,197 @@ button[class*="bg-transparent"][class*="border"]:hover { background: #eef5ef !im
   font-size: 11px !important;
   line-height: 1.5 !important;
 }
+
+/* ============================================================
+   Identidad Coronel: verde, turquesa claro y patrón de marca
+   ============================================================ */
+:root {
+  --canvas: #eef8f3;
+  --surface: #ffffff;
+  --line: #d8ece2;
+  --ink: #10231a;
+  --muted: #5f7368;
+  --green: #208d56;
+  --blue: #2f7d63;
+  --orange: #e56b45;
+  --yellow: #b98a45;
+  --red: #f93015;
+  --purple: #4f8a72;
+  --sage: #87c097;
+}
+body {
+  background:
+    radial-gradient(circle at 20% 0%, #ffffff 0%, transparent 34%),
+    radial-gradient(circle at 90% 10%, #dff4e9 0%, transparent 30%),
+    #eef8f3 !important;
+  color: #10231a !important;
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+.app-shell, .main-area { background: transparent !important; }
+.main-area { position: relative; }
+.main-area::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/manus-storage/patron-coronel.png");
+  background-repeat: repeat;
+  background-size: 440px;
+  opacity: .035;
+  mix-blend-mode: multiply;
+}
+.main-area > * { position: relative; z-index: 1; }
+
+/* Sidebar de marca */
+.sidebar { background: linear-gradient(180deg, #0f3a28 0%, #08271a 100%) !important; }
+.sidebar .nav-item.active { background: #87c097 !important; color: #08271a !important; box-shadow: none !important; }
+.sidebar .nav-item.active svg, .sidebar .nav-item.active .nav-arrow { color: #08271a !important; }
+.sidebar .nav-badge, .sidebar .side-badge { background: #f93015 !important; }
+.brand tagline, .brand span { color: #a8d8bb !important; }
+
+/* Fondo y acentos de cada zona en verde/turquesa */
+.content[data-page="overview"] { --page-accent: #208d56; --page-soft: #e2f5ea; }
+.content[data-page="birthdays"] { --page-accent: #2f8a68; --page-soft: #e8f6ee; }
+.content[data-page="clients"] { --page-accent: #1f7d58; --page-soft: #e3f5ec; }
+.content[data-page="priorities"] { --page-accent: #2f8a68; --page-soft: #e8f6ee; }
+.content[data-page="calls"] { --page-accent: #208d56; --page-soft: #e4f6ec; }
+.content[data-page="voice"] { --page-accent: #2f8a68; --page-soft: #e9f7f0; }
+.content[data-page="team"] { --page-accent: #208d56; --page-soft: #e6f5ec; }
+.content[data-page="targetHistory"] { --page-accent: #2f8a68; --page-soft: #e8f6ee; }
+.content[data-page="promotions"] { --page-accent: #2f8a68; --page-soft: #e6f5ec; }
+.content[data-page="responsibles"] { --page-accent: #1f7d58; --page-soft: #e6f5ec; }
+.content[data-page="profile"] { --page-accent: #208d56; --page-soft: #e5f6ed; }
+.content[data-page="administracion"] { --page-accent: #2f8a68; --page-soft: #e9f6ef; }
+
+/* El rosa cálido pasa a turquesa claro */
+.page-intro, .admin-page-intro { background: linear-gradient(120deg, #ffffff 0%, var(--page-soft) 100%) !important; }
+.insight-positive { background: #eaf8f0 !important; }
+.insight-warning { background: #eef8f1 !important; }
+.insight-critical { background: #fff1ee !important; }
+.insight-neutral { background: #f2faf5 !important; }
+.client-comment-note { background: #e7f6ee !important; border-left-color: #87c097 !important; color: #366a50 !important; }
+.insights-section { background: var(--page-soft) !important; border-color: #cfe8da !important; }
+.auth-wall { background: radial-gradient(circle at 50% 15%, #e1f5e9 0%, #eef8f3 62%) !important; }
+.quick-call-button, .btn-rojo { background: #f93015 !important; border-color: #f93015 !important; }
+.quick-call-button:hover, .btn-rojo:hover:not(:disabled), .btn-rojo:hover { background: #d9230b !important; border-color: #d9230b !important; }
+.btn-borde { color: #208d56 !important; }
+.panel-head .eyebrow, .eyebrow { color: #4e6d5c !important; }
+.panel-head .eyebrow::before { background: #208d56; }
+.pill-green, .pill-blue { background: #e3f5eb !important; color: #16663f !important; }
+.pill-orange, .pill-red { background: #ffefeb !important; color: #c52c17 !important; }
+.stat-card.accent-green { --stat-accent: #208d56; --stat-bg: #eef9f2; }
+.stat-card.accent-blue { --stat-accent: #2f8a68; --stat-bg: #eef8f2; }
+.stat-card.accent-orange { --stat-accent: #e56b45; --stat-bg: #fff4ef; }
+.stat-card.accent-red { --stat-accent: #f93015; --stat-bg: #fff1ee; }
+.stat-card.accent-purple { --stat-accent: #4f8a72; --stat-bg: #edf8f2; }
+
+/* Patrón de marca en el reporte PDF */
+.pdf-preview-sheet { position: relative; overflow: hidden; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.pdf-preview-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/manus-storage/patron-coronel.png");
+  background-repeat: repeat;
+  background-size: 390px;
+  opacity: .045;
+  mix-blend-mode: multiply;
+}
+.pdf-preview-sheet > * { position: relative; z-index: 1; }
+
+/* Tipografía más legible */
+body, button, input, select, textarea { font-family: "Manrope", "Segoe UI", sans-serif; }
+h1, h2, h3, .panel-head h3, .page-intro h2, .insights-head h2 { color: #10231a; }
+.breadcrumb, .eyebrow, .side-label, .panel-head .eyebrow { font-size: 10.5px !important; letter-spacing: .12em !important; }
+.pill, .nav-badge { font-size: 10px !important; }
+.panel-head h3 { font-size: 22px !important; }
+.stat-card .eyebrow { font-size: 10px !important; }
+.stat-card .muted, .muted, .micro-note { font-size: 12px !important; }
+.sidebar .nav-item { font-size: 12.5px !important; }
+.footer { font-size: 11px !important; }
+.table-panel td, .calls-table td { font-size: 12.5px !important; }
+.client-sheet p, .client-sheet small { font-size: 12.5px; }
+.sync-status, .topbar .muted { font-size: 11.5px !important; }
+
+/* Un poco más de vida, sin ruido */
+.insight-card:hover { border-color: #87c097 !important; }
+.panel-head h3 { letter-spacing: -.03em; }
+
+.profile-name-line { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.profile-name-line h3 { margin: 0; }
+.profile-name-line .small-action { min-height: 30px; }
+.profile-name-editor { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin: 3px 0 5px; }
+.profile-name-editor input { min-height: 36px; max-width: 280px; }
+.profile-name-editor .small-action { min-height: 36px; }
+.profile-name-editor .text-button { min-height: 36px; }
+.success-inline { margin: 3px 0 0 !important; color: #208d56 !important; font-size: 11.5px !important; font-weight: 700; }
+
+.topbar-data-line b { color: #208d56; font-weight: 800; }
+.team-targets-btn { flex: 0 0 auto; align-self: center; min-height: 32px; margin-left: 4px; white-space: nowrap; }
+.intro-note.team-targets-btn { align-items: center; }
+@media (max-width: 760px) {
+  .team-targets-btn { width: 100%; margin: 6px 0 0; }
+  .intro-note { flex-wrap: wrap; }
+}
+
+/* Word cloud moderno e interactivo */
+.topics-panel { background: linear-gradient(145deg, #ffffff 0%, #f0fbf5 100%) !important; }
+.word-cloud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  min-height: 220px;
+  padding: 22px 18px;
+  border: 1px solid #d8ece2;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(135,192,151,.22), transparent 32%),
+    radial-gradient(circle at 82% 78%, rgba(32,141,86,.12), transparent 34%),
+    #f7fcf9;
+}
+.word {
+  appearance: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(255,255,255,.84);
+  color: #176b45;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-weight: 800;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: transform .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.word:hover { transform: translateY(-2px) scale(1.03); border-color: #87c097; box-shadow: 0 7px 18px rgba(32,141,86,.12); }
+.word.is-active { background: #208d56; border-color: #208d56; color: #ffffff; }
+.word sup { font-size: .55em; font-weight: 800; opacity: .65; }
+.word-0 { color: #208d56; }
+.word-1 { color: #0f6b46; }
+.word-2 { color: #2f7d63; }
+.word-3 { color: #557d4f; }
+.word-4 { color: #146c55; }
+.word.is-active sup { opacity: .9; }
+.word-cloud-detail { margin-top: 14px; padding: 14px; border: 1px solid #d8ece2; border-radius: 14px; background: rgba(255,255,255,.8); }
+.word-cloud-detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.word-cloud-detail-head b { display: block; margin-top: 4px; font-family: var(--font-display); font-size: 22px; letter-spacing: -.03em; }
+.word-cloud-detail-head small { display: block; margin-top: 2px; color: #5f7368; font-size: 11px; }
+.word-cloud-comments { margin-top: 10px; }
+.word-cloud-comment { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 4px 8px; padding: 10px 0; border-top: 1px solid #edf4ef; }
+.word-cloud-comment p { margin: 0; color: #263d30; font-size: 12.5px; line-height: 1.45; }
+.word-cloud-comment small { grid-column: 2; color: #6c7f73; font-size: 10.5px; }
+.word-cloud-detail .empty { padding: 8px 0; }
+@media (max-width: 760px) {
+  .word-cloud { min-height: 170px; gap: 6px; padding: 15px 10px; }
+  .word { padding: 6px 9px; }
+  .word-cloud-detail { padding: 11px; }
+}

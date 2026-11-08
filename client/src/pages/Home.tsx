@@ -1144,8 +1144,11 @@ export default function Home() {
               RESTAURANTE CORONEL
             </p>
             <h1>{title}</h1>
-            <p className="muted">
-              {sourceTab === "limpia" ? "Datos reales" : "Datos de prueba"} · actualización automática cada 5 minutos
+            <p className="muted topbar-data-line">
+              {sourceTab === "limpia" ? "Datos reales" : "Datos de prueba"} ·{" "}
+              <b>{records.length} encuestas cargadas</b> desde{" "}
+              <b>{sourceTab === "limpia" ? "Encuestas_Limpias" : "Encuestas"}</b>{" "}
+              · actualización cada 5 minutos
             </p>
           </div>
           <div className="top-actions">
@@ -1486,8 +1489,11 @@ export default function Home() {
         </div>
         <footer className="footer">
           <span>
-            Encuestas registradas · {filtered.length}{" "}
-            registros
+            {records.length} encuestas cargadas desde{" "}
+            {sourceTab === "limpia" ? "Encuestas_Limpias" : "Encuestas"}
+            {search || qualityFilter !== "Todos"
+              ? ` · ${filtered.length} visibles con el filtro`
+              : ""}
           </span>
           <span>Datos personales: acceso restringido al equipo autorizado</span>
         </footer>
@@ -1724,17 +1730,28 @@ function Profile({
 }) {
   const [tab, setTab] = useState<"account" | "sessions">("account");
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(user?.name ?? "");
   const utils = trpc.useUtils();
   const sessionsQuery = trpc.auth.sessions.useQuery(undefined, {
     enabled: Boolean(user),
     staleTime: 0,
     refetchOnMount: "always",
   });
+  const updateName = trpc.profile.updateName.useMutation({
+    onSuccess: async () => {
+      await utils.auth.me.invalidate();
+      setEditingName(false);
+    },
+  });
   const updateAvatar = trpc.profile.updateAvatar.useMutation({
     onSuccess: async () => {
       await utils.auth.me.invalidate();
     },
   });
+  useEffect(() => {
+    if (user?.name) setNameDraft(user.name);
+  }, [user?.name]);
   const sessions = (sessionsQuery.data ?? []) as SessionEvent[];
   return (
     <>
@@ -1782,11 +1799,68 @@ function Profile({
             </div>
             <div className="profile-details">
               <p className="eyebrow">TUS DATOS</p>
-              <h3>{user?.name || "Usuario no identificado"}</h3>
+              {editingName ? (
+                <div className="profile-name-editor">
+                  <input
+                    autoFocus
+                    value={nameDraft}
+                    maxLength={80}
+                    onChange={event => setNameDraft(event.target.value)}
+                    onKeyDown={event => {
+                      if (event.key === "Enter") {
+                        const name = nameDraft.trim();
+                        if (name.length >= 2) updateName.mutate({ name });
+                      }
+                      if (event.key === "Escape") {
+                        setEditingName(false);
+                        setNameDraft(user?.name ?? "");
+                      }
+                    }}
+                    aria-label="Tu nombre"
+                  />
+                  <button
+                    className="small-action"
+                    disabled={
+                      updateName.isPending || nameDraft.trim().length < 2
+                    }
+                    onClick={() => updateName.mutate({ name: nameDraft.trim() })}
+                  >
+                    {updateName.isPending ? "Guardando…" : "Guardar"}
+                  </button>
+                  <button
+                    className="text-button"
+                    onClick={() => {
+                      setEditingName(false);
+                      setNameDraft(user?.name ?? "");
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <div className="profile-name-line">
+                  <h3>{user?.name || "Usuario no identificado"}</h3>
+                  <button
+                    className="small-action"
+                    onClick={() => {
+                      setNameDraft(user?.name ?? "");
+                      setEditingName(true);
+                    }}
+                  >
+                    Editar nombre
+                  </button>
+                </div>
+              )}
               <p>
                 {user?.email ||
                   "El proveedor de acceso no entregó correo visible."}
               </p>
+              {updateName.error && (
+                <p className="form-error">{updateName.error.message}</p>
+              )}
+              {updateName.isSuccess && !editingName && (
+                <p className="success-inline">✓ Nombre actualizado.</p>
+              )}
               <div className="profile-badges">
                 <Pill tone={user?.role === "admin" ? "green" : "blue"}>
                   {user?.role === "admin" ? "Administrador" : "Usuario"}
@@ -8595,6 +8669,14 @@ function Voice({
   positiveCount: number;
 }) {
   const [selected, setSelected] = useState<SentimentHighlight | null>(null);
+  const [selectedPhrase, setSelectedPhrase] = useState<string | null>(null);
+  const phraseMatches = useMemo(() => {
+    if (!selectedPhrase) return [];
+    const query = normalizeText(selectedPhrase);
+    return comments.filter(record =>
+      normalizeText(record.comment).includes(query)
+    );
+  }, [comments, selectedPhrase]);
   const repeatedComments = useMemo(() => buildRepeatedComments(comments), [comments]);
   const requestComments = useMemo(() => buildRequestComments(comments), [comments]);
   const visibleRequests = requestComments.slice(0, 10);
@@ -8867,24 +8949,73 @@ function Voice({
             </div>
             <Pill tone="blue">Contexto incluido</Pill>
           </div>
-          <div className="word-cloud">
+          <div className="word-cloud" aria-label="Frases que más se repiten">
             {topicPhrases.map(([phrase, count], i) => (
-              <span
+              <button
+                type="button"
                 key={phrase}
-                className={`word word-${i % 5}`}
-                style={{ fontSize: `${14 + Math.min(count, 5) * 4}px` }}
+                className={`word word-${i % 5} ${selectedPhrase === phrase ? "is-active" : ""}`}
+                style={{ fontSize: `${14 + Math.min(count, 5) * 3}px` }}
+                onClick={() =>
+                  setSelectedPhrase(current =>
+                    current === phrase ? null : phrase
+                  )
+                }
+                title={`Ver comentarios que mencionan “${phrase}”`}
               >
                 {phrase}
                 <sup>{count}</sup>
-              </span>
+              </button>
             ))}
           </div>
           {!topicPhrases.length && (
-            <Empty text="Aún no hay frases repetidas 4 o más veces." />
+            <Empty text="Aún no hay frases repetidas." />
+          )}
+          {selectedPhrase && (
+            <div className="word-cloud-detail">
+              <div className="word-cloud-detail-head">
+                <div>
+                  <span className="eyebrow">FRASE SELECCIONADA</span>
+                  <b>“{selectedPhrase}”</b>
+                  <small>
+                    {plural(phraseMatches.length, "comentario", "comentarios")}
+                  </small>
+                </div>
+                <button
+                  className="icon-button"
+                  onClick={() => setSelectedPhrase(null)}
+                  aria-label="Cerrar frase"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              {phraseMatches.length ? (
+                <div className="word-cloud-comments">
+                  {phraseMatches.slice(0, 6).map(record => (
+                    <div
+                      className="word-cloud-comment"
+                      key={`${record.id}-${record.timestamp}`}
+                    >
+                      <span className={`visit-quality ${clean(record.quality)}`}>
+                        {record.quality || "Sin calificar"}
+                      </span>
+                      <p>{record.comment}</p>
+                      <small>
+                        {formatDate(record.timestamp)} ·{" "}
+                        {record.registeredBy || "Sin mesero"}
+                      </small>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <Empty text="No encontramos comentarios con esa frase." />
+              )}
+            </div>
           )}
           <p className="micro-note">
-            Ejemplos: “buena atención”, “mala atención”, “falta consideración” o
-            “sabor excelente”.
+            {selectedPhrase
+              ? "Haz clic en la frase o en la X para volver al mapa."
+              : "Haz clic en una frase para ver los comentarios que la mencionan."}
           </p>
         </section>
         <section className="panel">
@@ -9509,6 +9640,16 @@ function Team({
                 : "Sin lista disponible; se muestran los códigos."}
             </small>
           </span>
+          <button
+            className="secondary-action team-targets-btn"
+            onClick={() =>
+              document
+                .getElementById("team-targets")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Editar metas
+          </button>
         </div>
       </div>
       <section className="insights-section">

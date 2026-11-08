@@ -365,6 +365,9 @@ export const appRouter = router({
     }),
   }),
   profile: router({
+    updateName: protectedProcedure
+      .input(z.object({ name: z.string().trim().min(2).max(80) }))
+      .mutation(({ input, ctx }) => db.updateUserName(ctx.user.openId, input.name)),
     updateAvatar: protectedProcedure
       .input(z.object({ avatarPreset: z.enum(["coronel", "chef", "flame", "leaf", "star", "shield"]) }))
       .mutation(({ input, ctx }) => db.updateUserAvatar(ctx.user.openId, input.avatarPreset)),
