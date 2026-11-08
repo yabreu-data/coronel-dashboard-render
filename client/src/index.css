@@ -4011,3 +4011,33 @@ body::before {
   mix-blend-mode: multiply;
 }
 .app-shell, .auth-wall, .loading-screen { position: relative; z-index: 1; }
+
+/* Correcciones de contraste del rediseño Bistró Botánico */
+.sidebar .nav-item,
+.sidebar .nav-item span,
+.sidebar .nav-item svg,
+.sidebar .nav-item .nav-arrow { color: #208d56 !important; }
+.sidebar .nav-item:hover,
+.sidebar .nav-item:hover span,
+.sidebar .nav-item:hover svg { color: #16663f !important; background: #f2faf6 !important; }
+.sidebar .nav-item.active,
+.sidebar .nav-item.active span,
+.sidebar .nav-item.active svg { color: #16663f !important; background: #eef8f2 !important; }
+.sidebar .nav-badge { background: #208d56 !important; color: #ffffff !important; }
+.sidebar .nav-section-label, .sidebar .side-label, .sidebar .brand-tagline { color: #208d56 !important; }
+.sidebar-bottom b, .sidebar-bottom span { color: #208d56 !important; }
+
+/* Contexto de la señal: todo el texto legible */
+.comment-modal .muted,
+.comment-modal .modal-head p,
+.comment-modal .modal-head .muted { color: #000000 !important; font-size: 13px !important; }
+.comment-modal .eyebrow { color: #208d56 !important; }
+.comment-modal h3 { color: #208d56 !important; }
+.highlight-comments article p { color: #000000 !important; }
+.highlight-comments article small { color: #3f4a43 !important; }
+
+/* El rojo no se usa como decoración: solo CTA */
+.pill-red, .pill-orange { background: #f2f8f4 !important; color: #000000 !important; border-color: #dcebe2 !important; }
+.birthday-signal.today { background: #208d56 !important; color: #208d56 !important; }
+.birthday-signal.soon, .birthday-signal.week { background: #87c097 !important; color: #87c097 !important; }
+.today-task.critical, .today-task.is-critical { border-color: #dcebe2 !important; }
