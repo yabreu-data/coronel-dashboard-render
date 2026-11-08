@@ -673,6 +673,17 @@ function BusinessGuide({
 
 type InsightTone = "positive" | "warning" | "critical" | "neutral";
 
+const emphasizeInsight = (text: string) => {
+  const parts = text.split(/(“[^”]+”|Calificó (?:Bueno|Regular|Malo))/g);
+  return parts.map((part, index) =>
+    /^“|^Calificó /.test(part) ? (
+      <strong key={`${part}-${index}`}>{part}</strong>
+    ) : (
+      part
+    )
+  );
+};
+
 function InsightCard({
   label,
   title,
@@ -701,8 +712,8 @@ function InsightCard({
         <span className="insight-label">{label}</span>
         {meta && <span className="insight-meta">{meta}</span>}
       </span>
-      <h3>{title}</h3>
-      <p>{evidence}</p>
+      <h3>{emphasizeInsight(title)}</h3>
+      <p>{emphasizeInsight(evidence)}</p>
       {action && (
         <span className="insight-action">
           {action} <ChevronRight size={14} />
@@ -9072,7 +9083,9 @@ function Voice({
             <div className="modal-head">
               <div>
                 <p className="eyebrow">CONTEXTO DE LA SEÑAL</p>
-                <h3>Comentarios con “{selected.word}”</h3>
+                <h3>
+                  Comentarios con <strong>“{selected.word}”</strong>
+                </h3>
                 <p className="muted">
                   {selected.count} mención(es) encontrada(s).
                 </p>
