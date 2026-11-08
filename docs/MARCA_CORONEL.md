@@ -83,3 +83,12 @@ Requiere la clave de administrador.
 - [Nombre editable](screenshots/audit/brand-name-edit.png)
 - [Metas del equipo](screenshots/audit/brand-team-targets.png)
 - [PDF](screenshots/audit/brand-pdf.png)
+
+## Saludo y contraste
+
+- El Centro de acción saluda primero: “Hola, {nombre} 👋”.
+- La urgencia pasa a una línea secundaria.
+- Riesgo con contexto muestra solo clientes que dejaron comentario.
+- Los clientes con calificación pero sin comentario siguen su propio criterio de calificación, no se presentan como “contexto”.
+- Nombres y textos secundarios de riesgo, clientes y productos tienen más contraste y tamaño.
+- El verde fuerte queda en acentos, sidebar y acciones; los fondos son turquesa muy claro.
