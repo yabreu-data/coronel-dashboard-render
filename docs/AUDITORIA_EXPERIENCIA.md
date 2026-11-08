@@ -71,13 +71,12 @@ Motivo: “Responsables” y “Administración” son abstractos; “Encargados
 
 ## Backlog priorizado
 
-### P0 — Seguridad y consistencia
-1. Reemplazar los `window.prompt` restantes por el modal de PIN:
-   - Promociones.
-   - Encargados.
-   - Cuentas y accesos.
-2. Confirmaciones destructivas con modal, no `window.confirm`.
-3. Revisar móvil de Promociones, Encargados, Cuentas y accesos y Mi cuenta.
+### P0 — Seguridad y consistencia (cerrado)
+1. PIN unificado para Promociones, Encargados, Cuentas y accesos y Metas.
+2. `targets.save` ahora exige PIN en el servidor.
+3. Guardado de metas solo persiste después de validar.
+4. Confirmaciones destructivas con modal, no `window.confirm`.
+5. Móvil de Promociones, Encargados y Mi cuenta revisado.
 
 ### P1 — Simplificación
 1. Permisos “Básico / Avanzado” en Cuentas y accesos.

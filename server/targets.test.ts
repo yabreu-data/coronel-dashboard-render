@@ -15,3 +15,14 @@ describe("targets delivery", () => {
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
+
+  it("requires the admin PIN to save goals", async () => {
+    await expect(
+      caller.targets.save({
+        surveysPerServer: 10,
+        surveysPerDelivery: 10,
+        positiveQualityPercent: 80,
+        adminPin: "0000",
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });

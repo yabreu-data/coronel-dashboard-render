@@ -499,8 +499,9 @@ export const appRouter = router({
   targets: router({
     get: publicProcedure.query(() => db.getTeamTargets()),
     save: publicProcedure
-      .input(teamTargetsInput.extend({ periodLabel: z.string().max(120).default("Sin período") }))
+      .input(teamTargetsInput.extend({ periodLabel: z.string().max(120).default("Sin período"), adminPin: z.string().min(1) }))
       .mutation(({ input, ctx }) => {
+        requirePin(input.adminPin);
         const changedBy = currentActor(ctx);
         const targetValues = { surveysPerServer: input.surveysPerServer, surveysPerDelivery: input.surveysPerDelivery, positiveQualityPercent: input.positiveQualityPercent };
         return db.saveTeamTargets(targetValues).then(result =>

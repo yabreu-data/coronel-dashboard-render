@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { trpc } from "@/lib/trpc";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -516,6 +524,101 @@ function Stat({
     <div className={`stat-card accent-${accent}`}>{content}</div>
   );
 }
+type AdminPinRequest = {
+  resolve: (pin: string | null) => void;
+  reason: string;
+};
+
+const AdminPinContext = createContext<
+  ((reason?: string) => Promise<string | null>) | null
+>(null);
+
+function useAdminPin() {
+  const ask = useContext(AdminPinContext);
+  if (!ask) throw new Error("useAdminPin debe usarse dentro de AdminPinProvider");
+  return ask;
+}
+
+function AdminPinProvider({ children }: { children: ReactNode }) {
+  const [request, setRequest] = useState<AdminPinRequest | null>(null);
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const close = useCallback((value: string | null) => {
+    setRequest(current => {
+      current?.resolve(value);
+      return null;
+    });
+    setPin("");
+    setError("");
+  }, []);
+  const dialogRef = useDialogFocus(Boolean(request), () => close(null));
+  const ask = useCallback(
+    (reason = "Confirma esta acción con la clave de administrador.") =>
+      new Promise<string | null>(resolve => {
+        setPin("");
+        setError("");
+        setRequest({ resolve, reason });
+      }),
+    []
+  );
+  const confirm = () => {
+    if (pin.trim() !== "5956") {
+      setError("Clave incorrecta. Intenta de nuevo.");
+      return;
+    }
+    close(pin.trim());
+  };
+  return (
+    <AdminPinContext.Provider value={ask}>
+      {children}
+      {request && (
+        <div className="priority-pin-backdrop" onClick={() => close(null)}>
+          <div
+            className="priority-pin-modal"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Clave de administrador"
+            onClick={event => event.stopPropagation()}
+          >
+            <p className="eyebrow">CLAVE DE ADMINISTRADOR</p>
+            <h3>Confirma el cambio</h3>
+            <p className="muted">{request.reason}</p>
+            <small className="priority-pin-help">
+              Escribe la clave de 4 dígitos. No la compartas con el equipo.
+            </small>
+            <input
+              type="password"
+              inputMode="numeric"
+              autoFocus
+              value={pin}
+              onChange={event => {
+                setPin(event.target.value);
+                setError("");
+              }}
+              onKeyDown={event => {
+                if (event.key === "Enter") confirm();
+                if (event.key === "Escape") close(null);
+              }}
+              placeholder="Clave"
+              aria-label="Clave de administrador"
+            />
+            {error && <small className="priority-pin-error">{error}</small>}
+            <div className="priority-pin-actions">
+              <button className="btn-borde" onClick={() => close(null)}>
+                Cancelar
+              </button>
+              <button className="btn-rojo" onClick={confirm}>
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AdminPinContext.Provider>
+  );
+}
+
 function Pill({
   children,
   tone = "neutral",
@@ -915,6 +1018,7 @@ export default function Home() {
       </div>
     );
   return (
+    <AdminPinProvider>
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
@@ -1453,6 +1557,7 @@ export default function Home() {
         </div>
       )}
     </div>
+    </AdminPinProvider>
   );
 }
 
@@ -6300,71 +6405,6 @@ function ClientFilterBar({
   );
 }
 
-function PromotionManager({ promotions }: { promotions: PromotionItem[] }) {
-  const utils = trpc.useUtils();
-  const save = trpc.promotions.save.useMutation({
-    onSuccess: () => utils.promotions.list.invalidate(),
-  });
-  const [name, setName] = useState("");
-  const [category, setCategory] =
-    useState<PromotionItem["category"]>("general");
-  const add = () => {
-    const pin = window.prompt(
-      "PIN de administrador para agregar una promoción:"
-    );
-    if (pin !== "5956" || !name.trim()) return;
-    save.mutate(
-      { name: name.trim(), category, adminPin: pin },
-      { onSuccess: () => setName("") }
-    );
-  };
-  return (
-    <section className="panel promotion-manager">
-      <div className="panel-head">
-        <div>
-          <p className="eyebrow">CATÁLOGO MAESTRO</p>
-          <h3>Promociones programables</h3>
-          <small className="muted">
-            Se guardan en la base de datos y aparecen en el formulario de
-            llamada.
-          </small>
-        </div>
-        <Pill tone="purple">{promotions.length} activas</Pill>
-      </div>
-      <div className="promotion-list">
-        {promotions.map(item => (
-          <span key={item.id} className="promotion-chip">
-            {item.name}
-            <small>{item.category}</small>
-          </span>
-        ))}
-      </div>
-      <div className="promotion-add">
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Nueva promoción…"
-        />
-        <select
-          value={category}
-          onChange={e =>
-            setCategory(e.target.value as PromotionItem["category"])
-          }
-        >
-          <option value="recuperacion">Para recuperar clientes</option>
-          <option value="cumpleanos">Para cumpleaños</option>
-          <option value="fidelidad">Para clientes fieles</option>
-          <option value="general">Para cualquier cliente</option>
-        </select>
-        <Button disabled={save.isPending || !name.trim()} onClick={add}>
-          Agregar
-        </Button>
-      </div>
-      {save.error && <p className="form-error">{save.error.message}</p>}
-    </section>
-  );
-}
-
 function QuickCallPicker({
   profiles,
   onClose,
@@ -6715,9 +6755,6 @@ function CallLogForm({
   );
 }
 
-function adminPin() {
-  return window.prompt("PIN de administrador:") === "5956";
-}
 function categoryLabel(category: PromotionItem["category"]) {
   return category === "recuperacion"
     ? "Para recuperar clientes"
@@ -6735,6 +6772,7 @@ function PromotionsAdmin({
   audit: AuditItem[];
 }) {
   const utils = trpc.useUtils();
+  const askPin = useAdminPin();
   const update = trpc.promotions.update.useMutation({
     onSuccess: () => {
       utils.promotions.list.invalidate();
@@ -6760,29 +6798,35 @@ function PromotionsAdmin({
       ...current,
       [item.id]: { name: item.name, category: item.category },
     }));
-  const saveEdit = (item: PromotionItem) => {
-    if (!adminPin()) return;
+  const saveEdit = async (item: PromotionItem) => {
     const draft = drafts[item.id];
     if (!draft?.name.trim()) return;
+    const pin = await askPin("Guardar el cambio de esta promoción.");
+    if (!pin) return;
     update.mutate(
       {
         id: item.id,
         name: draft.name.trim(),
         category: draft.category,
         active: item.active,
-        adminPin: "5956",
+        adminPin: pin,
       },
       { onSuccess: () => setEditing(null) }
     );
   };
-  const toggle = (item: PromotionItem) => {
-    if (!adminPin()) return;
+  const toggle = async (item: PromotionItem) => {
+    const pin = await askPin(
+      item.active
+        ? "Desactivar esta promoción: dejará de aparecer al registrar llamadas."
+        : "Activar esta promoción para poder ofrecerla."
+    );
+    if (!pin) return;
     update.mutate({
       id: item.id,
       name: item.name,
       category: item.category,
       active: item.active ? 0 : 1,
-      adminPin: "5956",
+      adminPin: pin,
     });
   };
   return (
@@ -6949,9 +6993,10 @@ function PromotionsAdmin({
           </label>
           <Button
             disabled={!name.trim() || save.isPending}
-            onClick={() => {
-              if (adminPin())
-                save.mutate({ name: name.trim(), category, adminPin: "5956" });
+            onClick={async () => {
+              const pin = await askPin("Crear esta promoción.");
+              if (pin)
+                save.mutate({ name: name.trim(), category, adminPin: pin });
             }}
           >
             {save.isPending ? "Guardando…" : "Crear promoción"}
@@ -7628,6 +7673,7 @@ function ResponsibleAdmin({
   audit: AuditItem[];
 }) {
   const utils = trpc.useUtils();
+  const askPin = useAdminPin();
   const save = trpc.responsibleUsers.save.useMutation({
     onSuccess: () => {
       utils.responsibleUsers.list.invalidate();
@@ -7647,33 +7693,42 @@ function ResponsibleAdmin({
   const [email, setEmail] = useState("");
   const [editing, setEditing] = useState<number | null>(null);
   const [draft, setDraft] = useState({ name: "", email: "" });
-  const submit = () => {
-    if (!adminPin() || !name.trim()) return;
+  const submit = async () => {
+    if (!name.trim()) return;
+    const pin = await askPin("Agregar este encargado a los seguimientos.");
+    if (!pin) return;
     save.mutate({
       name: name.trim(),
       email: email.trim() || undefined,
       active: 1,
-      adminPin: "5956",
+      adminPin: pin,
     });
   };
-  const saveEdit = (user: ResponsibleUser) => {
-    if (!adminPin() || !draft.name.trim()) return;
+  const saveEdit = async (user: ResponsibleUser) => {
+    if (!draft.name.trim()) return;
+    const pin = await askPin("Guardar los datos de este encargado.");
+    if (!pin) return;
     update.mutate({
       id: user.id,
       name: draft.name.trim(),
       email: draft.email.trim() || null,
       active: user.active,
-      adminPin: "5956",
+      adminPin: pin,
     });
   };
-  const toggle = (user: ResponsibleUser) => {
-    if (!adminPin()) return;
+  const toggle = async (user: ResponsibleUser) => {
+    const pin = await askPin(
+      user.active
+        ? "Marcar a esta persona como no disponible para nuevos seguimientos."
+        : "Volver a marcar a esta persona como disponible."
+    );
+    if (!pin) return;
     update.mutate({
       id: user.id,
       name: user.name,
       email: user.email,
       active: user.active ? 0 : 1,
-      adminPin: "5956",
+      adminPin: pin,
     });
   };
   return (
@@ -9114,6 +9169,7 @@ function Team({
 }) {
   const targetsQuery = trpc.targets.get.useQuery();
   const saveTargetsMutation = trpc.targets.save.useMutation();
+  const askPin = useAdminPin();
   const [targetSurveys, setTargetSurveys] = useState(
     () => localStorage.getItem("coronel.targetSurveys") || "10"
   );
@@ -9232,27 +9288,30 @@ function Team({
     setFromDate(toInput(start));
     setToDate(toInput(now));
   };
-  const saveTargets = () => {
+  const saveTargets = async () => {
     const surveys = Math.max(1, Number(targetSurveys) || 1);
     const delivery = Math.max(1, Number(targetDelivery) || 1);
     const quality = Math.min(100, Math.max(1, Number(targetQuality) || 1));
-    setTargetSurveys(String(surveys));
-    setTargetDelivery(String(delivery));
-    setTargetQuality(String(quality));
-    localStorage.setItem("coronel.targetSurveys", String(surveys));
-    localStorage.setItem("coronel.targetDelivery", String(delivery));
-    localStorage.setItem("coronel.targetQuality", String(quality));
-    const pin = window.prompt("PIN de administrador para guardar metas:");
-    if (pin !== "5956") return;
+    const pin = await askPin(
+      "Guardar las metas del equipo. El cambio quedará en el historial."
+    );
+    if (!pin) return;
     saveTargetsMutation.mutate(
       {
         surveysPerServer: surveys,
         surveysPerDelivery: delivery,
         positiveQualityPercent: quality,
         periodLabel,
+        adminPin: pin,
       },
       {
         onSuccess: async () => {
+          setTargetSurveys(String(surveys));
+          setTargetDelivery(String(delivery));
+          setTargetQuality(String(quality));
+          localStorage.setItem("coronel.targetSurveys", String(surveys));
+          localStorage.setItem("coronel.targetDelivery", String(delivery));
+          localStorage.setItem("coronel.targetQuality", String(quality));
           setSaved(true);
           await Promise.all([
             utils.targets.history.refetch(),
@@ -9870,6 +9929,7 @@ function AccessAdmin({
   audit: AuditItem[];
 }) {
   const utils = trpc.useUtils();
+  const askPin = useAdminPin();
   const [editing, setEditing] = useState<number | null>(null);
   const [drafts, setDrafts] = useState<Record<number, AccessUser>>({});
   const [notice, setNotice] = useState<{
@@ -9967,63 +10027,53 @@ function AccessAdmin({
     },
     onError: error => setNotice({ tone: "error", text: error.message }),
   });
-  const approveAccessRequest = (request: AccessRequestRow) => {
-    if (
-      !window.confirm(
-        `¿Aprobar el acceso de ${request.name} (${request.email}) y crear su cuenta?`
-      )
-    )
-      return;
-    const pin = window.prompt("Credencial administrativa:");
+  const approveAccessRequest = async (request: AccessRequestRow) => {
+    const pin = await askPin(
+      `Aprobar el acceso de ${request.name} (${request.email}) y crear su cuenta.`
+    );
     if (!pin) return;
     approveRequest.mutate({ id: request.id, adminPin: pin });
   };
-  const rejectAccessRequest = (request: AccessRequestRow) => {
-    if (
-      !window.confirm(
-        `¿Rechazar la solicitud de ${request.name} (${request.email})?`
-      )
-    )
-      return;
-    const pin = window.prompt("Credencial administrativa:");
+  const rejectAccessRequest = async (request: AccessRequestRow) => {
+    const pin = await askPin(
+      `Rechazar la solicitud de ${request.name} (${request.email}).`
+    );
     if (!pin) return;
     rejectRequest.mutate({ id: request.id, adminPin: pin });
   };
-  const resetAccountPassword = (account: AccessUser) => {
+  const resetAccountPassword = async (account: AccessUser) => {
     if (!account.openId) {
       setNotice({
         tone: "error",
-        text: "Esta cuenta no está vinculada a Supabase Auth; no se puede restablecer la contraseña desde aquí.",
+        text: "Esta cuenta no está vinculada a Supabase Auth; no se puede restablecer la clave desde aquí.",
       });
       return;
     }
-    const openId = account.openId;
-    if (
-      !window.confirm(
-        `¿Generar una contraseña temporal para ${account.name || account.email || "esta cuenta"}?`
-      )
-    )
-      return;
-    const pin = window.prompt("Credencial administrativa:");
+    const pin = await askPin(
+      `Crear una clave temporal para ${account.name || account.email || "esta cuenta"}.`
+    );
     if (!pin) return;
-    resetPassword.mutate({ openId, adminPin: pin });
+    resetPassword.mutate({ openId: account.openId, adminPin: pin });
   };
   const copyTempCredential = async () => {
     if (!tempCredential) return;
     const text = [
       "Acceso Coronel Dashboard",
       `Correo: ${tempCredential.email ?? ""}`,
-      `Contraseña temporal: ${tempCredential.password}`,
+      `Clave temporal: ${tempCredential.password}`,
       `Ingresa en: ${window.location.origin}/login`,
     ].join("\n");
     try {
       await navigator.clipboard.writeText(text);
       setNotice({
         tone: "success",
-        text: "Credencial copiada al portapapeles. Compártela por un canal privado.",
+        text: "Acceso copiado. Compártelo por un canal privado.",
       });
     } catch {
-      window.prompt("Copia la credencial temporal:", text);
+      setNotice({
+        tone: "error",
+        text: "No se pudo copiar automáticamente. Selecciona la clave y cópiala manualmente.",
+      });
     }
   };
   const startEdit = (account: AccessUser) => {
@@ -10047,10 +10097,12 @@ function AccessAdmin({
       ...current,
       [id]: { ...current[id], [field]: checked ? 1 : 0 },
     }));
-  const save = (account: AccessUser) => {
+  const save = async (account: AccessUser) => {
     const draft = drafts[account.id];
     if (!draft) return;
-    const pin = window.prompt("Credencial administrativa:");
+    const pin = await askPin(
+      `Guardar los permisos de ${account.name || account.email || "esta persona"}.`
+    );
     if (!pin) return;
     update.mutate({
       id: account.id,
@@ -10064,30 +10116,12 @@ function AccessAdmin({
       adminPin: pin,
     });
   };
-  const toggleAccount = (account: AccessUser) => {
-    const action = account.active ? "desactivar" : "recuperar";
-    if (
-      account.active &&
-      !window.confirm(
-        `¿Confirmas que deseas desactivar la cuenta de ${account.name || account.email || "este usuario"}?`
-      )
-    )
-      return;
-    if (
-      account.active &&
-      !window.confirm(
-        "Segunda confirmación: la cuenta perderá el acceso inmediatamente. ¿Continuar?"
-      )
-    )
-      return;
-    if (
-      !account.active &&
-      !window.confirm(
-        `¿Recuperar la cuenta de ${account.name || account.email || "este usuario"}?`
-      )
-    )
-      return;
-    const pin = window.prompt("Credencial administrativa:");
+  const toggleAccount = async (account: AccessUser) => {
+    const pin = await askPin(
+      account.active
+        ? `Quitar el acceso de ${account.name || account.email || "esta persona"}. No podrá entrar al sistema.`
+        : `Devolver el acceso a ${account.name || account.email || "esta persona"}.`
+    );
     if (!pin) return;
     update.mutate({
       id: account.id,
@@ -10159,7 +10193,7 @@ function AccessAdmin({
       {tempCredential && (
         <div className="temp-credential" role="status">
           <div className="temp-credential-info">
-            <b>Contraseña temporal generada</b>
+            <b>Clave temporal generada</b>
             <small>
               {tempCredential.name ? `${tempCredential.name} · ` : ""}
               {tempCredential.email}
@@ -10172,7 +10206,7 @@ function AccessAdmin({
           </div>
           <div className="temp-credential-actions">
             <button className="secondary-action" onClick={copyTempCredential}>
-              Copiar credencial
+              Copiar acceso
             </button>
             <button
               className="text-button"
