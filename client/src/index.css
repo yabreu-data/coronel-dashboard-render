@@ -4041,3 +4041,9 @@ body::before {
 .birthday-signal.today { background: #208d56 !important; color: #208d56 !important; }
 .birthday-signal.soon, .birthday-signal.week { background: #87c097 !important; color: #87c097 !important; }
 .today-task.critical, .today-task.is-critical { border-color: #dcebe2 !important; }
+
+/* Badges de navegación legibles sobre fondo claro */
+.sidebar .nav-item .nav-badge,
+.sidebar .nav-item.active .nav-badge { background: #208d56 !important; color: #ffffff !important; font-size: 10px !important; }
+.sidebar .nav-item .nav-badge * { color: #ffffff !important; }
+.comment-modal .muted, .comment-modal .modal-head .muted { color: #000000 !important; }
