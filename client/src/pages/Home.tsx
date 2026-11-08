@@ -790,6 +790,7 @@ export default function Home() {
   const [priorityClientKey, setPriorityClientKey] = useState<string | null>(
     null
   );
+  const [clientDetailKey, setClientDetailKey] = useState<string | null>(null);
   useEffect(() => {
     localStorage.setItem("coronel.lastPage", page);
   }, [page]);
@@ -851,6 +852,41 @@ export default function Home() {
     [filtered]
   );
   const profiles = useMemo(() => buildProfiles(filtered), [filtered]);
+  const detailProfile = clientDetailKey
+    ? profiles.find(profile => profile.key === clientDetailKey) ?? null
+    : null;
+  const detailRecords = clientDetailKey
+    ? records
+        .filter(record => clientKeyOf(record) === clientDetailKey)
+        .sort(
+          (a, b) =>
+            (parseDate(b.timestamp)?.getTime() || 0) -
+            (parseDate(a.timestamp)?.getTime() || 0)
+        )
+    : [];
+  const detailLogs = clientDetailKey
+    ? ((callsQuery.data ?? []) as CallLog[])
+        .filter(
+          log =>
+            clientKeyOf({ phone: log.phone || "", clientName: log.clientName }) ===
+            clientDetailKey
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.callDate).getTime() - new Date(a.callDate).getTime()
+        )
+    : [];
+  const detailDialogRef = useDialogFocus(Boolean(detailProfile), () =>
+    setClientDetailKey(null)
+  );
+  useEffect(() => {
+    if (!detailProfile) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [detailProfile]);
   const riskCount = profiles.filter(
     profile => profile.segment === "En riesgo"
   ).length;
@@ -929,13 +965,10 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const openPriorityClient = (key: string) => {
-    setPage("clients");
-    setPriorityClientKey(key);
+    setPriorityClientKey(null);
+    setClientDetailKey(key);
     setOverviewFocus(null);
-    setSearch("");
-    setQualityFilter("Todos");
     setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const exportCsv = () => downloadCsv(filtered);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
@@ -1554,6 +1587,112 @@ export default function Home() {
       {callSavedNotice && (
         <div className="app-toast" role="status">
           <CheckCircle2 size={17} /> {callSavedNotice}
+        </div>
+      )}
+      {detailProfile && (
+        <div
+          className="client-sheet-backdrop"
+          onClick={() => setClientDetailKey(null)}
+        >
+          <aside
+            className="client-sheet"
+            ref={detailDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Ficha de ${detailProfile.name}`}
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="client-sheet-head">
+              <div>
+                <p className="eyebrow">FICHA DEL CLIENTE</p>
+                <h3>{detailProfile.name}</h3>
+              </div>
+              <button
+                className="icon-button"
+                onClick={() => setClientDetailKey(null)}
+                aria-label="Cerrar ficha"
+              >
+                <X size={17} />
+              </button>
+            </div>
+            <div className="client-sheet-meta">
+              <span>{detailProfile.phone || "Sin teléfono"}</span>
+              <span>{segmentLabelFor(detailProfile.segment)}</span>
+              <span>
+                {plural(detailProfile.count, "visita", "visitas")}
+              </span>
+            </div>
+            <div className="client-sheet-actions">
+              {detailProfile.phone && (
+                <a
+                  className="btn-borde"
+                  href={`tel:${detailProfile.phone}`}
+                  aria-label={`Llamar a ${detailProfile.name}`}
+                >
+                  <Phone size={14} /> Llamar
+                </a>
+              )}
+              <button
+                className="btn-rojo"
+                onClick={() => {
+                  setClientDetailKey(null);
+                  setQuickCallProfile(detailProfile);
+                }}
+              >
+                <Phone size={14} /> Registrar llamada
+              </button>
+            </div>
+            <div className="client-sheet-signal">
+              <span className="eyebrow">CÓMO LLEGÓ</span>
+              <p>
+                {detailProfile.comment ||
+                  "Sin comentario registrado en su última encuesta."}
+              </p>
+              {detailLogs[0] && (
+                <small>
+                  Último contacto: {formatDateTime(detailLogs[0].callDate)} ·{" "}
+                  {detailLogs[0].outcome}
+                </small>
+              )}
+            </div>
+            <div className="client-sheet-history">
+              <div className="client-sheet-section-head">
+                <span className="eyebrow">ÚLTIMAS VISITAS</span>
+                <Pill tone="neutral">{detailRecords.length}</Pill>
+              </div>
+              {detailRecords.length ? (
+                detailRecords.slice(0, 6).map(record => (
+                  <div
+                    className="client-sheet-visit"
+                    key={`${record.id}-${record.timestamp}`}
+                  >
+                    <span className={`visit-quality ${clean(record.quality)}`}>
+                      {record.quality || "Sin calificar"}
+                    </span>
+                    <span>
+                      <b>{record.dish || "Sin plato registrado"}</b>
+                      <small>
+                        {formatDate(record.timestamp)} ·{" "}
+                        {record.registeredBy || "Sin mesero"}
+                      </small>
+                      {record.comment && <em>{record.comment}</em>}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <Empty text="Todavía no hay visitas registradas para este cliente." />
+              )}
+            </div>
+            <div className="client-sheet-footer">
+              <small>La ficha se cierra sin salir de esta pantalla.</small>
+              <button
+                className="btn-borde"
+                onClick={() => setClientDetailKey(null)}
+              >
+                Cerrar
+              </button>
+            </div>
+          </aside>
         </div>
       )}
     </div>

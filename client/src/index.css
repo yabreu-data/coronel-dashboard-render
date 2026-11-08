@@ -3447,3 +3447,67 @@ button[class*="bg-transparent"][class*="border"]:hover { background: #eef5ef !im
   .page-intro, .admin-page-intro { border-left-width: 3px !important; }
   .stat-card strong { font-size: 30px !important; }
 }
+
+/* Ficha de cliente como panel flotante, no como cambio de página */
+.client-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 14px;
+  background: rgba(24, 32, 26, .38);
+  backdrop-filter: blur(5px);
+  animation: sheet-fade .18s ease both;
+}
+.client-sheet {
+  width: min(440px, 100%);
+  height: 100%;
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid #e0d7c8;
+  border-radius: 18px;
+  background: #fffdf8;
+  box-shadow: 0 24px 70px rgba(20, 32, 25, .24);
+  animation: sheet-in .28s cubic-bezier(.16, 1, .3, 1) both;
+}
+.client-sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.client-sheet-head h3 { margin: 4px 0 0; font-size: 29px; line-height: 1.05; letter-spacing: -.035em; }
+.client-sheet-head .icon-button { flex: 0 0 auto; }
+.client-sheet-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 13px 0 16px; color: #67736a; font-size: 11.5px; }
+.client-sheet-meta span { padding: 5px 8px; border-radius: 6px; background: #f4efe5; }
+.client-sheet-actions { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 17px; border-bottom: 1px solid #ece5d8; }
+.client-sheet-actions .btn-borde, .client-sheet-actions .btn-rojo { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; padding: 0 12px; text-decoration: none; font-size: 11px; font-weight: 800; border-radius: 8px; }
+.client-sheet-signal { padding: 16px 0; border-bottom: 1px solid #ece5d8; }
+.client-sheet-signal p { margin: 6px 0; color: #35473c; font-size: 13px; line-height: 1.55; }
+.client-sheet-signal small { color: #7b857c; font-size: 10.5px; }
+.client-sheet-history { padding-top: 16px; }
+.client-sheet-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+.client-sheet-visit { display: flex; align-items: flex-start; gap: 9px; padding: 11px 0; border-top: 1px solid #f0e9dd; }
+.client-sheet-visit > span:last-child { min-width: 0; }
+.client-sheet-visit b, .client-sheet-visit small, .client-sheet-visit em { display: block; }
+.client-sheet-visit b { color: #1e2e24; font-size: 12.5px; }
+.client-sheet-visit small { margin-top: 2px; color: #7b857c; font-size: 10.5px; }
+.client-sheet-visit em { margin-top: 5px; color: #5d685f; font-size: 11.5px; line-height: 1.45; font-style: normal; }
+.visit-quality { flex: 0 0 auto; padding: 4px 6px; border-radius: 5px; font-size: 8.5px; font-weight: 800; text-transform: uppercase; }
+.visit-quality.bueno { background: #e3f2ea; color: #1b3b2a; }
+.visit-quality.regular { background: #fbf1df; color: #8a5a12; }
+.visit-quality.malo { background: #faece7; color: #a8422f; }
+.visit-quality:not(.bueno):not(.regular):not(.malo) { background: #f1f2ed; color: #67736a; }
+.client-sheet-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #ece5d8; }
+.client-sheet-footer small { color: #7b857c; font-size: 10px; }
+.client-sheet-footer .btn-borde { flex: 0 0 auto; min-height: 34px; padding: 0 12px; }
+@keyframes sheet-in { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 760px) {
+  .client-sheet-backdrop { align-items: flex-end; padding: 0; }
+  .client-sheet { width: 100%; height: auto; max-height: 88vh; padding: 17px 16px 20px; border-radius: 18px 18px 0 0; border-bottom: 0; animation: sheet-up .28s cubic-bezier(.16, 1, .3, 1) both; }
+  .client-sheet-head h3 { font-size: 25px; }
+  .client-sheet-actions .btn-borde, .client-sheet-actions .btn-rojo { flex: 1; }
+  .client-sheet-footer small { display: none; }
+  @keyframes sheet-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .client-sheet-backdrop, .client-sheet { animation: none; }
+}
