@@ -3754,3 +3754,51 @@ h1, h2, h3, .topbar h1, .panel-head h3, .page-intro h2, .insights-head h2,
 .pdf-section-picker input[type="date"] { background: #ffffff !important; border-color: #cfe8da !important; color: #10231a !important; }
 .pdf-preview-actions { background: #ffffff !important; border-top: 1px solid #e5f0e9 !important; }
 .pdf-preview-sheet { background: #fffdf8 !important; }
+
+/* Saludo humano */
+.command-greeting { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.command-greeting span { font-size: .72em; line-height: 1; transform: translateY(2px); }
+.command-lead { margin: 4px 0 8px !important; color: #35624b !important; font-size: 13px !important; font-weight: 600; }
+.command-summary { margin-top: 2px !important; }
+
+/* Menos verde saturado: el color fuerte queda para acentos, no para fondos */
+body { background: #f6fbf8 !important; }
+.app-shell, .main-area { background: transparent !important; }
+.content[data-page="overview"], .content[data-page="birthdays"], .content[data-page="clients"],
+.content[data-page="priorities"], .content[data-page="calls"], .content[data-page="voice"],
+.content[data-page="team"], .content[data-page="targetHistory"], .content[data-page="promotions"],
+.content[data-page="responsibles"], .content[data-page="profile"], .content[data-page="administracion"] {
+  --page-soft: #f2faf6;
+}
+.page-intro, .admin-page-intro { background: linear-gradient(120deg, #ffffff 0%, #f6fcf9 100%) !important; }
+.insights-section { background: #f3fbf7 !important; border-color: #dcefe4 !important; }
+.insight-positive { background: #f8fcf9 !important; }
+.insight-warning { background: #fbfcf8 !important; }
+.insight-critical { background: #fff7f4 !important; }
+.insight-neutral { background: #fbfcf9 !important; }
+.command-copy, .clients-command-copy, .priorities-command-copy { background: linear-gradient(135deg, #ffffff 0%, #f7fcf9 100%) !important; }
+.stat-card { background: #fbfdfb !important; }
+.stat-card.accent-green { --stat-bg: #f4fbf7; }
+.stat-card.accent-blue { --stat-bg: #f5fbf8; }
+.stat-card.accent-orange { --stat-bg: #fdf9f4; }
+.stat-card.accent-red { --stat-bg: #fdf5f2; }
+.stat-card.accent-purple { --stat-bg: #f7fbf8; }
+
+/* Contraste real en riesgo, clientes y productos */
+.today-client b, .risk-row b, .product-row b { color: #10231a !important; font-size: 13px !important; line-height: 1.25 !important; white-space: normal !important; }
+.today-client small, .risk-row small, .product-row small { color: #365347 !important; font-size: 12px !important; line-height: 1.35 !important; white-space: normal !important; }
+.today-client, .risk-row, .product-row { min-height: 42px; }
+.product-row strong { color: #10231a !important; font-size: 15px !important; font-weight: 800 !important; }
+.product-row .product-quality-percent { color: #146b46 !important; font-size: 12px !important; font-weight: 800 !important; }
+.product-row .product-rank { background: #e3f5eb !important; color: #146b46 !important; }
+.product-row { padding: 12px 0 !important; border-top-color: #e7f0ea !important; }
+.product-row:hover { background: #f8fcf9; }
+.today-client:hover, .risk-row:hover { background: #f3faf6; border-radius: 8px; }
+
+/* Menos mayúsculas diminutas */
+.panel-head .eyebrow { font-size: 10.5px !important; }
+.command-greeting { letter-spacing: -.045em !important; }
+@media (max-width: 760px) {
+  .command-greeting { font-size: 30px !important; }
+  .today-client small, .risk-row small { font-size: 11.5px !important; }
+}

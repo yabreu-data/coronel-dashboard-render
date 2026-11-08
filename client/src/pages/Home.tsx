@@ -4339,7 +4339,7 @@ function BirthdayPage({
       <div className="page-intro birthday-page-intro">
         <div>
           <Pill tone="orange">🎂 CUMPLEAÑOS</Pill>
-          <h2>Felicita a tus clientes</h2>
+          <h2>Felicita a tus clientes <span aria-hidden="true">🎂</span></h2>
           <p>
             Mira quién cumple años, saluda por WhatsApp y registra si vino a
             usar su promoción. También puedes llamarlo si prefieres.
@@ -4559,6 +4559,7 @@ function Overview({
       .sort((a, b) => b.count - a.count);
   }, [records]);
   const risks = profiles.filter(p => p.segment === "En riesgo");
+  const risksWithContext = risks.filter(profile => profile.comment.trim());
   const [showDetails, setShowDetails] = useState(false);
   const birthdayMarketing = useMemo(
     () => buildBirthdayMarketing(records, profiles, promotions),
@@ -4618,7 +4619,12 @@ function Overview({
       <section className="command-center">
         <div className="command-copy">
           <p className="eyebrow">CENTRO DE ACCIÓN · {todayLabel}</p>
-          <h2>{firstName}, empieza por lo urgente.</h2>
+          <h2 className="command-greeting">
+            Hola, {firstName} <span aria-hidden="true">👋</span>
+          </h2>
+          <p className="command-lead">
+            Qué bueno verte. Empecemos por lo que no puede esperar.
+          </p>
           <p className="command-summary">
             {overdueCount
               ? `Tienes ${plural(overdueCount, "prioridad vencida", "prioridades vencidas")} y ${plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")} por atender.`
@@ -4902,9 +4908,9 @@ function Overview({
               <p className="eyebrow">CLIENTES A LLAMAR</p>
               <h3>Riesgo con contexto</h3>
             </div>
-            <Pill tone="red">{plural(risks.length, "caso", "casos")}</Pill>
+            <Pill tone="red">{plural(risksWithContext.length, "caso con contexto", "casos con contexto")}</Pill>
           </div>
-          {risks.slice(0, 3).map(profile => (
+          {risksWithContext.slice(0, 3).map(profile => (
             <button
               className="today-client"
               key={profile.key}
@@ -4921,8 +4927,8 @@ function Overview({
               <ChevronRight size={14} />
             </button>
           ))}
-          {!risks.length && (
-            <Empty text="No hay clientes en riesgo con el filtro actual." />
+          {!risksWithContext.length && (
+            <Empty text="No hay clientes en riesgo con comentario para mostrar contexto." />
           )}
           <button className="panel-link" onClick={() => onNavigate("clients")}>
             Ver todos los clientes <ChevronRight size={15} />
@@ -5067,9 +5073,9 @@ function Overview({
                   <p className="eyebrow">CLIENTES A RECUPERAR</p>
                   <h3>Riesgo con contexto</h3>
                 </div>
-                <Pill tone="red">{plural(risks.length, "prioridad", "prioridades")}</Pill>
+                <Pill tone="red">{plural(risksWithContext.length, "caso con contexto", "casos con contexto")}</Pill>
               </div>
-              {risks.slice(0, 4).map(p => (
+              {risksWithContext.slice(0, 4).map(p => (
                 <button
                   className="risk-row"
                   key={p.key}
@@ -5086,8 +5092,8 @@ function Overview({
                   <ChevronRight size={14} />
                 </button>
               ))}
-              {!risks.length && (
-                <Empty text="No hay clientes en riesgo con el filtro actual." />
+              {!risksWithContext.length && (
+                <Empty text="No hay clientes en riesgo con comentario para mostrar contexto." />
               )}
             </section>
             <section className="panel star-customer-panel">
