@@ -506,14 +506,14 @@ function Stat({
   );
   return onClick ? (
     <button
-      className="stat-card stat-card-link"
+      className={`stat-card stat-card-link accent-${accent}`}
       onClick={onClick}
       aria-label={`${label}: abrir detalle`}
     >
       {content}
     </button>
   ) : (
-    <div className="stat-card">{content}</div>
+    <div className={`stat-card accent-${accent}`}>{content}</div>
   );
 }
 function Pill({
@@ -1147,7 +1147,7 @@ export default function Home() {
             </span>
           </div>
         </div>
-        <div className="content">
+        <div className="content" data-page={page}>
           {showGlobalFilters && (
             <FilterBar
               search={search}
