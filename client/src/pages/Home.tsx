@@ -6302,7 +6302,7 @@ function Clients({
               />
               <span>
                 <b>{profile.name}</b>
-                <small>{noCommentLabel(profile)}</small>
+                <small>{clientSignal(profile)}</small>
               </span>
               <Phone size={14} />
             </button>
