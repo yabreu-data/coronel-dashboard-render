@@ -252,6 +252,11 @@ const promotionCatalog = [
   "Premio cliente fiel",
   "Ninguna",
 ];
+const scrollAppToTop = (behavior: ScrollBehavior = "smooth") => {
+  const scroller = document.querySelector<HTMLElement>(".main-area");
+  if (scroller) scroller.scrollTo({ top: 0, behavior });
+  else window.scrollTo({ top: 0, behavior });
+};
 const clean = (value: string) => value.trim().toLowerCase();
 const normalizeText = (value: string) =>
   clean(value)
@@ -962,7 +967,7 @@ export default function Home() {
       setQualityFilter("Todos");
     } else if (filter) setQualityFilter(filter);
     setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollAppToTop("smooth");
   };
   const openPriorityClient = (key: string) => {
     setPriorityClientKey(null);
@@ -1394,7 +1399,7 @@ export default function Home() {
                   onBackToPriorities={() => {
                     setPriorityClientKey(null);
                     setPage("priorities");
-                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    scrollAppToTop("smooth");
                   }}
                 />
               )}

@@ -3511,3 +3511,7 @@ button[class*="bg-transparent"][class*="border"]:hover { background: #eef5ef !im
 @media (prefers-reduced-motion: reduce) {
   .client-sheet-backdrop, .client-sheet { animation: none; }
 }
+
+/* La ficha se ajusta a su contenido, sin dejar un panel vacío enorme */
+.client-sheet { height: auto !important; max-height: calc(100vh - 28px); }
+@media (max-width: 760px) { .client-sheet { max-height: 88vh; } }
