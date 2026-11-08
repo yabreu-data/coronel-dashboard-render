@@ -3742,3 +3742,15 @@ h1, h2, h3, .topbar h1, .panel-head h3, .page-intro h2, .insights-head h2,
 .panel-head .eyebrow, .eyebrow { font-size: 10.5px !important; }
 .pill { font-size: 10px !important; }
 .client-sheet p { font-size: 13px !important; }
+
+/* PDF: panel de control moderno, no tema oscuro anterior */
+.pdf-preview-modal { background: #ffffff !important; border: 1px solid #d8ece2 !important; color: #10231a !important; box-shadow: 0 24px 70px rgba(16,35,26,.18) !important; }
+.pdf-preview-modal h3 { color: #10231a !important; }
+.pdf-preview-modal .eyebrow { color: #5f7368 !important; }
+.pdf-preview-modal .muted { color: #5f7368 !important; }
+.pdf-section-picker { background: #eef8f3 !important; border: 1px solid #d8ece2 !important; color: #10231a !important; }
+.pdf-section-picker b, .pdf-section-picker label, .pdf-section-picker label span { color: #263d30 !important; }
+.pdf-section-picker small { color: #5f7368 !important; }
+.pdf-section-picker input[type="date"] { background: #ffffff !important; border-color: #cfe8da !important; color: #10231a !important; }
+.pdf-preview-actions { background: #ffffff !important; border-top: 1px solid #e5f0e9 !important; }
+.pdf-preview-sheet { background: #fffdf8 !important; }
