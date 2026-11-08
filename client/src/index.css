@@ -3724,3 +3724,21 @@ h1, h2, h3, .panel-head h3, .page-intro h2, .insights-head h2 { color: #10231a; 
   .word { padding: 6px 9px; }
   .word-cloud-detail { padding: 11px; }
 }
+
+/* Tipografía moderna: Manrope para la interfaz, Lora solo como acento */
+h1, h2, h3, .topbar h1, .panel-head h3, .page-intro h2, .insights-head h2,
+.command-copy h2, .client-sheet-head h3, .topics-panel h3, .word-cloud-detail-head b {
+  font-family: "Manrope", "Segoe UI", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -.045em !important;
+}
+.auth-wall-card h1, .boot-title { font-family: "Manrope", "Segoe UI", sans-serif !important; font-weight: 800 !important; letter-spacing: -.05em !important; }
+.page-intro h2, .topbar h1 { line-height: 1.05; }
+.clients-row small, .today-task small, .client-sheet small,
+.word-cloud-comment small, .risk-row small, .session-row small { font-size: 11.5px !important; }
+.table-panel td, .calls-table td { font-size: 13px !important; }
+.micro-note { font-size: 11.5px !important; }
+.stat-card .muted { font-size: 12px !important; }
+.panel-head .eyebrow, .eyebrow { font-size: 10.5px !important; }
+.pill { font-size: 10px !important; }
+.client-sheet p { font-size: 13px !important; }

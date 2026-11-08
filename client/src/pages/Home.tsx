@@ -2365,7 +2365,7 @@ function PdfPreviewModal({
   });
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  if (!open) return null;
+  const dialogRef = useDialogFocus(open, onClose);
   const scopedRecords = records.filter(record => {
     const date = parseDate(record.timestamp);
     if (!date) return !fromDate && !toDate;
@@ -2409,7 +2409,7 @@ function PdfPreviewModal({
     scopedGood >= scopedBad
       ? "Predomina la percepción positiva frente a las clasificaciones malas."
       : "Las clasificaciones malas superan a las positivas y requieren seguimiento.";
-  const dialogRef = useDialogFocus(open, onClose);
+  if (!open) return null;
   const dateLabel = `${fromDate || "inicio"} – ${toDate || "hoy"}`;
   const summary = `En ${dateLabel} se registraron ${scopedRecords.length} encuestas, con ${Math.round(scopedPositive * 100)}% de calidad positiva. ${trend}`;
   const toggle = (key: keyof typeof sections) =>
@@ -8672,10 +8672,15 @@ function Voice({
   const [selectedPhrase, setSelectedPhrase] = useState<string | null>(null);
   const phraseMatches = useMemo(() => {
     if (!selectedPhrase) return [];
-    const query = normalizeText(selectedPhrase);
-    return comments.filter(record =>
-      normalizeText(record.comment).includes(query)
-    );
+    const tokens = normalizeText(selectedPhrase)
+      .split(/\s+/)
+      .filter(token => token.length > 2);
+    return comments.filter(record => {
+      const text = normalizeText(record.comment);
+      return tokens.length
+        ? tokens.every(token => text.includes(token))
+        : text.includes(normalizeText(selectedPhrase));
+    });
   }, [comments, selectedPhrase]);
   const repeatedComments = useMemo(() => buildRepeatedComments(comments), [comments]);
   const requestComments = useMemo(() => buildRequestComments(comments), [comments]);
@@ -9783,7 +9788,7 @@ function Team({
             </small>
           </span>
           <span className="targets-toggle-action">
-            {targetsOpen ? "Ocultar edición" : "Editar objetivos"}{" "}
+            {targetsOpen ? "Ocultar edición" : "Editar metas"}{" "}
             <ChevronDown size={18} className={targetsOpen ? "rotate" : ""} />
           </span>
         </button>
