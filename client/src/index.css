@@ -4942,3 +4942,7 @@ body * { font-variant-numeric: tabular-nums; }
 @media (max-width: 760px) {
   .birthday-funnel-compact { grid-template-columns: minmax(0, 1fr) !important; }
 }
+
+/* Alinear los encabezados del funnel con sus columnas */
+.funnel-head span:nth-child(2) { text-align: right !important; }
+.funnel-head span:nth-child(3) { text-align: left !important; padding-left: 2px; }
