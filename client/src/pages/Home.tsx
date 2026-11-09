@@ -3419,6 +3419,11 @@ function BirthdayWorkspace({
       </div>
 
       <div className="birthday-funnel-compact" aria-label="Avance de la campaña">
+        <div className="funnel-head">
+          <span>Etapa</span>
+          <span>Personas</span>
+          <span>Avance</span>
+        </div>
         {[
           { label: "Total del mes", value: counts.todos },
           { label: "Ya saludados", value: contactedCount },
@@ -3429,19 +3434,19 @@ function BirthdayWorkspace({
             ? Math.round((stage.value / counts.todos) * 100)
             : 0;
           return (
-            <div className="birthday-stage" key={stage.label}>
-              <div className="birthday-stage-head">
-                <span>{stage.label}</span>
-                <b>{stage.value}</b>
+            <div className="funnel-row" key={stage.label}>
+              <span className="funnel-label">{stage.label}</span>
+              <b className="funnel-value">{stage.value}</b>
+              <div className="funnel-progress">
+                <div className="birthday-stage-track">
+                  <i
+                    style={{
+                      width: index === 0 ? "100%" : `${Math.max(pct, 3)}%`,
+                    }}
+                  />
+                </div>
+                <small>{index === 0 ? "Total de cumpleaños" : `${pct}% del total`}</small>
               </div>
-              <div className="birthday-stage-track">
-                <i
-                  style={{
-                    width: index === 0 ? "100%" : `${Math.max(pct, 3)}%`,
-                  }}
-                />
-              </div>
-              <small>{index === 0 ? "Total de cumpleaños" : `${pct}% del total`}</small>
             </div>
           );
         })}
@@ -3555,7 +3560,17 @@ function BirthdayWorkspace({
                               {segmentLabelFor(item.profile.segment)}
                             </Pill>
                           )}
-                          <span className="bw-days">
+                          <span
+                            className={`bw-days ${
+                              item.days === 0
+                                ? "is-today"
+                                : item.days > 0 && item.days <= 3
+                                  ? "is-soon"
+                                  : item.days < 0
+                                    ? "is-overdue"
+                                    : ""
+                            }`}
+                          >
                             {daysLabel(item.days)}
                           </span>
                         </div>
@@ -5048,10 +5063,13 @@ function Overview({
             Lo que más aparece en los comentarios, sin filtros ni adornos.
           </p>
           <div className="center-phrase-list">
-            {topPhrases.map(([phrase, count]) => (
+            {topPhrases.map(([phrase, count], index) => (
               <button
-                className="center-phrase-chip"
+                className={`center-phrase-chip phrase-tone-${index % 4}`}
                 key={phrase}
+                style={{
+                  fontSize: `${14 + Math.min(count, 6) * 1.7 + (index % 3)}px`,
+                }}
                 onClick={() => onNavigate("voice")}
               >
                 <span>{phrase}</span>
@@ -8721,6 +8739,14 @@ function Voice({
   const topPositive = positiveHighlights[0];
   const topNegative = negativeHighlights[0];
   const topRequest = requestTags[0];
+  const openPhrase = (phrase: string) => {
+    setSelectedPhrase(phrase);
+    window.setTimeout(() => {
+      document
+        .getElementById("voice-topics")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
   const wordCard = (
     item: SentimentHighlight,
     tone: "positive" | "negative"
@@ -8825,6 +8851,11 @@ function Voice({
           value={comments.length}
           detail="con texto"
           icon={MessageSquareText}
+          onClick={() =>
+            document
+              .getElementById("voice-repeated")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />
         <Stat
           label="FRASES REPETIDAS"
@@ -8832,6 +8863,11 @@ function Voice({
           detail="2+ apariciones"
           accent="purple"
           icon={Sparkles}
+          onClick={() =>
+            document
+              .getElementById("voice-topics")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />
         <Stat
           label="ÚLTIMO COMENTARIO"
@@ -8843,6 +8879,11 @@ function Voice({
           detail="fecha de captura"
           accent="orange"
           icon={Clock3}
+          onClick={() =>
+            document
+              .getElementById("voice-repeated")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />
         <Stat
           label="PARA REVISAR"
@@ -8864,9 +8905,14 @@ function Voice({
           detail="sugerencias detectadas"
           accent="orange"
           icon={Sparkles}
+          onClick={() =>
+            document
+              .getElementById("voice-requests")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />      </div>
       <div className="dashboard-grid voice-grid">
-        <section className="panel">
+        <section className="panel" id="voice-repeated">
           <div className="panel-head">
             <div>
               <p className="eyebrow">LO QUE MÁS SE REPITE</p>
@@ -8877,10 +8923,16 @@ function Voice({
           <div className="voice-list">
             {repeatedComments.length ? (
               repeatedComments.slice(0, 10).map(item => (
-                <div className="voice-list-item" key={item.text}>
+                <button
+                  type="button"
+                  className="voice-list-item voice-list-button"
+                  key={item.text}
+                  onClick={() => openPhrase(item.text)}
+                >
                   <span className="voice-count">×{item.count}</span>
                   <p>{item.text}</p>
-                </div>
+                  <ChevronRight size={14} />
+                </button>
               ))
             ) : (
               <Empty text="Aún no hay comentarios repetidos." />
@@ -8911,15 +8963,18 @@ function Voice({
           <div className="voice-list">
             {requestComments.length ? (
               visibleRequests.map(record => (
-                <div
-                  className="voice-list-item"
+                <button
+                  type="button"
+                  className="voice-list-item voice-list-button"
                   key={`${record.id}-${record.timestamp}`}
+                  onClick={() => openPhrase(record.comment)}
                 >
                   <span className="voice-tag">
                     {requestTag(record.comment)}
                   </span>
                   <p>{record.comment}</p>
-                </div>
+                  <ChevronRight size={14} />
+                </button>
               ))
             ) : (
               <Empty text="No se detectaron pedidos en los comentarios." />
@@ -8971,7 +9026,7 @@ function Voice({
             comentarios originales.
           </p>
         </section>
-        <section className="panel topics-panel">
+        <section className="panel topics-panel" id="voice-topics">
           <div className="panel-head">
             <div>
               <p className="eyebrow">LECTURA RÁPIDA</p>

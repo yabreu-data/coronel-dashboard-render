@@ -4756,3 +4756,166 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
 @media (max-width: 760px) {
   .sidebar-signature { margin-top: 6px; padding: 9px 4px 0; text-align: center; }
 }
+
+/* ============================================================
+   CONTRASTE, TIPOGRAFÍA GLOBAL Y NUBE DE FRASES
+   ============================================================ */
+
+/* El 91% nunca debe quedar blanco sobre fondo claro */
+.pulse-card .pulse-top .pulse-percent,
+.pulse-card .pulse-top .pulse-percent small,
+.pulse-card .pulse-percent {
+  color: #0f6b42 !important;
+  -webkit-text-fill-color: #0f6b42 !important;
+  opacity: 1 !important;
+}
+
+/* Una sola tipografía en toda la app; la excepción son las etiquetas de sección */
+body * {
+  font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif !important;
+}
+body * { font-variant-numeric: tabular-nums; }
+.side-label, .nav-section-label, .nav-section-label * , .sidebar-monogram {
+  font-family: "Playfair Display", Georgia, serif !important;
+}
+
+/* Nube de frases del Centro */
+.center-phrase-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+  min-height: 92px;
+  margin: 2px 0 9px;
+  padding: 10px 8px;
+}
+.center-phrase-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  text-decoration: none;
+}
+.center-phrase-chip span { color: inherit; }
+.center-phrase-chip b {
+  min-width: 17px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(36,85,127,.09);
+  color: currentColor;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+}
+.center-phrase-chip:hover { background: rgba(36,85,127,.08); transform: translateY(-1px); }
+.center-phrase-chip.phrase-tone-0 { color: #176b45; }
+.center-phrase-chip.phrase-tone-1 { color: #9a611b; }
+.center-phrase-chip.phrase-tone-2 { color: #24557f; }
+.center-phrase-chip.phrase-tone-3 { color: #b33a25; }
+.center-phrase-chip.phrase-tone-0 b { background: #e6f5ec; }
+.center-phrase-chip.phrase-tone-1 b { background: #fff1d9; }
+.center-phrase-chip.phrase-tone-2 b { background: #e9f1fc; }
+.center-phrase-chip.phrase-tone-3 b { background: #ffe9e4; }
+
+/* Tarjetas de Voz: toda la fila abre el detalle de la frase */
+.voice-list-item.voice-list-button {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  border-bottom: 1px solid #edf2ef;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.voice-list-item.voice-list-button:hover { background: #f4faf6; }
+.voice-list-item.voice-list-button p { flex: 1; margin: 0; }
+.voice-list-item.voice-list-button svg { flex: 0 0 auto; margin-top: 2px; color: #1d7a4c; }
+.voice-list-item.voice-list-button .voice-tag { flex: 0 0 auto; }
+
+/* Progreso de cumpleaños: columnas alineadas y legibles */
+.birthday-funnel-compact {
+  display: grid;
+  gap: 0;
+  margin: 16px 0;
+  padding: 16px 18px;
+  border: 1px solid #e7efea;
+  border-radius: 20px;
+  background: #ffffff;
+}
+.funnel-head, .funnel-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 1.25fr) 72px minmax(180px, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+.funnel-head {
+  padding: 0 6px 8px;
+  border-bottom: 1px solid #edf2ef;
+  color: #7c8b82;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.funnel-row { padding: 9px 6px; border-bottom: 1px solid #f0f4f1; }
+.funnel-row:last-child { border-bottom: 0; }
+.funnel-label { color: #0c100d; font-size: 12.5px; font-weight: 700; }
+.funnel-value { color: #1d7a4c; font-size: 20px; font-weight: 800; text-align: right; line-height: 1; }
+.funnel-progress { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.funnel-progress small { color: #7c8b82; font-size: 10px; }
+.birthday-stage-track { height: 8px; overflow: hidden; border-radius: 999px; background: #edf4ef; }
+.birthday-stage-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #208d56, #77c996); }
+.funnel-row:nth-child(3) .birthday-stage-track i { background: linear-gradient(90deg, #d89a2b, #f0c568); }
+.funnel-row:nth-child(4) .birthday-stage-track i { background: linear-gradient(90deg, #3279b8, #78b8e8); }
+.funnel-row:nth-child(5) .birthday-stage-track i { background: linear-gradient(90deg, #c05a3c, #ee9a7c); }
+
+/* Alertas de días en cumpleaños */
+.bw-days {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid #e0eae4;
+  border-radius: 999px;
+  background: #f3f7f4;
+  color: #55665c;
+  font-size: 10.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.bw-days.is-today {
+  border-color: #f2b6a9;
+  background: #ffe6e0;
+  color: #b82412;
+  box-shadow: 0 4px 10px -5px rgba(224,47,27,.35);
+}
+.bw-days.is-soon {
+  border-color: #efd4a2;
+  background: #fff3dc;
+  color: #8a5717;
+}
+.bw-days.is-overdue {
+  border-color: #eab5aa;
+  background: #fff0ed;
+  color: #b82412;
+}
+@media (max-width: 760px) {
+  .birthday-funnel-compact { padding: 12px; }
+  .funnel-head { display: none; }
+  .funnel-row { grid-template-columns: minmax(100px,1fr) 48px; gap: 8px; }
+  .funnel-progress { grid-column: 1 / -1; }
+  .funnel-value { font-size: 18px; }
+  .center-phrase-list { justify-content: flex-start; min-height: 0; }
+}
