@@ -9090,7 +9090,7 @@ function Voice({
                 <h3>
                   Comentarios con <strong>“{selected.word}”</strong>
                 </h3>
-                <p className="muted">
+                <p className="muted comment-modal-count">
                   {selected.count} mención(es) encontrada(s).
                 </p>
               </div>
