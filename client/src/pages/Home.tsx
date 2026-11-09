@@ -1084,7 +1084,7 @@ export default function Home() {
         <div className="sidebar-logo-box">
           <img
             className="sidebar-logo"
-            src="/manus-storage/logo-blanco.png"
+            src="/manus-storage/logo-coronel.png"
             alt="Coronel · Pollos y Parrillas"
           />
         </div>
@@ -4539,13 +4539,6 @@ function Overview({
   onOpenClient: (key: string) => void;
   userName?: string;
 }) {
-  const [onboardingHidden, setOnboardingHidden] = useState(
-    () => localStorage.getItem("coronel.onboardingDismissed") === "1"
-  );
-  const dismissOnboarding = () => {
-    localStorage.setItem("coronel.onboardingDismissed", "1");
-    setOnboardingHidden(true);
-  };
   const productStats = useMemo(() => {
     const map: Record<
       string,
@@ -4668,14 +4661,7 @@ function Overview({
               <Cake size={16} /> Ver cumpleaños
             </button>
           </div>
-          <div className="command-meta">
-            <span>
-              <span className="live-dot" /> Datos actualizados
-            </span>
-            <span>
-              {records.length} encuestas · {clients} clientes
-            </span>
-          </div>
+
         </div>
         <aside className="pulse-card" aria-label="Cómo se sienten tus clientes">
           <div className="pulse-top">
@@ -4968,49 +4954,6 @@ function Overview({
           </button>
         </section>
       </div>
-      {!onboardingHidden && (
-        <section className="onboarding-panel compact-onboarding">
-          <div className="onboarding-head">
-            <div>
-              <p className="eyebrow">PRIMEROS PASOS</p>
-              <h3>Tu rutina diaria, en tres pasos</h3>
-            </div>
-            <button
-              className="onboarding-close"
-              onClick={dismissOnboarding}
-              aria-label="Ocultar primeros pasos"
-            >
-              <X size={16} />
-            </button>
-          </div>
-          <div className="onboarding-steps">
-            <button onClick={() => onNavigate("priorities")}>
-              <span className="onboarding-num">1</span>
-              <div>
-                <b>Prioriza lo vencido</b>
-                <small>{plural(overdueCount, "prioridad vencida", "prioridades vencidas")}.</small>
-              </div>
-              <ChevronRight size={16} />
-            </button>
-            <button onClick={() => onNavigate("birthdays")}>
-              <span className="onboarding-num">2</span>
-              <div>
-                <b>Contacta cumpleaños</b>
-                <small>{plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")}.</small>
-              </div>
-              <ChevronRight size={16} />
-            </button>
-            <button onClick={() => onNavigate("clients")}>
-              <span className="onboarding-num">3</span>
-              <div>
-                <b>Registra la llamada</b>
-                <small>Deja contexto y próxima acción.</small>
-              </div>
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </section>
-      )}
       <button
         className="details-toggle-button"
         onClick={() => setShowDetails(value => !value)}
@@ -5133,32 +5076,7 @@ function Overview({
             <SurveyChart records={records} />
             <MonthlyComparison records={records} />
           </div>
-          <div className="quick-nav">
-            <button onClick={() => onNavigate("clients")}>
-              <Users size={18} />
-              <span>
-                <b>Clientes y fidelización</b>
-                <small>Nuevos, recurrentes, fieles y en riesgo</small>
-              </span>
-              <ChevronRight size={16} />
-            </button>
-            <button onClick={() => onNavigate("voice")}>
-              <MessageSquareText size={18} />
-              <span>
-                <b>Voz del cliente</b>
-                <small>Frases accionables de comentarios</small>
-              </span>
-              <ChevronRight size={16} />
-            </button>
-            <button onClick={() => onNavigate("team")}>
-              <UserRoundCheck size={18} />
-              <span>
-                <b>Equipo y operación</b>
-                <small>Equipo vs. delivery web</small>
-              </span>
-              <ChevronRight size={16} />
-            </button>
-          </div>
+
         </div>
       )}
     </>
