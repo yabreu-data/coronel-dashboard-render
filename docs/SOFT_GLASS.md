@@ -22,8 +22,8 @@
 | `--shadow-card` | sombra verde muy suave | Volumen |
 
 ### Fondo
-- Patrón Coronel repetido a **220 px**.
-- Capa blanca de 97 % para que el patrón se vea sin competir con la lectura.
+- Patrón Coronel repetido a **360 px**, más grande y al 2 % de visibilidad.
+- Capa blanca de 98 % para que el patrón se vea sin competir con la lectura.
 - También se aplica en login y carga.
 
 ### Tarjetas
@@ -68,3 +68,16 @@ Se eliminó la comparación vacía que aparecía sin fechas y se movieron las me
 - [Soft Glass · Inicio](screenshots/audit/softglass-overview.png)
 - [Soft Glass · Equipo](screenshots/audit/softglass-team.png)
 - [Soft Glass · Móvil](screenshots/audit/softglass-mobile.png)
+
+## Centro de mando
+
+- Saludo antes de la urgencia.
+- Se eliminó el panel “Pulso del negocio” duplicado.
+- Plan de hoy a ancho completo, con tareas en dos columnas.
+- Luego clientes a llamar y cumpleaños.
+- El análisis queda debajo, colapsado.
+
+## Voz del cliente y Equipo
+
+- Voz: insights primero, word cloud interactivo y contexto de la señal legible. Aún conserva paneles secundarios que se pueden reducir.
+- Equipo: período primero, insights, KPI, personas y metas al final; la comparación solo aparece con fechas completas.

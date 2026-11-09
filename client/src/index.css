@@ -4404,3 +4404,25 @@ body {
 .team-section-heading .eyebrow { margin-bottom: 3px; }
 .team-section-heading h2 { margin: 0; font-size: 27px !important; }
 @media (max-width: 760px) { .team-section-heading { margin-top: 17px; } .team-section-heading h2 { font-size: 23px !important; } }
+
+/* Centro de mando más humano y sin duplicar el pulso */
+.command-grid.command-single { grid-template-columns: minmax(0, 1fr) !important; }
+.command-single .today-panel { max-width: none; }
+.command-single .today-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.command-single .today-list > * { margin: 0 !important; }
+@media (max-width: 760px) { .command-single .today-list { grid-template-columns: 1fr; } }
+
+/* Patrón más grande y más transparente */
+body {
+  background-image:
+    linear-gradient(rgba(243,246,244,.98), rgba(243,246,244,.98)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 360px !important;
+}
+.loading-screen, .auth-wall {
+  background-image:
+    linear-gradient(rgba(243,246,244,.97), rgba(243,246,244,.97)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 360px !important;
+}
+.pdf-preview-sheet::before { background-size: 520px !important; opacity: .03 !important; }

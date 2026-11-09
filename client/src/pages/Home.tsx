@@ -4803,12 +4803,12 @@ function Overview({
           />
         </div>
       </section>
-      <div className="command-grid">
+      <div className="command-grid command-single">
         <section className="panel today-panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">PLAN DE HOY</p>
-              <h3>Lo que no puede esperar</h3>
+              <p className="eyebrow">TU PLAN DE HOY</p>
+              <h3>Esto es lo que toca hoy</h3>
             </div>
             <span className="today-open-count">
               {overdueCount
@@ -4870,44 +4870,6 @@ function Overview({
             onClick={() => onNavigate("priorities")}
           >
             Ver todas las prioridades <ChevronRight size={15} />
-          </button>
-        </section>
-        <section className="panel signal-panel">
-          <div className="panel-head">
-            <div>
-              <p className="eyebrow">PULSO DEL NEGOCIO</p>
-              <h3>Qué está pasando</h3>
-            </div>
-            <Pill tone="blue">{riskCount} en riesgo</Pill>
-          </div>
-          <div className="signal-stats">
-            <div>
-              <span>EN RIESGO</span>
-              <b>{riskCount}</b>
-              <small>clientes a recuperar</small>
-            </div>
-            <div>
-              <span>SIN CALIFICAR</span>
-              <b>{missingQuality}</b>
-              <small>respuestas pendientes</small>
-            </div>
-            <div>
-              <span>CUMPLEAÑOS HOY</span>
-              <b>{todayBirthdayCount}</b>
-              <small>por felicitar</small>
-            </div>
-          </div>
-          <div className="signal-note">
-            <span className="signal-dot" />
-            {badClients
-              ? `${plural(badClients, "cliente necesita", "clientes necesitan")} una llamada de recuperación.`
-              : "No hay clientes con calidad Mala pendientes."}
-          </div>
-          <button
-            className="panel-link"
-            onClick={() => onNavigate("clients")}
-          >
-            Ver clientes y seguimiento <ChevronRight size={15} />
           </button>
         </section>
       </div>
