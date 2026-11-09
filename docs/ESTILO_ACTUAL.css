@@ -1476,3 +1476,17 @@ body * { font-variant-numeric: tabular-nums; }
     padding: 18px 14px 28px !important;
   }
 }
+
+/* Cabecera de ficha con superficie propia y siempre visible */
+.client-sheet-head {
+  position: relative;
+  z-index: 3;
+  margin: -2px 0 10px;
+  padding: 12px 14px;
+  border: 1px solid #e3eee7;
+  border-radius: 14px;
+  background: #f6fbf8 !important;
+}
+.client-sheet-head h3 { color: #145c36 !important; }
+.client-sheet-head .eyebrow { color: #176b45 !important; }
+.client-sheet-head .icon-button { background: #ffffff !important; color: #55665c !important; }
