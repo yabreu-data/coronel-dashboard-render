@@ -15,8 +15,21 @@ export function useAuth(options?: UseAuthOptions) {
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
-    refetchOnWindowFocus: false,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      // Al cambiar de cuenta o renovar sesión, el saludo y la cabecera
+      // deben tomar el nombre del usuario autenticado actual.
+      void utils.auth.me.invalidate();
+    });
+    return () => subscription.unsubscribe();
+  }, [utils]);
 
   const logoutMutation = trpc.auth.logout.useMutation();
 
