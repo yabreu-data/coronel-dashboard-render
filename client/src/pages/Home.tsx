@@ -813,6 +813,10 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [searchScope, setSearchScope] = useState<SearchScope>("all");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(
+    {}
+  );
   const [overviewFocus, setOverviewFocus] = useState<OverviewFocus>(null);
   const [priorityClientKey, setPriorityClientKey] = useState<string | null>(
     null
@@ -1080,7 +1084,15 @@ export default function Home() {
   return (
     <AdminPinProvider>
     <div className="app-shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarCollapsed ? "is-collapsed" : ""}`}>
+        <button
+          className="sidebar-collapse"
+          onClick={() => setSidebarCollapsed(value => !value)}
+          aria-label={sidebarCollapsed ? "Abrir menú" : "Ocultar menú"}
+          title={sidebarCollapsed ? "Abrir menú" : "Ocultar menú"}
+        >
+          {sidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+        </button>
         <div className="sidebar-logo-box">
           <img
             className="sidebar-logo"
@@ -1097,9 +1109,28 @@ export default function Home() {
               .filter(Boolean) as typeof visibleTabs;
             if (!groupTabs.length) return null;
             return (
-              <div className="nav-section" key={group.label}>
-                <div className="nav-section-label">{group.label}</div>
-                {groupTabs.map(({ id, label, icon: Icon }) => (
+              <div
+                className={`nav-section ${collapsedGroups[group.label] ? "is-collapsed" : ""}`}
+                key={group.label}
+              >
+                <button
+                  className="nav-section-label"
+                  onClick={() =>
+                    setCollapsedGroups(current => ({
+                      ...current,
+                      [group.label]: !current[group.label],
+                    }))
+                  }
+                  aria-expanded={!collapsedGroups[group.label]}
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown
+                    size={13}
+                    className={collapsedGroups[group.label] ? "group-chevron collapsed" : "group-chevron"}
+                  />
+                </button>
+                {!collapsedGroups[group.label] &&
+                  groupTabs.map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
                     className={`nav-item ${page === id ? "active" : ""}`}
@@ -1135,7 +1166,7 @@ export default function Home() {
                       <ChevronRight size={15} className="nav-arrow" />
                     )}
                   </button>
-                ))}
+                  ))}
               </div>
             );
           })}
@@ -1506,6 +1537,9 @@ export default function Home() {
               : ""}
           </span>
           <span>Datos personales: acceso restringido al equipo autorizado</span>
+          <span className="footer-signature">
+            Hecho con amor por Yennifer Abreu <span aria-hidden="true">❤️</span>
+          </span>
         </footer>
       </main>
       <nav className="mobile-bottom-nav" aria-label="Navegación principal">
@@ -4563,6 +4597,15 @@ function Overview({
   }, [records]);
   const risks = profiles.filter(p => p.segment === "En riesgo");
   const risksWithContext = risks.filter(profile => profile.comment.trim());
+  const starClients = useMemo(
+    () => profiles.filter(p => p.count >= 2 && clean(p.quality) === "bueno").slice(0, 4),
+    [profiles]
+  );
+  const topPhrases = useMemo(
+    () =>
+      buildTopicPhrases(records.filter(record => record.comment.trim())).slice(0, 6),
+    [records]
+  );
   const [showDetails, setShowDetails] = useState(false);
   const birthdayMarketing = useMemo(
     () => buildBirthdayMarketing(records, profiles, promotions),
@@ -4951,6 +4994,68 @@ function Overview({
           )}
           <button className="panel-link" onClick={() => onNavigate("birthdays")}>
             Abrir agenda de cumpleaños <ChevronRight size={15} />
+          </button>
+        </section>
+      </div>
+      <div className="command-grid command-secondary command-appreciation">
+        <section className="panel center-stars">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">CLIENTES ESTRELLA</p>
+              <h3>Los que merecen un detalle</h3>
+            </div>
+            <Pill tone="orange">{starClients.length} destacados</Pill>
+          </div>
+          <p className="appreciation-lead">
+            Vuelven, califican bien y son parte de la historia de Coronel.
+          </p>
+          {starClients.map(client => (
+            <button
+              className="star-row center-star-row"
+              key={client.key}
+              onClick={() => onOpenClient(client.key)}
+            >
+              <span className="star-badge" aria-hidden="true">★</span>
+              <span>
+                <b>{client.name}</b>
+                <small>
+                  {client.count} visitas · {client.quality} · {client.phone || "Sin teléfono"}
+                </small>
+              </span>
+              <ChevronRight size={14} />
+            </button>
+          ))}
+          {!starClients.length && <Empty text="Aún no hay clientes estrella." />}
+          <button className="panel-link" onClick={() => onNavigate("clients")}>
+            Ver clientes <ChevronRight size={15} />
+          </button>
+        </section>
+        <section className="panel center-phrases">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">LO QUE MÁS DICEN</p>
+              <h3>Frases que se repiten</h3>
+            </div>
+            <Pill tone="orange">{topPhrases.length} frases</Pill>
+          </div>
+          <p className="appreciation-lead">
+            Lo que más aparece en los comentarios, sin filtros ni adornos.
+          </p>
+          <div className="center-phrase-list">
+            {topPhrases.map(([phrase, count]) => (
+              <button
+                className="center-phrase-chip"
+                key={phrase}
+                onClick={() => onNavigate("voice")}
+              >
+                <span>{phrase}</span>
+                <b>{count}</b>
+              </button>
+            ))}
+          </div>
+          {!topPhrases.length && <Empty text="Aún no hay frases repetidas." />}
+          <button className="panel-link" onClick={() => onNavigate("voice")}>
+            Abrir Voz del cliente <ChevronRight size={15} />
           </button>
         </section>
       </div>
