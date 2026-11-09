@@ -368,7 +368,7 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
 /* La "otra" tipografía queda solo para los títulos de sección del sidebar */
 .side-label,
 .nav-section-label {
-  font-family: "Playfair Display", Georgia, serif !important;
+  font-family: "Poppins", Georgia, serif !important;
   font-style: normal;
   font-weight: 700 !important;
   letter-spacing: .04em !important;
@@ -490,7 +490,7 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
   .footer-signature { margin-left: 0; width: 100%; }
 }
 
-.nav-section-label span { font-family: "Playfair Display", Georgia, serif !important; }
+.nav-section-label span { font-family: "Poppins", Georgia, serif !important; }
 
 /* Sidebar colapsado limpio: logo completo, sin badges amontonados y botón visible */
 .sidebar-collapse { top: 10px !important; right: 6px !important; }
@@ -533,7 +533,7 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
   border-radius: 14px;
   background: #eaf8f1;
   color: #1d7a4c;
-  font-family: "Playfair Display", Georgia, serif !important;
+  font-family: "Poppins", Georgia, serif !important;
   font-size: 26px;
   font-weight: 700;
 }
@@ -600,7 +600,7 @@ body * {
 }
 body * { font-variant-numeric: tabular-nums; }
 .side-label, .nav-section-label, .nav-section-label * , .sidebar-monogram {
-  font-family: "Playfair Display", Georgia, serif !important;
+  font-family: "Poppins", Georgia, serif !important;
 }
 
 /* Nube de frases del Centro */
@@ -770,3 +770,148 @@ body * { font-variant-numeric: tabular-nums; }
 /* Alinear los encabezados del funnel con sus columnas */
 .funnel-head span:nth-child(2) { text-align: right !important; }
 .funnel-head span:nth-child(3) { text-align: left !important; padding-left: 2px; }
+
+/* Tarjetas con Radio Canada; los títulos de página siguen en Plus Jakarta */
+.panel, .stat-card, .dashboard-card, .insight-card, .clients-row,
+.today-task, .priority-queue-item, .client-sheet, .birthday-command,
+.birthday-progress-grid, .comment-modal, .bw-modal, .center-stars, .center-phrases {
+  font-family: "Radio Canada", "Poppins", "Plus Jakarta Sans", sans-serif !important;
+}
+.panel *, .stat-card *, .dashboard-card *, .insight-card *, .clients-row *,
+.today-task *, .priority-queue-item *, .client-sheet *, .birthday-command *,
+.birthday-progress-grid *, .comment-modal *, .bw-modal *, .center-stars *, .center-phrases * {
+  font-family: "Radio Canada", "Poppins", "Plus Jakarta Sans", sans-serif !important;
+}
+.panel h1, .panel h2, .panel h3, .panel h4, .stat-card strong,
+.insight-card h3, .client-sheet h3, .birthday-command h3 {
+  font-family: "Radio Canada", "Poppins", sans-serif !important;
+  letter-spacing: -.02em;
+}
+
+/* Ficha del cliente: Por recuperar en rojo */
+.client-sheet-meta .segment-risk {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ffe8e2;
+  color: #b82412 !important;
+  font-weight: 800;
+}
+
+/* Progreso de cumpleaños: tarjetas autónomas, fáciles de leer */
+.birthday-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.birthday-progress-item {
+  min-width: 0;
+  padding: 14px 14px 12px;
+  border: 1px solid #e7efea;
+  border-top: 3px solid #208d56;
+  border-radius: 16px;
+  background: #ffffff;
+}
+.birthday-progress-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.birthday-progress-top span { color: #55665c; font-size: 11px; font-weight: 700; line-height: 1.25; }
+.birthday-progress-top b { color: #1d7a4c; font-size: 25px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.birthday-progress-track { height: 7px; margin: 11px 0 6px; overflow: hidden; border-radius: 999px; background: #edf4ef; }
+.birthday-progress-track i { display: block; height: 100%; border-radius: inherit; background: #208d56; }
+.birthday-progress-item small { color: #7c8b82; font-size: 10px; }
+.birthday-progress-item.tone-contacted { border-top-color: #2a9d63; }
+.birthday-progress-item.tone-accepted { border-top-color: #d89a2b; }
+.birthday-progress-item.tone-accepted .birthday-progress-top b { color: #9a611b; }
+.birthday-progress-item.tone-accepted .birthday-progress-track i { background: #d89a2b; }
+.birthday-progress-item.tone-redeemed { border-top-color: #c05a3c; }
+.birthday-progress-item.tone-redeemed .birthday-progress-top b { color: #a83f17; }
+.birthday-progress-item.tone-redeemed .birthday-progress-track i { background: #c05a3c; }
+.birthday-progress-item.tone-total { border-top-color: #145c36; }
+@media (max-width: 760px) {
+  .birthday-progress-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
+/* Sesión en la cabecera: avatar, nombre y menú, sin correo */
+.account-menu { position: relative; }
+.account-trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 5px 10px 5px 6px;
+  border: 1px solid #e2ebe5;
+  border-radius: 14px;
+  background: #fff;
+  color: #0c100d;
+}
+.account-trigger:hover { background: #f6faf7; border-color: #cfe5d7; }
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eaf8f1;
+  color: #1d7a4c;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+}
+.account-name { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0; }
+.account-name b {
+  max-width: 128px;
+  overflow: hidden;
+  color: #0c100d;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-name small { color: #7c8b82; font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.account-trigger > svg { color: #7c8b82; transition: transform .18s ease; }
+.account-trigger > svg.rotate { transform: rotate(180deg); }
+.account-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  min-width: 184px;
+  padding: 6px;
+  border: 1px solid #e2ebe5;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 18px 35px -15px rgba(12,16,13,.25);
+}
+.account-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #0c100d;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+.account-dropdown button:hover { background: #f1f8f4; color: #1d7a4c; }
+.account-dropdown .account-logout { color: #b82412; }
+.account-dropdown .account-logout:hover { background: #fff0ed; color: #b82412; }
+
+/* Notificaciones del sidebar: rojo limpio, sin borde verde */
+.nav-badge, .nav-badge.alert-badge, .nav-badge.birthday-badge, .nav-badge.task-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #e02f1b !important;
+  color: #fff !important;
+  box-shadow: 0 4px 9px -4px rgba(224,47,27,.55);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}

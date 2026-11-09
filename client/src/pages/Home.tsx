@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -38,6 +39,7 @@ import {
   Settings2,
   History,
   HelpCircle,
+  LogOut,
 } from "lucide-react";
 import { isBirthdayInNextDays } from "@shared/customerUtils";
 import { hasScoredQuality, wilsonInterval } from "@shared/metricsUtils";
@@ -817,6 +819,18 @@ export default function Home() {
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(
     {}
   );
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const closeOnOutside = (event: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeOnOutside);
+    return () => document.removeEventListener("mousedown", closeOnOutside);
+  }, [accountMenuOpen]);
   const [overviewFocus, setOverviewFocus] = useState<OverviewFocus>(null);
   const [priorityClientKey, setPriorityClientKey] = useState<string | null>(
     null
@@ -1234,29 +1248,57 @@ export default function Home() {
               Actualizar
             </Button>
             <div
-              className={`account-control ${user ? "account-signed-in" : "account-signed-out"}`}
+              ref={accountMenuRef}
+              className={`account-menu ${user ? "account-signed-in" : "account-signed-out"}`}
             >
               {user ? (
                 <>
-                  <span className="account-status">
-                    <span className="account-dot" />
-                    Sesión iniciada
-                    <strong>{user.name || user.email || "Usuario"}</strong>
-                  </span>
-                  <button className="logout-button" onClick={() => logout()}>
-                    Cerrar sesión
+                  <button
+                    className="account-trigger"
+                    onClick={() => setAccountMenuOpen(value => !value)}
+                    aria-expanded={accountMenuOpen}
+                    aria-haspopup="menu"
+                  >
+                    <span className="account-avatar" aria-hidden="true">
+                      {avatarSymbol(user.avatarPreset)}
+                    </span>
+                    <span className="account-name">
+                      <b>{user.name || "Usuario"}</b>
+                      <small>Mi cuenta</small>
+                    </span>
+                    <ChevronDown
+                      size={14}
+                      className={accountMenuOpen ? "rotate" : ""}
+                    />
                   </button>
+                  {accountMenuOpen && (
+                    <div className="account-dropdown" role="menu">
+                      <button
+                        role="menuitem"
+                        onClick={() => {
+                          setAccountMenuOpen(false);
+                          navigate("profile");
+                        }}
+                      >
+                        <Users size={15} /> Mi perfil
+                      </button>
+                      <button
+                        role="menuitem"
+                        className="account-logout"
+                        onClick={() => {
+                          setAccountMenuOpen(false);
+                          logout();
+                        }}
+                      >
+                        <LogOut size={15} /> Cerrar sesión
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
-                <>
-                  <span className="account-status">
-                    <span className="account-dot offline" />
-                    Sin sesión
-                  </span>
-                  <button className="login-button" onClick={() => startLogin()}>
-                    Iniciar sesión
-                  </button>
-                </>
+                <button className="login-button" onClick={() => startLogin()}>
+                  Iniciar sesión
+                </button>
               )}
             </div>
           </div>
@@ -1687,7 +1729,13 @@ export default function Home() {
             </div>
             <div className="client-sheet-meta">
               <span>{detailProfile.phone || "Sin teléfono"}</span>
-              <span>{segmentLabelFor(detailProfile.segment)}</span>
+              <span
+                className={
+                  detailProfile.segment === "En riesgo" ? "segment-risk" : ""
+                }
+              >
+                {segmentLabelFor(detailProfile.segment)}
+              </span>
               <span>
                 {plural(detailProfile.count, "visita", "visitas")}
               </span>
@@ -3418,35 +3466,35 @@ function BirthdayWorkspace({
         </div>
       </div>
 
-      <div className="birthday-funnel-compact" aria-label="Avance de la campaña">
-        <div className="funnel-head">
-          <span>Etapa</span>
-          <span>Personas</span>
-          <span>Avance</span>
-        </div>
+      <div className="birthday-progress-grid" aria-label="Avance de la campaña">
         {[
-          { label: "Total del mes", value: counts.todos },
-          { label: "Ya saludados", value: contactedCount },
-          { label: "Aceptaron promo", value: acceptedCount },
-          { label: "Usaron promo", value: redeemedCount },
+          { label: "Total del mes", value: counts.todos, tone: "total" },
+          { label: "Ya saludados", value: contactedCount, tone: "contacted" },
+          { label: "Aceptaron promo", value: acceptedCount, tone: "accepted" },
+          { label: "Usaron promo", value: redeemedCount, tone: "redeemed" },
         ].map((stage, index) => {
           const pct = counts.todos
             ? Math.round((stage.value / counts.todos) * 100)
             : 0;
           return (
-            <div className="funnel-row" key={stage.label}>
-              <span className="funnel-label">{stage.label}</span>
-              <b className="funnel-value">{stage.value}</b>
-              <div className="funnel-progress">
-                <div className="birthday-stage-track">
-                  <i
-                    style={{
-                      width: index === 0 ? "100%" : `${Math.max(pct, 3)}%`,
-                    }}
-                  />
-                </div>
-                <small>{index === 0 ? "Total de cumpleaños" : `${pct}% del total`}</small>
+            <div
+              className={`birthday-progress-item tone-${stage.tone}`}
+              key={stage.label}
+            >
+              <div className="birthday-progress-top">
+                <span>{stage.label}</span>
+                <b>{stage.value}</b>
               </div>
+              <div className="birthday-progress-track">
+                <i
+                  style={{
+                    width: index === 0 ? "100%" : `${Math.max(pct, 3)}%`,
+                  }}
+                />
+              </div>
+              <small>
+                {index === 0 ? "cumpleaños este mes" : `${pct}% del total`}
+              </small>
             </div>
           );
         })}
