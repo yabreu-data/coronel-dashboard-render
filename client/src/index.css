@@ -4426,3 +4426,6 @@ body {
   background-size: auto, 360px !important;
 }
 .pdf-preview-sheet::before { background-size: 520px !important; opacity: .03 !important; }
+
+/* Evitar que el patrón se mezcle con multiply y vuelva a dominar */
+body { background-blend-mode: normal !important; }
