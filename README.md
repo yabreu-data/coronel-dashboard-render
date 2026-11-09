@@ -159,3 +159,6 @@ pnpm keepalive:remove  # elimina el job
 ```
 
 Detalle, verificación en SQL y alternativas en [`docs/KEEPALIVE_RENDER.md`](docs/KEEPALIVE_RENDER.md).
+
+
+Recuperación de contraseña: [docs/RECUPERACION_CONTRASENA.md](docs/RECUPERACION_CONTRASENA.md).
