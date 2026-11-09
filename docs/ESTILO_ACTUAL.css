@@ -1371,3 +1371,33 @@ body * { font-variant-numeric: tabular-nums; }
   .bw-card { width: 100% !important; }
   .bw-filters, .bw-chips, .birthday-toolbar { flex-wrap: wrap !important; }
 }
+
+/* El modal de ficha debe quedar siempre centrado en la ventana */
+.content > section { transform: none !important; }
+
+/* Móvil: barra superior compacta, no una pared de 400 px */
+@media (max-width: 760px) {
+  .sidebar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    padding: 9px 12px !important;
+    gap: 4px 10px !important;
+  }
+  .sidebar-logo-box {
+    width: 88px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 0 0 auto !important;
+    justify-content: flex-start !important;
+  }
+  .sidebar-logo { max-width: 78px !important; }
+  .sidebar .grouped-sidebar-nav {
+    flex: 1 1 100% !important;
+    margin-top: 5px !important;
+  }
+  .sidebar .nav-item { padding: 7px 8px !important; font-size: 10.5px !important; }
+  .quick-call-button span { display: inline !important; }
+  .bw-modal-head-actions { flex-wrap: wrap; }
+  .bw-modal-head-actions .bw-modal-edit { min-height: 29px; }
+}
