@@ -348,3 +348,158 @@ button:active:not(:disabled) { transform: scale(.975); }
   color: #ffffff !important;
   border-color: #176b45 !important;
 }
+
+/* ============================================================
+   TIPOGRAFÍA ÚNICA, SECCIONES Y RECONOCIMIENTO
+   ============================================================ */
+
+/* Una sola familia para toda la app, incluidos números */
+body, h1, h2, h3, h4, h5, h6, p, span, b, strong, small, label,
+button, input, select, textarea, td, th, a, li, blockquote,
+.stat-card strong, .pulse-percent, .agenda-date b, .product-rank,
+.birthday-stage-head b, .target-summary b {
+  font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif !important;
+  font-feature-settings: "tnum" 1;
+}
+h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
+.stat-card strong, .pulse-percent, .agenda-date b, .product-rank,
+.birthday-stage-head b, .target-summary b { font-variant-numeric: tabular-nums; }
+
+/* La "otra" tipografía queda solo para los títulos de sección del sidebar */
+.side-label,
+.nav-section-label {
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-style: normal;
+  font-weight: 700 !important;
+  letter-spacing: .04em !important;
+  color: #1d7a4c !important;
+}
+.side-label { font-size: 11px !important; }
+.nav-section-label {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 32px;
+  margin-top: 8px;
+  padding: 5px 8px 5px 10px;
+  border: 0;
+  border-left: 3px solid #e02f1b;
+  border-radius: 0 8px 8px 0;
+  background: transparent;
+  font-size: 12px !important;
+  text-align: left;
+  cursor: pointer;
+}
+.nav-section-label:hover { background: #fff7f4; color: #b82412 !important; }
+.nav-section-label .group-chevron { transition: transform .2s ease; color: #8a9a90; }
+.nav-section-label .group-chevron.collapsed { transform: rotate(-90deg); }
+.nav-section.is-collapsed .nav-item { display: none !important; }
+
+/* Sidebar colapsable */
+.sidebar {
+  position: relative;
+  width: 232px !important;
+  transition: width .24s ease, padding .24s ease !important;
+}
+.sidebar-collapse {
+  position: absolute;
+  top: 20px;
+  right: -12px;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #d8eee2;
+  border-radius: 50%;
+  background: #fff;
+  color: #1d7a4c;
+  box-shadow: 0 4px 12px rgba(20,92,54,.10);
+}
+.sidebar-collapse:hover { background: #eaf8f1; }
+.sidebar.is-collapsed { width: 84px !important; padding: 24px 10px !important; align-items: center; }
+.sidebar.is-collapsed .sidebar-logo-box { width: 56px !important; padding: 5px !important; justify-content: center !important; }
+.sidebar.is-collapsed .sidebar-logo { max-width: 46px !important; width: 46px !important; height: 46px !important; object-fit: cover; object-position: left center; }
+.sidebar.is-collapsed .brand-tagline,
+.sidebar.is-collapsed .side-label,
+.sidebar.is-collapsed .nav-section-label,
+.sidebar.is-collapsed .nav-item > span:not(.nav-badge),
+.sidebar.is-collapsed .nav-arrow,
+.sidebar.is-collapsed .sidebar-bottom > div:not(.live-dot) { display: none !important; }
+.sidebar.is-collapsed .nav-item { justify-content: center; padding: 11px 8px !important; }
+.sidebar.is-collapsed .nav-section { margin-top: 4px; width: 100%; }
+.sidebar.is-collapsed .nav-badge { position: absolute; top: 4px; right: 4px; }
+
+/* Firma discreta al pie */
+.footer { display: flex !important; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+.footer-signature { margin-left: auto; font-weight: 700; color: #1d7a4c !important; }
+.footer-signature span { font-size: 12px; }
+
+/* Clientes estrella: cálido, no verde */
+.center-stars {
+  background: linear-gradient(155deg, #fff8ed, #fffdf9) !important;
+  border-color: #f0dfc2 !important;
+}
+.center-stars .panel-head h3 { color: #8a5717 !important; }
+.center-stars .pill { background: #fff1d8 !important; color: #8a5717 !important; border-color: #efd8ae !important; }
+.center-star-row { border-bottom-color: #f2e6d3; }
+.center-star-row .star-badge { background: #f3b53b; color: #fff; }
+.appreciation-lead { margin: -.15rem 0 .7rem; color: #6b766f; font-size: 12px; }
+.center-phrases {
+  background: linear-gradient(155deg, #f3f7ff, #fbfdff) !important;
+  border-color: #dce7f5 !important;
+}
+.center-phrases .panel-head h3 { color: #24557f !important; }
+.center-phrases .pill { background: #e9f1fc !important; color: #24557f !important; border-color: #d5e4f6 !important; }
+.center-phrase-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+.center-phrase-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid #d5e4f6;
+  border-radius: 999px;
+  background: #fff;
+  color: #24557f;
+  font-size: 12px;
+}
+.center-phrase-chip b { min-width: 20px; padding: 2px 5px; border-radius: 999px; background: #e9f1fc; color: #24557f; font-size: 10px; text-align: center; }
+.center-phrase-chip:hover { background: #ecf3fd; transform: translateY(-1px); }
+
+/* Etapas de cumpleaños más visibles */
+.birthday-stage { background: #fffaf2 !important; border-color: #f0dfc2 !important; border-radius: 18px !important; }
+.birthday-stage-head span { color: #8a5717 !important; font-weight: 800 !important; font-size: 13px !important; }
+.birthday-stage-head b { color: #8a5717 !important; font-size: 20px !important; }
+.birthday-playbook-tabs button { border-radius: 14px !important; padding: 10px 13px !important; }
+.birthday-playbook-tabs button b { font-size: 13px !important; color: #1d7a4c !important; }
+.birthday-playbook-tabs button small { color: #55665c !important; font-size: 11px !important; }
+.birthday-playbook-tabs button.active { background: #eaf8f1 !important; border-color: #bfe5cf !important; }
+
+/* Responsive del sidebar y firma */
+@media (max-width: 760px) {
+  .sidebar.is-collapsed { width: 100% !important; padding: 16px 14px !important; align-items: stretch; }
+  .sidebar.is-collapsed .brand-tagline,
+  .sidebar.is-collapsed .side-label,
+  .sidebar.is-collapsed .nav-section-label,
+  .sidebar.is-collapsed .nav-item > span:not(.nav-badge),
+  .sidebar.is-collapsed .sidebar-bottom > div:not(.live-dot) { display: initial !important; }
+  .sidebar.is-collapsed .nav-item { justify-content: flex-start; }
+  .sidebar-collapse { display: none; }
+  .footer-signature { margin-left: 0; width: 100%; }
+}
+
+.nav-section-label span { font-family: "Playfair Display", Georgia, serif !important; }
+
+/* Sidebar colapsado limpio: logo completo, sin badges amontonados y botón visible */
+.sidebar-collapse { top: 10px !important; right: 6px !important; }
+.sidebar.is-collapsed .sidebar-logo {
+  max-width: 48px !important;
+  width: 48px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+.sidebar.is-collapsed .nav-item { position: relative; }
+.sidebar.is-collapsed .nav-badge { display: none !important; }

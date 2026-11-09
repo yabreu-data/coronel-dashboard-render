@@ -4667,3 +4667,15 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
 }
 
 .nav-section-label span { font-family: "Playfair Display", Georgia, serif !important; }
+
+/* Sidebar colapsado limpio: logo completo, sin badges amontonados y botón visible */
+.sidebar-collapse { top: 10px !important; right: 6px !important; }
+.sidebar.is-collapsed .sidebar-logo {
+  max-width: 48px !important;
+  width: 48px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+.sidebar.is-collapsed .nav-item { position: relative; }
+.sidebar.is-collapsed .nav-badge { display: none !important; }
