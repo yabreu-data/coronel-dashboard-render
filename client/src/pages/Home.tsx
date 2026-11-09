@@ -1099,6 +1099,7 @@ export default function Home() {
             src="/manus-storage/logo-coronel.png"
             alt="Coronel · Pollos y Parrillas"
           />
+          <span className="sidebar-monogram" aria-hidden="true">C</span>
         </div>
         <span className="brand-tagline">Sistema de gestión</span>
         <div className="side-label">REPORTE</div>

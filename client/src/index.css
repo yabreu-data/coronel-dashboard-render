@@ -4697,3 +4697,19 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
   border-radius: 10px !important;
 }
 .agenda-date b, .agenda-date small { color: #8a5717 !important; }
+
+/* Monograma limpio cuando el sidebar está cerrado */
+.sidebar-monogram { display: none; }
+.sidebar.is-collapsed .sidebar-logo { display: none !important; }
+.sidebar.is-collapsed .sidebar-monogram {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #eaf8f1;
+  color: #1d7a4c;
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: 26px;
+  font-weight: 700;
+}
