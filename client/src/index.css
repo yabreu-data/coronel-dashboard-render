@@ -5091,3 +5091,12 @@ body * { font-variant-numeric: tabular-nums; }
   font-weight: 800;
   line-height: 1;
 }
+
+/* El menú de sesión debe flotar por encima del contenido */
+.topbar { position: relative !important; z-index: 40 !important; overflow: visible !important; }
+.account-dropdown { z-index: 120 !important; }
+.top-actions { overflow: visible !important; }
+.nav-badge, .nav-badge.alert-badge, .nav-badge.birthday-badge, .nav-badge.task-badge {
+  box-shadow: none !important;
+  border: 0 !important;
+}
