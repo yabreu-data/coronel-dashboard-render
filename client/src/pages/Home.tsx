@@ -820,6 +820,8 @@ export default function Home() {
     {}
   );
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [contactEditOpen, setContactEditOpen] = useState(false);
+  const [contactPhone, setContactPhone] = useState("");
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!accountMenuOpen) return;
@@ -921,6 +923,25 @@ export default function Home() {
             new Date(b.callDate).getTime() - new Date(a.callDate).getTime()
         )
     : [];
+  const detailCampaign = clientDetailKey
+    ? birthdayCampaignsQuery.data?.find(
+        (campaign: BirthdayCampaign) => campaign.clientKey === clientDetailKey
+      )
+    : undefined;
+  const displayDetailPhone = detailCampaign?.phone || detailProfile?.phone || "";
+  const saveContact = trpc.birthdayCampaigns.save.useMutation({
+    onSuccess: async () => {
+      await birthdayCampaignsQuery.refetch();
+      setContactEditOpen(false);
+    },
+  });
+  useEffect(() => {
+    if (!detailProfile) return;
+    setContactEditOpen(false);
+    setContactPhone(
+      (detailCampaign?.phone || detailProfile.phone || "").toString()
+    );
+  }, [clientDetailKey]);
   const detailDialogRef = useDialogFocus(Boolean(detailProfile), () =>
     setClientDetailKey(null)
   );
@@ -1727,19 +1748,104 @@ export default function Home() {
                 <X size={17} />
               </button>
             </div>
-            <div className="client-sheet-meta">
-              <span>{detailProfile.phone || "Sin teléfono"}</span>
-              <span
-                className={
-                  detailProfile.segment === "En riesgo" ? "segment-risk" : ""
-                }
-              >
-                {segmentLabelFor(detailProfile.segment)}
-              </span>
-              <span>
-                {plural(detailProfile.count, "visita", "visitas")}
-              </span>
+            <div className="client-sheet-info">
+              <div>
+                <small>TELÉFONO</small>
+                <b>{displayDetailPhone || "Sin teléfono"}</b>
+              </div>
+              <div>
+                <small>GRUPO</small>
+                <b
+                  className={
+                    detailProfile.segment === "En riesgo"
+                      ? "segment-risk"
+                      : ""
+                  }
+                >
+                  {segmentLabelFor(detailProfile.segment)}
+                </b>
+              </div>
+              <div>
+                <small>VISITAS</small>
+                <b>{detailProfile.count}</b>
+              </div>
+              <div>
+                <small>ÚLTIMA ACTUALIZACIÓN</small>
+                <b>
+                  {detailCampaign?.updatedAt
+                    ? formatDateTime(detailCampaign.updatedAt)
+                    : detailRecords[0]
+                      ? formatDateTime(detailRecords[0].timestamp)
+                      : "Sin actualizar"}
+                </b>
+              </div>
             </div>
+            <div className="client-sheet-head-actions">
+              <button
+                className="btn-borde client-edit-trigger"
+                onClick={() => setContactEditOpen(value => !value)}
+              >
+                <Settings2 size={14} /> Editar datos
+              </button>
+            </div>
+            {contactEditOpen && (
+              <form
+                className="client-edit-form"
+                onSubmit={event => {
+                  event.preventDefault();
+                  if (!detailProfile) return;
+                  saveContact.mutate({
+                    clientKey: detailProfile.key,
+                    clientName: detailProfile.name,
+                    phone: contactPhone,
+                    stage: detailCampaign?.stage ?? "week",
+                    channel: detailCampaign?.channel ?? "whatsapp",
+                    progressStatus:
+                      detailCampaign?.progressStatus ?? "pending",
+                    promotion: detailCampaign?.promotion ?? undefined,
+                    responsible: detailCampaign?.responsible ?? undefined,
+                    nextActionAt: detailCampaign?.nextActionAt
+                      ? new Date(detailCampaign.nextActionAt).toISOString()
+                      : null,
+                    nextActionLabel:
+                      detailCampaign?.nextActionLabel ?? undefined,
+                    familyName: detailCampaign?.familyName ?? undefined,
+                    familyBirthday:
+                      detailCampaign?.familyBirthday ?? undefined,
+                    noRedeemReason:
+                      detailCampaign?.noRedeemReason ?? undefined,
+                    notes: detailCampaign?.notes ?? undefined,
+                  });
+                }}
+              >
+                <label>
+                  Teléfono
+                  <input
+                    type="tel"
+                    value={contactPhone}
+                    onChange={event => setContactPhone(event.target.value)}
+                    placeholder="Número de contacto"
+                  />
+                </label>
+                <div className="client-edit-form-actions">
+                  <button className="btn-rojo" type="submit" disabled={saveContact.isPending}>
+                    {saveContact.isPending ? "Guardando…" : "Guardar cambios"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-borde"
+                    onClick={() => setContactEditOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                {saveContact.isError && (
+                  <p className="form-error">
+                    No se pudo guardar: {saveContact.error.message}
+                  </p>
+                )}
+              </form>
+            )}
             <div className="client-sheet-actions">
               {detailProfile.phone && (
                 <a
@@ -3584,7 +3690,7 @@ function BirthdayWorkspace({
                   row.item.days >= 0;
                 return (
                   <article
-                    className={`bw-card bw-card-${row.horizon} ${expanded ? "is-expanded" : ""}`}
+                    className={`bw-card bw-card-${row.horizon} ${item.days === 0 ? "is-birthday-today" : ""} ${expanded ? "is-expanded" : ""}`}
                     key={row.key}
                   >
                     <div className="bw-card-top">
@@ -3983,6 +4089,14 @@ function BirthdayWorkspace({
                   {historyRow.campaign?.familyName
                     ? `${historyRow.campaign.familyName}${historyRow.campaign.familyBirthday ? ` · ${historyRow.campaign.familyBirthday}` : ""}`
                     : "—"}
+                </b>
+              </div>
+              <div>
+                <small>Última actualización</small>
+                <b>
+                  {historyRow.campaign?.updatedAt
+                    ? formatDateTime(historyRow.campaign.updatedAt)
+                    : "Sin actualizar"}
                 </b>
               </div>
             </div>

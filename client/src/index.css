@@ -5100,3 +5100,179 @@ body * { font-variant-numeric: tabular-nums; }
   box-shadow: none !important;
   border: 0 !important;
 }
+
+/* Calendario de cumpleaños más visible */
+.birthday-toolbar-action {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid #cfe4d8 !important;
+  border-radius: 11px;
+  background: #ffffff !important;
+  color: #176b45 !important;
+  font-size: 11px;
+  font-weight: 800;
+}
+.birthday-toolbar-action:hover { background: #eef8f2 !important; }
+.birthday-toolbar-action:last-child {
+  border-color: #1d7a4c !important;
+  background: #1d7a4c !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 14px -6px rgba(29,122,76,.35);
+}
+.birthday-toolbar-action.active {
+  border-color: #b82412 !important;
+  background: #e02f1b !important;
+  color: #fff !important;
+}
+.birthday-toolbar-month {
+  min-width: 118px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #f3f9f5;
+  color: #176b45;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Filtro de fecha legible */
+.bw-clear-date {
+  border: 1px solid #f0b6a7 !important;
+  border-radius: 10px;
+  background: #ffe8e2 !important;
+  color: #b82412 !important;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 8px 11px;
+}
+.bw-clear-date:hover { background: #ffdcd4 !important; }
+
+/* Ficha del cliente: datos con etiquetas visibles */
+.client-sheet { background: #ffffff !important; border-radius: 24px !important; }
+.client-sheet-head h3 { color: #0c100d !important; font-size: 26px !important; }
+.client-sheet-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+.client-sheet-info > div {
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #e7efea;
+  border-radius: 12px;
+  background: #f8faf9;
+}
+.client-sheet-info small {
+  display: block;
+  color: #6b7a71 !important;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+.client-sheet-info b {
+  display: block;
+  margin-top: 3px;
+  color: #0c100d !important;
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.client-sheet-info .segment-risk {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #ffe8e2;
+  color: #b82412 !important;
+}
+.client-sheet-head-actions { display: flex; justify-content: flex-end; margin: -4px 0 8px; }
+.client-edit-trigger { display: inline-flex; align-items: center; gap: 5px; min-height: 31px; font-size: 11px; font-weight: 800; }
+.client-edit-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #dcebe2;
+  border-radius: 14px;
+  background: #f6fbf8;
+}
+.client-edit-form label { flex: 1 1 190px; color: #55665c; font-size: 10px; font-weight: 800; }
+.client-edit-form input { width: 100%; min-height: 34px; margin-top: 4px; }
+.client-edit-form-actions { display: flex; gap: 7px; }
+.client-edit-form-actions button { min-height: 34px; font-size: 11px; }
+.client-edit-form .form-error { flex: 1 0 100%; margin: 0; }
+
+/* Ficha de cumpleaños: etiquetas y valores legibles */
+.bw-modal { background: #ffffff !important; color: #0c100d !important; border-radius: 24px !important; }
+.bw-modal-head h3 { color: #145c36 !important; }
+.bw-history-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px !important; }
+.bw-history-grid > div {
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #e7efea;
+  border-radius: 12px;
+  background: #f8faf9;
+}
+.bw-history-grid small {
+  display: block;
+  color: #6b7a71 !important;
+  font-size: 8.5px !important;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.bw-history-grid b {
+  display: block;
+  margin-top: 3px;
+  color: #0c100d !important;
+  font-size: 12.5px !important;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* Cumpleaños de hoy: tarjeta festiva */
+.bw-card.is-birthday-today {
+  position: relative;
+  overflow: hidden;
+  border-color: #efc46b !important;
+  background: linear-gradient(135deg, #fff8e8 0%, #ffe8d4 100%) !important;
+  box-shadow: 0 12px 25px -15px rgba(180,95,25,.35) !important;
+}
+.bw-card.is-birthday-today::after {
+  content: "🎂";
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 21px;
+  opacity: .55;
+  pointer-events: none;
+}
+.bw-card.is-birthday-today .bw-date {
+  border-color: #e5b95f !important;
+  background: #fff4d9 !important;
+  color: #8a5717 !important;
+}
+
+/* Etiquetas de prioridad más visibles */
+.insight-card .insight-label {
+  padding: 3px 7px;
+  border-radius: 7px;
+  background: #eef7f1;
+  color: #176b45 !important;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .055em;
+}
+.insight-critical .insight-label { background: #ffe8e2 !important; color: #b82412 !important; }
+.insight-warning .insight-label { background: #fff1d9 !important; color: #8a5717 !important; }
+.insight-positive .insight-label { background: #e6f6ec !important; color: #176b45 !important; }
+.insight-neutral .insight-label { background: #eef2f0 !important; color: #55665c !important; }
+
+@media (max-width: 760px) {
+  .client-sheet-info { grid-template-columns: 1fr 1fr; }
+  .bw-history-grid { grid-template-columns: 1fr 1fr; }
+}
