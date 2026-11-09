@@ -4429,3 +4429,60 @@ body {
 
 /* Evitar que el patrón se mezcle con multiply y vuelva a dominar */
 body { background-blend-mode: normal !important; }
+
+/* Aviso humano de cumpleaños de hoy */
+.today-birthday-banner {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 14px 0 4px;
+  padding: 11px 13px;
+  border: 1px solid rgba(158,212,174,.65);
+  border-left: 3px solid var(--brand-green-dark);
+  border-radius: 12px;
+  background: linear-gradient(100deg, #f5fcf7, #eef8f2);
+}
+.today-birthday-emoji { font-size: 26px; line-height: 1; flex: 0 0 auto; }
+.today-birthday-banner > div { flex: 1; min-width: 0; }
+.today-birthday-banner b { display: block; color: var(--text-main); font-size: 12.5px; }
+.today-birthday-banner small { display: block; margin-top: 2px; color: var(--text-muted); font-size: 11px; }
+.today-birthday-banner button { flex: 0 0 auto; min-height: 32px; padding: 0 11px; border: 1px solid var(--brand-green-light); border-radius: 8px; background: #fff; color: var(--brand-green-dark); font-size: 11px; font-weight: 800; }
+.today-birthday-banner button:hover { background: #eef8f2; }
+
+/* Calidad positiva explicada */
+.quality-human-row { display: flex; align-items: center; gap: 10px; }
+.quality-human-face { font-size: 34px; line-height: 1; }
+.quality-human-lead { margin: 0 0 8px; color: #e9f8f0; font-size: 12px; font-weight: 600; }
+@media (max-width: 760px) {
+  .today-birthday-banner { align-items: flex-start; padding: 10px; }
+  .today-birthday-banner button { min-height: 30px; }
+}
+
+/* Pestañas de Equipo */
+.team-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 0 16px;
+  padding: 4px;
+  border: 1px solid rgba(158,212,174,.40);
+  border-radius: 12px;
+  background: rgba(255,255,255,.86);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
+}
+.team-tabs button {
+  min-height: 34px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.team-tabs button:hover { background: #f2f8f5; color: var(--brand-green-dark); }
+.team-tabs button.selected { background: var(--brand-green-dark); color: #fff; }
+@media (max-width: 760px) {
+  .team-tabs { display: flex; width: 100%; }
+  .team-tabs button { flex: 1; padding: 0 9px; }
+}

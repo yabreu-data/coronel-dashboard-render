@@ -4640,6 +4640,16 @@ function Overview({
               ? `Tienes ${plural(overdueCount, "prioridad vencida", "prioridades vencidas")} y ${plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")} por atender.`
               : `No hay prioridades vencidas. Tienes ${plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")} y ${plural(missingQuality, "respuesta sin calificar", "respuestas sin calificar")}.`}
           </p>
+          {todayBirthdayCount > 0 ? (
+            <div className="today-birthday-banner">
+              <span className="today-birthday-emoji" aria-hidden="true">🎂</span>
+              <div>
+                <b>Hoy está de cumpleaños {birthdaysToday.map(item => item.record.clientName || "un cliente").join(", ")}</b>
+                <small>Un saludo a tiempo se recuerda. Puedes escribirle ahora.</small>
+              </div>
+              <button onClick={() => onNavigate("birthdays")}>Saludar</button>
+            </div>
+          ) : null}
           <div className="command-actions">
             <button
               className="btn-rojo command-primary"
@@ -4667,13 +4677,21 @@ function Overview({
             </span>
           </div>
         </div>
-        <aside className="pulse-card" aria-label="Pulso del negocio">
+        <aside className="pulse-card" aria-label="Cómo se sienten tus clientes">
           <div className="pulse-top">
             <div>
-              <p className="eyebrow">CALIDAD POSITIVA</p>
-              <div className="pulse-percent">
-                {Math.round(positive * 100)}<small>%</small>
+              <p className="eyebrow">CÓMO SE SIENTEN TUS CLIENTES</p>
+              <div className="quality-human-row">
+                <span className="quality-human-face" aria-hidden="true">
+                  {positive >= 0.85 ? "😊" : positive >= 0.7 ? "🙂" : positive >= 0.5 ? "😐" : "😟"}
+                </span>
+                <div className="pulse-percent">
+                  {Math.round(positive * 100)}<small>%</small>
+                </div>
               </div>
+              <p className="quality-human-lead">
+                {Math.round(positive * 10)} de cada 10 clientes salieron contentos.
+              </p>
             </div>
             {overallCi && (
               <Pill tone="green">
@@ -4682,7 +4700,7 @@ function Overview({
             )}
           </div>
           <p className="pulse-sample">
-            {good} de {answeredCount} con respuesta · {missingQuality} sin calificar
+            {good} de {answeredCount} respuestas fueron buenas · {missingQuality} sin calificar
           </p>
           <div className="quality-bar pulse-bar">
             <span style={{ width: `${positive * 100}%` }} />
@@ -9460,6 +9478,9 @@ function Team({
   );
   const [saved, setSaved] = useState(false);
   const [targetsOpen, setTargetsOpen] = useState(false);
+  const [teamTab, setTeamTab] = useState<"resumen" | "personas" | "metas">(
+    "resumen"
+  );
   const utils = trpc.useUtils();
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -9627,16 +9648,39 @@ function Team({
           </span>
           <button
             className="secondary-action team-targets-btn"
-            onClick={() =>
-              document
-                .getElementById("team-targets")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => {
+              setTeamTab("metas");
+              setTargetsOpen(true);
+              window.setTimeout(() => {
+                document
+                  .getElementById("team-targets")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 60);
+            }}
           >
             Editar metas
           </button>
         </div>
       </div>
+      <div className="team-tabs" role="tablist" aria-label="Secciones de Equipo">
+        {([
+          ["resumen", "Resumen"],
+          ["personas", "Personas"],
+          ["metas", "Metas"],
+        ] as const).map(([id, label]) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={teamTab === id}
+            className={teamTab === id ? "selected" : ""}
+            onClick={() => setTeamTab(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {teamTab === "resumen" && (
+        <>
       <section className="panel team-date-filter">
         <div className="panel-head">
           <div>
@@ -9797,14 +9841,17 @@ function Team({
           detail="objetivo positivo"
           accent="green"
           icon={Sparkles}
-          onClick={() =>
-            document
-              .getElementById("team-targets")
-              ?.scrollIntoView({ behavior: "smooth" })
-          }
+          onClick={() => {
+            setTeamTab("metas");
+            setTargetsOpen(true);
+          }}
         />
       </div>
-      <div className="team-section-heading">
+        </>
+      )}
+      {teamTab === "personas" && (
+        <>
+            <div className="team-section-heading">
         <p className="eyebrow">PERSONAS</p>
         <h2>Volumen y calidad por persona</h2>
       </div>
@@ -9959,7 +10006,11 @@ function Team({
           )}
         </section>
       </div>
-      <div className="team-section-heading">
+        </>
+      )}
+      {teamTab === "metas" && (
+        <>
+            <div className="team-section-heading">
         <p className="eyebrow">METAS</p>
         <h2>Objetivos del equipo</h2>
       </div>
@@ -10047,6 +10098,8 @@ function Team({
           </div>
         )}
       </section>
+        </>
+      )}
     </>
   );
 }
