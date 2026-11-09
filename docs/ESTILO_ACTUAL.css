@@ -1316,3 +1316,58 @@ body * { font-variant-numeric: tabular-nums; }
   .bw-history-columns { grid-template-columns: 1fr !important; }
   .bw-history-columns ul { max-height: 180px !important; }
 }
+
+/* La ficha de cumpleaños estaba dentro de una sección animada:
+   eso rompía el position:fixed del modal. */
+.bw-panel { animation: none !important; transform: none !important; }
+
+/* Móvil real: sidebar superior compacto y contenido a todo el ancho */
+@media (max-width: 760px) {
+  .app-shell { display: block !important; }
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: relative !important;
+    overflow: visible !important;
+    padding: 12px 13px 8px !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid #e7efea !important;
+    gap: 4px !important;
+    display: block !important;
+  }
+  .sidebar-logo-box { width: 126px !important; min-height: 0 !important; padding: 0 !important; margin: 0 auto !important; }
+  .sidebar-logo { max-width: 112px !important; }
+  .sidebar .brand-tagline, .sidebar .side-label, .sidebar-signature,
+  .sidebar .sidebar-bottom, .sidebar-collapse { display: none !important; }
+  .sidebar .grouped-sidebar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 3px !important;
+    margin-top: 7px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 2px !important;
+  }
+  .sidebar .nav-section { display: contents !important; }
+  .sidebar .nav-section-label { display: none !important; }
+  .sidebar .nav-item {
+    width: auto !important;
+    min-width: max-content !important;
+    padding: 8px 9px !important;
+    gap: 6px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+  .sidebar .nav-item span:not(.nav-badge) { display: inline !important; }
+  .sidebar .nav-item .nav-arrow { display: none !important; }
+  .sidebar .nav-badge { display: inline-grid !important; }
+  .main-area { width: 100% !important; min-width: 0 !important; }
+  .topbar { padding: 12px 14px !important; }
+  .topbar-copy { flex: 1 1 100% !important; }
+  .top-actions { width: 100% !important; display: grid !important; grid-template-columns: 1fr 1fr !important; }
+  .content { width: 100% !important; padding: 12px 12px 96px !important; }
+  .bw-card-top { grid-template-columns: 52px minmax(0,1fr) !important; }
+  .bw-card { width: 100% !important; }
+  .bw-filters, .bw-chips, .birthday-toolbar { flex-wrap: wrap !important; }
+}
