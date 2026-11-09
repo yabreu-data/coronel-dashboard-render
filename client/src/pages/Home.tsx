@@ -983,7 +983,7 @@ export default function Home() {
       countOverduePriorities(records, birthdays, profiles, persistedPriorities),
     [birthdays, persistedPriorities, profiles, records]
   );
-  const priorityCount = Math.min(5, riskCount + birthdays.length);
+  const priorityCount = rawOverdueCount;
   const overdueCount = rawOverdueCount;
   const pendingTaskCount = persistedPriorities.filter(
     priority => priority.status !== "done"
@@ -1188,7 +1188,8 @@ export default function Home() {
                     {id === "overview" && priorityCount > 0 && (
                       <span
                         className="nav-badge alert-badge"
-                        aria-label={`${priorityCount} alertas`}
+                        title={`${priorityCount} acciones vencidas`}
+                        aria-label={`${priorityCount} acciones vencidas`}
                       >
                         {priorityCount > 99 ? "99+" : priorityCount}
                       </span>
@@ -1196,7 +1197,8 @@ export default function Home() {
                     {id === "birthdays" && birthdays.length > 0 && (
                       <span
                         className="nav-badge birthday-badge"
-                        aria-label={`${birthdays.length} cumpleaños próximos`}
+                        title={`${birthdays.length} cumpleaños en los próximos 7 días`}
+                        aria-label={`${birthdays.length} cumpleaños en los próximos 7 días`}
                       >
                         {birthdays.length > 99 ? "99+" : birthdays.length}
                       </span>
@@ -1204,7 +1206,8 @@ export default function Home() {
                     {id === "priorities" && pendingTaskCount > 0 && (
                       <span
                         className="nav-badge task-badge"
-                        aria-label={`${pendingTaskCount} tareas pendientes`}
+                        title={`${pendingTaskCount} prioridades abiertas`}
+                        aria-label={`${pendingTaskCount} prioridades abiertas`}
                       >
                         {pendingTaskCount > 99 ? "99+" : pendingTaskCount}
                       </span>

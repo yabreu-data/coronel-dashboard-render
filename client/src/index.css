@@ -5363,3 +5363,106 @@ body * { font-variant-numeric: tabular-nums; }
 }
 .contact-history-item p { color: #0c100d !important; }
 .contact-history-item small { color: #6b7a71 !important; }
+
+/* ============================================================
+   TARJETAS DE CUMPLEAÑOS + SVG + MÓVIL
+   ============================================================ */
+
+/* Tarjetas de cumpleaños más modernas */
+.bw-card {
+  border: 1px solid #e4ede7 !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 22px -14px rgba(20,92,54,.16) !important;
+  padding: 13px 15px !important;
+}
+.bw-card:hover { transform: translateY(-2px); box-shadow: 0 14px 26px -14px rgba(20,92,54,.24) !important; }
+.bw-card-top { grid-template-columns: 58px minmax(0,1fr) auto !important; gap: 12px !important; }
+.bw-card .bw-date {
+  background: #fff7e8 !important;
+  border-color: #f0dfc2 !important;
+  border-radius: 12px !important;
+}
+.bw-card .bw-date b { color: #8a5717 !important; font-size: 21px !important; }
+.bw-card .bw-date small { color: #9a611b !important; font-size: 9px !important; }
+.bw-card .bw-meta { color: #66756b !important; font-size: 11px !important; }
+.bw-card .bw-card-foot { margin-top: 9px !important; }
+
+/* Fondo SVG sutil y visible para cumpleaños de hoy */
+.bw-card.is-birthday-today::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .62;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='110' viewBox='0 0 180 110'%3E%3Cg fill='none' stroke='%23d89a2b' stroke-width='1.2' opacity='.7'%3E%3Cpath d='M22 76c-8-10 0-22 8-22s16 12 8 22z' fill='%23f2b544' fill-opacity='.28'/%3E%3Cpath d='M30 76v17'/%3E%3Cpath d='M54 65c-6-8 0-17 6-17s12 9 6 17z' fill='%23e8795f' fill-opacity='.25'/%3E%3Cpath d='M60 65v26'/%3E%3Ccircle cx='132' cy='25' r='4' fill='%2377c996' fill-opacity='.35'/%3E%3Ccircle cx='151' cy='40' r='3' fill='%23f2b544' fill-opacity='.4'/%3E%3Cpath d='M96 17l2.5 5 5.5.8-4 3.7.9 5.5-4.9-2.7-4.9 2.7.9-5.5-4-3.7 5.5-.8z' fill='%23f0c45b' fill-opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 110px;
+}
+.bw-card.is-birthday-today .birthday-card-art { opacity: .75; right: 6px; top: 26px; bottom: auto; }
+.bw-card.is-birthday-today { isolation: isolate; }
+
+/* Tarjetas y fichas modernas en móvil */
+@media (max-width: 760px) {
+  .topbar {
+    padding: 12px 14px !important;
+    gap: 9px !important;
+    align-items: stretch !important;
+  }
+  .topbar-copy { flex: 1 1 100% !important; }
+  .top-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px !important;
+  }
+  .quick-call-button, .source-selector, .account-menu, .refresh-button { width: 100% !important; }
+  .account-trigger { width: 100% !important; justify-content: flex-start; }
+  .account-dropdown { left: 0; right: auto; width: 100%; }
+  .content { padding: 12px 12px 96px !important; }
+  .panel, .stat-card, .dashboard-card, .page-intro, .client-sheet, .bw-modal {
+    border-radius: 18px !important;
+    padding: 16px !important;
+  }
+  .client-sheet, .bw-modal, .quick-call-modal, .call-modal {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+    border-radius: 20px !important;
+  }
+  .client-sheet-backdrop, .bw-modal-backdrop { align-items: flex-end !important; padding: 8px !important; }
+  .bw-card { padding: 12px !important; }
+  .bw-card-top { grid-template-columns: 52px minmax(0,1fr) !important; gap: 9px !important; }
+  .bw-card .bw-days { grid-column: 2; justify-self: start; }
+  .bw-card-foot { gap: 6px !important; }
+  .bw-card-foot .bw-status-select { max-width: 100%; }
+  .birthday-toolbar { flex-wrap: wrap !important; gap: 6px !important; }
+  .birthday-toolbar-month { min-width: 92px; }
+  .birthday-toolbar-action { flex: 1 1 auto; }
+  .birthday-calendar-panel { padding: 12px !important; }
+  .birthday-calendar-weekdays { font-size: 9px !important; }
+  .birthday-calendar-day { min-height: 48px !important; padding: 4px !important; }
+  .birthday-calendar-day strong { font-size: 13px !important; }
+  .birthday-calendar-day small { font-size: 7.5px !important; }
+  .birthday-progress-grid { grid-template-columns: 1fr 1fr !important; }
+  .bw-filters { flex-wrap: wrap !important; }
+  .bw-search { flex: 1 1 100% !important; }
+  .client-sheet-info { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+  .client-sheet-info > div { padding: 8px !important; }
+  .client-sheet-info b { font-size: 11.5px !important; }
+  .bw-history-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+  .insights-grid, .stats-grid, .dashboard-grid, .command-grid, .dashboard-secondary,
+  .command-secondary, .overview-bottom-charts { grid-template-columns: 1fr !important; }
+  .insights-head { flex-wrap: wrap; gap: 6px; }
+  .insights-head h2 { font-size: 27px !important; }
+  .footer { gap: 5px 12px !important; }
+  .footer-signature { width: 100%; margin-left: 0 !important; }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+@media (max-width: 420px) {
+  .client-sheet-info, .bw-history-grid { grid-template-columns: 1fr !important; }
+  .birthday-calendar-grid { gap: 3px !important; }
+  .birthday-calendar-day { min-height: 42px !important; }
+}
