@@ -886,9 +886,14 @@ export default function Home() {
   const bad = answered.filter(r => clean(r.quality) === "malo").length;
   const positive = answered.length ? good / answered.length : 0;
   const comments = filtered.filter(r => r.comment.trim());
-  const reviewCount = filtered.filter(
-    r => clean(r.quality) === "regular" || clean(r.quality) === "malo"
-  ).length;
+  const reviewRecords = useMemo(
+    () =>
+      filtered.filter(
+        r => clean(r.quality) === "regular" || clean(r.quality) === "malo"
+      ),
+    [filtered]
+  );
+  const reviewCount = reviewRecords.length;
   const clientCount = new Set(filtered.map(clientKeyOf)).size;
   const birthdays = useMemo(
     () =>
@@ -1545,6 +1550,7 @@ export default function Home() {
               {page === "voice" && (
                 <Voice
                   comments={comments}
+                  reviewRecords={reviewRecords}
                   reviewCount={reviewCount}
                   topicPhrases={topicPhrases}
                   positiveHighlights={positiveHighlights}
@@ -6820,6 +6826,15 @@ function Clients({
                                 : "Sin llamadas"}
                             </span>
                           </span>
+                          {profile.comment?.trim() ? (
+                            <small className="clients-last-comment">
+                              “{profile.comment}”
+                            </small>
+                          ) : (
+                            <small className="clients-last-comment is-empty">
+                              Sin comentario registrado.
+                            </small>
+                          )}
                         </span>
                         <span className="clients-row-action">
                           <Phone size={14} />
@@ -8989,6 +9004,7 @@ function TargetPerformanceChart({
 
 function Voice({
   comments,
+  reviewRecords,
   reviewCount,
   topicPhrases,
   positiveHighlights,
@@ -8997,6 +9013,7 @@ function Voice({
   positiveCount,
 }: {
   comments: RecordItem[];
+  reviewRecords: RecordItem[];
   reviewCount: number;
   topicPhrases: [string, number][];
   positiveHighlights: SentimentHighlight[];
@@ -9006,6 +9023,15 @@ function Voice({
 }) {
   const [selected, setSelected] = useState<SentimentHighlight | null>(null);
   const [selectedPhrase, setSelectedPhrase] = useState<string | null>(null);
+  const [commentSheet, setCommentSheet] = useState<
+    | {
+        kind: "review" | "repeated" | "last";
+        title: string;
+        subtitle: string;
+        items?: RecordItem[];
+      }
+    | null
+  >(null);
   const phraseMatches = useMemo(() => {
     if (!selectedPhrase) return [];
     const tokens = normalizeText(selectedPhrase)
@@ -9173,9 +9199,12 @@ function Voice({
           accent="orange"
           icon={Clock3}
           onClick={() =>
-            document
-              .getElementById("voice-repeated")
-              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            setCommentSheet({
+              kind: "last",
+              title: "Último comentario",
+              subtitle: comments.length ? "Comentario más reciente" : "Sin comentarios",
+              items: comments.length ? [comments[comments.length - 1]] : [],
+            })
           }
         />
         <Stat
@@ -9184,6 +9213,14 @@ function Voice({
           detail="asociados a alerta"
           accent="red"
           icon={AlertTriangle}
+          onClick={() =>
+            setCommentSheet({
+              kind: "review",
+              title: "Para revisar",
+              subtitle: `${reviewRecords.length} respuestas con calidad Regular o Mala`,
+              items: reviewRecords,
+            })
+          }
         />
         <Stat
           label="COMENTARIOS REPETIDOS"
@@ -9191,6 +9228,13 @@ function Voice({
           detail="frases que se repiten"
           accent="purple"
           icon={MessageSquareText}
+          onClick={() =>
+            setCommentSheet({
+              kind: "repeated",
+              title: "Comentarios repetidos",
+              subtitle: `${repeatedComments.length} frases agrupadas`,
+            })
+          }
         />
         <Stat
           label="PEDIDOS"
@@ -9478,6 +9522,74 @@ function Voice({
           </div>
         </div>
       )}
+      {commentSheet &&
+        createPortal(
+          <div className="client-sheet-backdrop" onClick={() => setCommentSheet(null)}>
+            <aside
+              className="client-sheet voice-comments-sheet"
+              role="dialog"
+              aria-modal="true"
+              aria-label={commentSheet.title}
+              onClick={event => event.stopPropagation()}
+            >
+              <div className="client-sheet-head">
+                <div>
+                  <p className="eyebrow">VOZ DEL CLIENTE</p>
+                  <h3>{commentSheet.title}</h3>
+                  <small className="muted">{commentSheet.subtitle}</small>
+                </div>
+                <button className="icon-button" onClick={() => setCommentSheet(null)} aria-label="Cerrar ficha">
+                  <X size={17} />
+                </button>
+              </div>
+              <div className="voice-sheet-list">
+                {commentSheet.kind === "repeated" ? (
+                  repeatedComments.length ? (
+                    repeatedComments.map(item => (
+                      <article className="voice-sheet-comment" key={item.text}>
+                        <div className="voice-sheet-top">
+                          <span className="voice-count">×{item.count}</span>
+                          <small>Comentario repetido</small>
+                        </div>
+                        <p>“{item.text}”</p>
+                      </article>
+                    ))
+                  ) : (
+                    <Empty text="No hay comentarios repetidos." />
+                  )
+                ) : commentSheet.items?.length ? (
+                  commentSheet.items.map(item => (
+                    <article className="voice-sheet-comment" key={`${item.id}-${item.timestamp}`}>
+                      <div className="voice-sheet-top">
+                        <b>{item.clientName || "Cliente sin nombre"}</b>
+                        <Pill
+                          tone={
+                            clean(item.quality) === "malo"
+                              ? "red"
+                              : clean(item.quality) === "regular"
+                                ? "orange"
+                                : "green"
+                          }
+                        >
+                          {item.quality || "Sin calidad"}
+                        </Pill>
+                      </div>
+                      <p>{item.comment?.trim() ? `“${item.comment}”` : "No dejó comentario."}</p>
+                      <small>{formatDateTime(item.timestamp)} · {item.dish || "Producto no indicado"}</small>
+                    </article>
+                  ))
+                ) : (
+                  <Empty text="No hay comentarios para mostrar." />
+                )}
+              </div>
+              <div className="client-sheet-footer">
+                <small>Se cierra sin salir de Voz del cliente.</small>
+                <button className="btn-borde" onClick={() => setCommentSheet(null)}>Cerrar</button>
+              </div>
+            </aside>
+          </div>,
+          document.body
+        )}
     </>
   );
 }
