@@ -389,6 +389,17 @@ const formatBirthday = (value: string) => {
 };
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count === 1 ? one : many}`;
+
+const productGroupOf = (name: string) => {
+  const n = normalizeText(name);
+  if (/(pollo|broaster|brasa|pechuga|alita|cuarto|pierna|muslo|pollo a la)/.test(n)) return "Pollos";
+  if (/(parrilla|carne|anticucho|chorizo|costilla|res|cerdo|bife)/.test(n)) return "Parrillas";
+  if (/(papa|ensalada|arroz|choclo|guarnici|complemento)/.test(n)) return "Guarniciones";
+  if (/(bebida|gaseosa|chicha|jugo|agua|cerveza|limonada|refresco)/.test(n)) return "Bebidas";
+  if (/(postre|torta|helado|dulce)/.test(n)) return "Postres";
+  return "Otros";
+};
+
 const segmentLabelFor = (value?: string) =>
   value === "En riesgo"
     ? "Por recuperar"
@@ -3701,6 +3712,25 @@ function BirthdayWorkspace({
                     className={`bw-card bw-card-${row.horizon} ${item.days === 0 ? "is-birthday-today" : ""} ${expanded ? "is-expanded" : ""}`}
                     key={row.key}
                   >
+                    {item.days === 0 && (
+                      <svg
+                        className="birthday-card-art"
+                        viewBox="0 0 160 96"
+                        aria-hidden="true"
+                      >
+                        <g opacity=".9">
+                          <path d="M26 58c-8-10 0-22 8-22s16 12 8 22z" fill="#f2b544" />
+                          <path d="M26 58v22" stroke="#d98f2b" strokeWidth="1.5" />
+                          <path d="M47 48c-6-8 0-17 6-17s12 9 6 17z" fill="#e8795f" />
+                          <path d="M47 48v28" stroke="#c95f47" strokeWidth="1.5" />
+                          <circle cx="118" cy="28" r="3" fill="#77c996" />
+                          <circle cx="137" cy="42" r="2.5" fill="#f2b544" />
+                          <rect x="105" y="52" width="6" height="2.5" rx="1" fill="#e8795f" transform="rotate(22 108 53)" />
+                          <rect x="128" y="18" width="7" height="2.5" rx="1" fill="#5aa9d6" transform="rotate(-18 131 19)" />
+                          <path d="M70 22l3 6 6 .8-4.5 4.3 1 6-5.5-3-5.5 3 1-6-4.5-4.3 6-.8z" fill="#f0c45b" opacity=".8" />
+                        </g>
+                      </svg>
+                    )}
                     <div className="bw-card-top">
                       <div className="bw-date">
                         <b>{date.split(" ")[0]}</b>
@@ -4844,6 +4874,26 @@ function Overview({
       }))
       .sort((a, b) => b.count - a.count);
   }, [records]);
+  const productGroups = useMemo(() => {
+    const groups: Record<
+      string,
+      { count: number; good: number; answered: number }
+    > = {};
+    productStats.forEach(product => {
+      const group = productGroupOf(product.name);
+      groups[group] ??= { count: 0, good: 0, answered: 0 };
+      groups[group].count += product.count;
+      groups[group].good += product.good;
+      groups[group].answered += product.answered;
+    });
+    return Object.entries(groups)
+      .map(([name, value]) => ({
+        name,
+        ...value,
+        score: value.answered ? value.good / value.answered : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [productStats]);
   const risks = profiles.filter(p => p.segment === "En riesgo");
   const risksWithContext = risks.filter(profile => profile.comment.trim());
   const starClients = useMemo(
@@ -5325,25 +5375,27 @@ function Overview({
       </button>
       {showDetails && (
         <div className="dashboard-details">
-          <div className="dashboard-grid">
+          <div className="dashboard-grid dashboard-details-single">
             <section className="panel">
               <div className="panel-head">
                 <div>
                   <p className="eyebrow">PRODUCTO Y EVALUACIÓN</p>
-                  <h3>Más consumidos y mejor valorados</h3>
+                  <h3>Grupos de productos</h3>
                 </div>
-                <Pill tone="green">Top categorías</Pill>
+                <Pill tone="green">Categorías</Pill>
               </div>
               <div className="product-list">
-                {productStats.slice(0, 5).map(p => (
+                {productGroups.map((p, index) => (
                   <div className="product-row" key={p.name}>
-                    <span className="product-rank">
-                      {productStats.indexOf(p) + 1}
-                    </span>
+                    <span className="product-rank">{index + 1}</span>
                     <span>
                       <b>{p.name}</b>
                       <small>
                         {p.count} encuesta(s) ·{" "}
+                        {records.length
+                          ? `${Math.round((p.count / records.length) * 100)}% del total`
+                          : "Sin total"}{" "}
+                        ·{" "}
                         <b className="product-quality-percent">
                           {p.answered
                             ? `${Math.round(p.score * 100)}% Bueno`
@@ -5358,77 +5410,11 @@ function Overview({
                   </div>
                 ))}
               </div>
-            </section>
-            <section className="panel">
-              <div className="panel-head">
-                <div>
-                  <p className="eyebrow">CLIENTES A RECUPERAR</p>
-                  <h3>Riesgo con contexto</h3>
-                </div>
-                <Pill tone="red">{plural(risksWithContext.length, "caso con contexto", "casos con contexto")}</Pill>
-              </div>
-              {risksWithContext.slice(0, 4).map(p => (
-                <button
-                  className="risk-row"
-                  key={p.key}
-                  onClick={() => onNavigate("clients", p.quality)}
-                >
-                  <Face tone="bad" size="sm" />
-                  <span>
-                    <b>{p.name}</b>
-                    <small>
-                      {p.phone || "Sin teléfono"} ·{" "}
-                      {clientSignal(p)}
-                    </small>
-                  </span>
-                  <ChevronRight size={14} />
-                </button>
-              ))}
-              {!risksWithContext.length && (
-                <Empty text="No hay clientes en riesgo con comentario para mostrar contexto." />
-              )}
-            </section>
-            <section className="panel star-customer-panel">
-              <div className="panel-head">
-                <div>
-                  <p className="eyebrow">CLIENTES ESTRELLA</p>
-                  <h3>Los que vuelven y valoran</h3>
-                </div>
-                <Pill tone="green">
-                  {
-                    profiles.filter(
-                      p => p.count >= 2 && clean(p.quality) === "bueno"
-                    ).length
-                  }{" "}
-                  destacados
-                </Pill>
-              </div>
-              {profiles
-                .filter(p => p.count >= 2 && clean(p.quality) === "bueno")
-                .slice(0, 4)
-                .map(p => (
-                  <button
-                    className="star-row featured-star-row"
-                    key={p.key}
-                    onClick={() => onOpenClient(p.key)}
-                    title="Abrir ficha del cliente"
-                  >
-                    <span className="star-badge">★</span>
-                    <span>
-                      <b>{p.name}</b>
-                      <small>
-                        {p.count} encuestas · {p.quality} ·{" "}
-                        {p.phone || "Sin teléfono"}
-                      </small>
-                    </span>
-                    <ChevronRight size={14} />
-                  </button>
-                ))}
-              {!profiles.some(
-                p => p.count >= 2 && clean(p.quality) === "bueno"
-              ) && (
-                <Empty text="Aún no hay clientes recurrentes con calidad Bueno." />
-              )}
+              <p className="micro-note">
+                El formulario todavía no separa cada variante; agrupamos por
+                categoría para no comparar nombres sueltos. “Otros” reúne lo que
+                aún no está clasificado.
+              </p>
             </section>
           </div>
           <div className="dashboard-grid overview-bottom-charts">
@@ -6358,6 +6344,30 @@ function Clients({
           <button className="back-priority-button" onClick={onBackToPriorities}>
             ← Volver a Prioridades
           </button>
+        </div>
+        <div className="client-sheet-info priority-detail-info">
+          <div>
+            <small>TELÉFONO</small>
+            <b>{focusedProfile.phone || "Sin teléfono"}</b>
+          </div>
+          <div>
+            <small>GRUPO</small>
+            <b className={focusedProfile.segment === "En riesgo" ? "segment-risk" : ""}>
+              {segmentLabelFor(focusedProfile.segment)}
+            </b>
+          </div>
+          <div>
+            <small>ENCUESTAS</small>
+            <b>{focusedProfile.count}</b>
+          </div>
+          <div>
+            <small>ÚLTIMA ACTUALIZACIÓN</small>
+            <b>
+              {focusedHistory[0]
+                ? formatDateTime(focusedHistory[0].timestamp)
+                : "Sin visitas"}
+            </b>
+          </div>
         </div>
         <section className="panel priority-detail-panel">
           <div className="panel-head">

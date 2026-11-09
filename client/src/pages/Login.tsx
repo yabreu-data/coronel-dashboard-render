@@ -44,6 +44,8 @@ export default function Login() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [recoveryCooldown, setRecoveryCooldown] = useState(0);
   const [requestName, setRequestName] = useState("");
   const [requestEmail, setRequestEmail] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
@@ -56,6 +58,15 @@ export default function Login() {
   useEffect(() => {
     if (!loading && user) window.location.replace("/");
   }, [loading, user]);
+
+  useEffect(() => {
+    if (!recoveryCooldown) return;
+    const timer = window.setInterval(
+      () => setRecoveryCooldown(value => Math.max(0, value - 1)),
+      1000
+    );
+    return () => window.clearInterval(timer);
+  }, [recoveryCooldown > 0]);
 
   const changeMode = (next: Mode) => {
     setMode(next);
