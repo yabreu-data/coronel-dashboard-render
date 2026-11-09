@@ -743,3 +743,26 @@ body * { font-variant-numeric: tabular-nums; }
   .funnel-value { font-size: 18px; }
   .center-phrase-list { justify-content: flex-start; min-height: 0; }
 }
+
+/* El contenedor del funnel debe tener UNA columna, no cuatro */
+.birthday-funnel-compact {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-auto-flow: row !important;
+}
+.funnel-head, .funnel-row { width: 100% !important; }
+.funnel-row { display: grid !important; }
+
+/* Alertas de días más resaltantes */
+.bw-days.is-soon {
+  border-color: #f0bfa2 !important;
+  background: #fff0e7 !important;
+  color: #a83f17 !important;
+}
+.bw-days.is-today {
+  box-shadow: 0 5px 12px -5px rgba(224,47,27,.45) !important;
+}
+.stat-card { cursor: pointer; }
+
+@media (max-width: 760px) {
+  .birthday-funnel-compact { grid-template-columns: minmax(0, 1fr) !important; }
+}
