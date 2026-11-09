@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useDialogFocus } from "@/hooks/useDialogFocus";
 import {
   AlertTriangle,
+  ArrowUp,
   ArrowUpRight,
   Cake,
   CheckCircle2,
@@ -31,6 +32,7 @@ import {
   MessageSquareText,
   Phone,
   RefreshCw,
+  Rows3,
   Search,
   Sparkles,
   UserRoundCheck,
@@ -830,10 +832,16 @@ export default function Home() {
   const [searchScope, setSearchScope] = useState<SearchScope>("all");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [compactMode, setCompactMode] = useState(
+    () => localStorage.getItem("coronel.compact") === "1"
+  );
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(
     {}
   );
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  useEffect(() => {
+    localStorage.setItem("coronel.compact", compactMode ? "1" : "0");
+  }, [compactMode]);
   const [contactEditOpen, setContactEditOpen] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
@@ -1632,6 +1640,23 @@ export default function Home() {
           </span>
         </footer>
       </main>
+      <div className="floating-tools" aria-label="Controles de vista">
+        <button
+          className={compactMode ? "active" : ""}
+          onClick={() => setCompactMode(value => !value)}
+          title={compactMode ? "Vista normal" : "Compactar vista"}
+          aria-label={compactMode ? "Vista normal" : "Compactar vista"}
+        >
+          <Rows3 size={17} />
+        </button>
+        <button
+          onClick={() => scrollAppToTop("smooth")}
+          title="Volver arriba"
+          aria-label="Volver arriba"
+        >
+          <ArrowUp size={18} />
+        </button>
+      </div>
       <nav className="mobile-bottom-nav" aria-label="Navegación principal">
         {[
           { id: "overview" as Page, label: "Inicio", icon: LayoutDashboard },
