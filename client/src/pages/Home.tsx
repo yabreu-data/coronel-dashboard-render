@@ -1081,14 +1081,14 @@ export default function Home() {
     <AdminPinProvider>
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand">
+        <div className="sidebar-logo-box">
           <img
-            className="brand-logo"
+            className="sidebar-logo"
             src="/manus-storage/logo-blanco.png"
             alt="Coronel · Pollos y Parrillas"
           />
-          <span className="brand-tagline">Sistema de gestión</span>
         </div>
+        <span className="brand-tagline">Sistema de gestión</span>
         <div className="side-label">REPORTE</div>
         <nav className="grouped-sidebar-nav">
           {navGroups.map(group => {
@@ -1150,11 +1150,6 @@ export default function Home() {
       </aside>
       <main className="main-area">
         <header className="topbar">
-          <img
-            className="topbar-logo"
-            src="/manus-storage/logo-blanco.png"
-            alt="Coronel · Pollos y Parrillas"
-          />
           <div className="topbar-copy">
             <p className="breadcrumb">
               RESTAURANTE CORONEL
@@ -9680,6 +9675,46 @@ function Team({
           </button>
         </div>
       </div>
+      <section className="panel team-date-filter">
+        <div className="panel-head">
+          <div>
+            <p className="eyebrow">PERÍODO</p>
+            <h3>Elegir fechas</h3>
+            <small className="muted">
+              Período aplicado: {periodLabel} · {periodRecords.length}{" "}
+              encuesta(s)
+            </small>
+          </div>
+          <div className="period-shortcuts">
+            <button onClick={() => setQuickPeriod("7d")}>Últimos 7 días</button>
+            <button onClick={() => setQuickPeriod("month")}>Este mes</button>
+            <button onClick={() => setQuickPeriod("clear")}>Todo</button>
+          </div>
+        </div>
+        <div className="date-filter-controls">
+          <label>
+            Desde
+            <input
+              type="date"
+              value={fromDate}
+              onChange={e => setFromDate(e.target.value)}
+            />
+          </label>
+          <label>
+            Hasta
+            <input
+              type="date"
+              value={toDate}
+              onChange={e => setToDate(e.target.value)}
+            />
+          </label>
+          {fromDate && toDate && fromDate > toDate && (
+            <span className="form-error">
+              La fecha inicial debe ser anterior a la final.
+            </span>
+          )}
+        </div>
+      </section>
       <section className="insights-section">
         <div className="insights-head">
           <div>
@@ -9753,131 +9788,11 @@ function Team({
           />
         </div>
       </section>
-      <section className="panel team-date-filter">
-        <div className="panel-head">
-          <div>
-            <p className="eyebrow">PERÍODO</p>
-            <h3>Elegir fechas</h3>
-            <small className="muted">
-              Período aplicado: {periodLabel} · {periodRecords.length}{" "}
-              encuesta(s)
-            </small>
-          </div>
-          <div className="period-shortcuts">
-            <button onClick={() => setQuickPeriod("7d")}>Últimos 7 días</button>
-            <button onClick={() => setQuickPeriod("month")}>Este mes</button>
-            <button onClick={() => setQuickPeriod("clear")}>Todo</button>
-          </div>
-        </div>
-        <div className="date-filter-controls">
-          <label>
-            Desde
-            <input
-              type="date"
-              value={fromDate}
-              onChange={e => setFromDate(e.target.value)}
-            />
-          </label>
-          <label>
-            Hasta
-            <input
-              type="date"
-              value={toDate}
-              onChange={e => setToDate(e.target.value)}
-            />
-          </label>
-          {fromDate && toDate && fromDate > toDate && (
-            <span className="form-error">
-              La fecha inicial debe ser anterior a la final.
-            </span>
-          )}
-        </div>
-      </section>
-      <PeriodComparison records={records} fromDate={fromDate} toDate={toDate} />
-      <section
-        id="team-targets"
-        className={`panel targets-panel ${targetsOpen ? "is-open" : "is-collapsed"}`}
-      >
-        <button
-          className="targets-toggle"
-          onClick={() => setTargetsOpen(value => !value)}
-          aria-expanded={targetsOpen}
-        >
-          <span>
-            <p className="eyebrow">METAS</p>
-            <h3>Metas del equipo</h3>
-            <small>
-              Editar metas compartidas y registrar el cambio en el historial.
-            </small>
-          </span>
-          <span className="targets-toggle-action">
-            {targetsOpen ? "Ocultar edición" : "Editar metas"}{" "}
-            <ChevronDown size={18} className={targetsOpen ? "rotate" : ""} />
-          </span>
-        </button>
-        {targetsOpen && (
-          <div className="targets-editor">
-            <div className="targets-editor-note">
-              Se guardan en la base de datos y se comparten entre dispositivos.
-              Cada guardado crea una fila en Historial de metas.
-            </div>
-            <div className="target-save-status">
-              {saved
-                ? `✓ Guardadas: ${surveyGoal} encuestas · ${qualityGoal}% calidad`
-                : saveTargetsMutation.isPending
-                  ? "Guardando…"
-                  : ""}
-              <Button
-                disabled={saveTargetsMutation.isPending}
-                onClick={saveTargets}
-              >
-                {saveTargetsMutation.isPending ? "Guardando…" : "Guardar metas"}
-              </Button>
-            </div>
-            <div className="target-controls">
-              <label>
-                Encuestas por mesero
-                <input
-                  type="number"
-                  min="1"
-                  value={targetSurveys}
-                  onChange={e => setTargetSurveys(e.target.value)}
-                />
-              </label>
-              <label>
-                Encuestas delivery / web
-                <input
-                  type="number"
-                  min="1"
-                  value={targetDelivery}
-                  onChange={e => setTargetDelivery(e.target.value)}
-                />
-              </label>
-              <label>
-                Calidad positiva mínima (%)
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={targetQuality}
-                  onChange={e => setTargetQuality(e.target.value)}
-                />
-              </label>
-              <span className="muted target-summary">
-                Meta actual: <b>{surveyGoal} encuestas por mesero</b>,{" "}
-                <b>{deliveryGoal} delivery/web</b> y{" "}
-                <b>{qualityGoal}% de calidad positiva</b>.
-              </span>
-            </div>
-            {saveTargetsMutation.error && (
-              <p className="form-error">
-                No se pudieron guardar las metas:{" "}
-                {saveTargetsMutation.error.message}
-              </p>
-            )}
-          </div>
-        )}
-      </section>
+
+      {fromDate && toDate ? (
+        <PeriodComparison records={records} fromDate={fromDate} toDate={toDate} />
+      ) : null}
+
       <div className="stats-grid">
         <Stat
           label="ENCUESTAS DE SALÓN"
@@ -9935,7 +9850,7 @@ function Team({
           <div className="panel-head">
             <div>
               <p className="eyebrow">META DELIVERY / WEB</p>
-              <h3>Ventas web y delivery</h3>
+              <h3>Encuestas de delivery / web</h3>
             </div>
             <Pill
               tone={
@@ -10078,6 +9993,90 @@ function Team({
           )}
         </section>
       </div>
+      <section
+        id="team-targets"
+        className={`panel targets-panel ${targetsOpen ? "is-open" : "is-collapsed"}`}
+      >
+        <button
+          className="targets-toggle"
+          onClick={() => setTargetsOpen(value => !value)}
+          aria-expanded={targetsOpen}
+        >
+          <span>
+            <p className="eyebrow">METAS</p>
+            <h3>Metas del equipo</h3>
+            <small>
+              Editar metas compartidas y registrar el cambio en el historial.
+            </small>
+          </span>
+          <span className="targets-toggle-action">
+            {targetsOpen ? "Ocultar edición" : "Editar metas"}{" "}
+            <ChevronDown size={18} className={targetsOpen ? "rotate" : ""} />
+          </span>
+        </button>
+        {targetsOpen && (
+          <div className="targets-editor">
+            <div className="targets-editor-note">
+              Se guardan en la base de datos y se comparten entre dispositivos.
+              Cada guardado crea una fila en Historial de metas.
+            </div>
+            <div className="target-save-status">
+              {saved
+                ? `✓ Guardadas: ${surveyGoal} encuestas · ${qualityGoal}% calidad`
+                : saveTargetsMutation.isPending
+                  ? "Guardando…"
+                  : ""}
+              <Button
+                disabled={saveTargetsMutation.isPending}
+                onClick={saveTargets}
+              >
+                {saveTargetsMutation.isPending ? "Guardando…" : "Guardar metas"}
+              </Button>
+            </div>
+            <div className="target-controls">
+              <label>
+                Encuestas por mesero
+                <input
+                  type="number"
+                  min="1"
+                  value={targetSurveys}
+                  onChange={e => setTargetSurveys(e.target.value)}
+                />
+              </label>
+              <label>
+                Encuestas delivery / web
+                <input
+                  type="number"
+                  min="1"
+                  value={targetDelivery}
+                  onChange={e => setTargetDelivery(e.target.value)}
+                />
+              </label>
+              <label>
+                Calidad positiva mínima (%)
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={targetQuality}
+                  onChange={e => setTargetQuality(e.target.value)}
+                />
+              </label>
+              <span className="muted target-summary">
+                Meta actual: <b>{surveyGoal} encuestas por mesero</b>,{" "}
+                <b>{deliveryGoal} delivery/web</b> y{" "}
+                <b>{qualityGoal}% de calidad positiva</b>.
+              </span>
+            </div>
+            {saveTargetsMutation.error && (
+              <p className="form-error">
+                No se pudieron guardar las metas:{" "}
+                {saveTargetsMutation.error.message}
+              </p>
+            )}
+          </div>
+        )}
+      </section>
     </>
   );
 }
