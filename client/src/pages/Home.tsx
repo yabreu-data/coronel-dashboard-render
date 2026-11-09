@@ -1150,7 +1150,12 @@ export default function Home() {
       </aside>
       <main className="main-area">
         <header className="topbar">
-          <div>
+          <img
+            className="topbar-logo"
+            src="/manus-storage/logo-blanco.png"
+            alt="Coronel · Pollos y Parrillas"
+          />
+          <div className="topbar-copy">
             <p className="breadcrumb">
               RESTAURANTE CORONEL
             </p>
