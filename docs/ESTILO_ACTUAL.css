@@ -1522,3 +1522,89 @@ body * { font-variant-numeric: tabular-nums; }
 .voice-sheet-comment p { margin: 0 0 5px; color: #0c100d !important; font-size: 12px; line-height: 1.45; }
 .voice-sheet-comment > small { color: #7c8b82 !important; font-size: 10px; }
 .voice-sheet-comment .voice-count { display: inline-grid; place-items: center; min-width: 25px; min-height: 23px; border-radius: 999px; background: #eaf8f1; color: #176b45; font-size: 10px; font-weight: 800; }
+
+/* Todas las fichas de llamada como panel lateral */
+.quick-call-backdrop {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding: 14px !important;
+  background: rgba(24,32,26,.38) !important;
+  backdrop-filter: blur(5px);
+}
+.quick-call-modal {
+  width: min(460px, 100%) !important;
+  height: 100% !important;
+  max-height: none !important;
+  padding: 22px !important;
+  overflow-y: auto !important;
+  border: 1px solid #e0ebe5 !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  box-shadow: 0 24px 70px rgba(20,32,25,.24) !important;
+}
+.quick-call-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.quick-call-head h3 { margin: 4px 0 5px; color: #145c36 !important; font-size: 26px !important; }
+.quick-call-head p { color: #55665c !important; font-size: 12px; }
+.quick-call-search { display: flex; align-items: center; gap: 7px; margin: 14px 0 10px; padding: 0 11px; min-height: 40px; border: 1px solid #dcebe2; border-radius: 12px; background: #f8faf9; color: #55665c; }
+.quick-call-search input { flex: 1; border: 0; outline: 0; background: transparent; color: #0c100d; font-size: 13px; }
+.quick-call-results { display: flex; flex-direction: column; gap: 6px; }
+.quick-call-result { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px; border: 1px solid #e7efea; border-radius: 13px; background: #fff; text-align: left; }
+.quick-call-result:hover { background: #f2faf5; border-color: #bfe1cd; }
+.quick-call-result > span:nth-child(2) { flex: 1; min-width: 0; }
+.quick-call-result b { display: block; color: #0c100d; font-size: 12.5px; }
+.quick-call-result small { display: block; margin-top: 2px; color: #66756b; font-size: 10.5px; }
+.quick-call-pick { padding: 4px 8px; border-radius: 999px; background: #eaf8f1; color: #176b45; font-size: 10px; font-weight: 800; }
+
+.call-modal-backdrop {
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding: 14px !important;
+}
+.call-modal {
+  width: min(540px, 100%) !important;
+  height: 100% !important;
+  max-height: none !important;
+  padding: 22px !important;
+  overflow-y: auto !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  color: #0c100d !important;
+  border: 1px solid #e0ebe5 !important;
+  box-shadow: 0 24px 70px rgba(20,32,25,.24) !important;
+}
+.call-modal .modal-head h3 { color: #145c36 !important; font-size: 27px !important; }
+.call-modal label, .call-modal .muted, .call-modal .eyebrow { color: #55665c !important; }
+.call-modal input, .call-modal select, .call-modal textarea { background: #fff !important; color: #0c100d !important; border-color: #dcebe2 !important; border-radius: 11px !important; }
+.call-modal .call-history-in-modal { background: #f8faf9; border-color: #e7efea; border-radius: 13px; }
+
+/* Fichas genéricas de cumpleaños/plantillas: panel lateral */
+.bw-modal-backdrop {
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding: 14px !important;
+}
+.bw-modal {
+  width: min(540px, 100%) !important;
+  height: 100% !important;
+  max-height: none !important;
+  padding: 22px !important;
+  overflow-y: auto !important;
+  border-radius: 20px !important;
+}
+.bw-modal-wide { width: min(620px, 100%) !important; }
+
+/* CRM: historial de llamadas dentro de la ficha del cliente */
+.client-sheet-history .client-sheet-visit { border-top-color: #e7efea; }
+.client-sheet-history .visit-quality { flex: 0 0 auto; }
+
+@media (max-width: 760px) {
+  .quick-call-backdrop, .call-modal-backdrop, .bw-modal-backdrop { padding: 8px !important; }
+  .quick-call-modal, .call-modal, .bw-modal, .bw-modal-wide {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 20px !important;
+  }
+  .quick-call-head h3, .call-modal .modal-head h3 { font-size: 23px !important; }
+}

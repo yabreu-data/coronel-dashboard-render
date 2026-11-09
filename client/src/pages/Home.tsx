@@ -1760,7 +1760,7 @@ export default function Home() {
           >
             <div className="client-sheet-head">
               <div>
-                <p className="eyebrow">FICHA DEL CLIENTE</p>
+                <p className="eyebrow">FICHA 360 · CRM DEL CLIENTE</p>
                 <h3>{detailProfile.name}</h3>
               </div>
               <button
@@ -1791,6 +1791,18 @@ export default function Home() {
               <div>
                 <small>VISITAS</small>
                 <b>{detailProfile.count}</b>
+              </div>
+              <div>
+                <small>CUMPLEAÑOS</small>
+                <b>{detailProfile.birthday || "Sin fecha"}</b>
+              </div>
+              <div>
+                <small>PROMOCIÓN</small>
+                <b>{detailLogs[0]?.promotion || detailCampaign?.promotion || "Sin promoción"}</b>
+              </div>
+              <div>
+                <small>ÚLTIMA LLAMADA</small>
+                <b>{detailLogs[0] ? formatDate(detailLogs[0].callDate) : "Sin llamadas"}</b>
               </div>
               <div>
                 <small>ÚLTIMA ACTUALIZACIÓN</small>
@@ -1929,6 +1941,28 @@ export default function Home() {
                 <Empty text="Todavía no hay visitas registradas para este cliente." />
               )}
             </div>
+            {detailLogs.length > 0 && (
+              <div className="client-sheet-history">
+                <div className="client-sheet-section-head">
+                  <span className="eyebrow">LLAMADAS Y PROMOCIONES</span>
+                  <Pill tone="neutral">{detailLogs.length}</Pill>
+                </div>
+                {detailLogs.slice(0, 5).map(log => (
+                  <div className="client-sheet-visit" key={log.id}>
+                    <span className="visit-quality">
+                      {formatDate(log.callDate)}
+                    </span>
+                    <span>
+                      <b>{log.outcome}</b>
+                      <small>
+                        {log.promotion || "Sin promoción"} ·{" "}
+                        {log.recoveryResult || log.notes || "Sin detalle"}
+                      </small>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="client-sheet-footer">
               <small>La ficha se cierra sin salir de esta pantalla.</small>
               <button
@@ -7152,7 +7186,7 @@ function CallLogForm({
     );
   return (
     <div
-      className="modal-backdrop"
+      className="modal-backdrop call-modal-backdrop"
       onClick={event => {
         event.stopPropagation();
         if (event.target === event.currentTarget) onClose();
