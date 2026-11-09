@@ -4376,3 +4376,26 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand-green-dark
   .panel, .dashboard-card { padding: 17px !important; }
   .page-intro h2 { font-size: 31px !important; }
 }
+
+/* Patrón textil sutil: no debe competir con las tarjetas */
+body {
+  background-image:
+    linear-gradient(rgba(243,246,244,.97), rgba(243,246,244,.97)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 220px !important;
+}
+.panel, .stat-card, .dashboard-card, .page-intro, .admin-page-intro,
+.command-copy, .clients-command-copy, .priorities-command-copy, .insights-section,
+.filter-bar, .business-guide, .clients-row, .today-task, .priority-queue-item,
+.insight-card, .calls-agenda-panel, .access-summary, .access-user-card,
+.avatar-picker-panel, .profile-security, .admin-add-panel, .admin-table-panel, .audit-panel {
+  background: rgba(255,255,255,.93) !important;
+  backdrop-filter: blur(14px);
+}
+.insight-card, .stat-card { background: rgba(255,255,255,.96) !important; }
+.insights-section { background: rgba(158,212,174,.10) !important; }
+@media (max-width: 760px) {
+  .sidebar-logo-box { width: 150px !important; min-height: 62px !important; padding: 9px 12px !important; margin: 0 auto !important; }
+  .sidebar-logo { max-width: 118px !important; }
+  .brand-tagline { margin-top: 0 !important; }
+}
