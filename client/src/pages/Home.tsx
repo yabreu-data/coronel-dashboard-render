@@ -1162,9 +1162,8 @@ export default function Home() {
             <h1>{title}</h1>
             <p className="muted topbar-data-line">
               {sourceTab === "limpia" ? "Datos reales" : "Datos de prueba"} ·{" "}
-              <b>{records.length} encuestas cargadas</b> desde{" "}
-              <b>{sourceTab === "limpia" ? "Encuestas_Limpias" : "Encuestas"}</b>{" "}
-              · actualización cada 5 minutos
+              <b>{records.length} encuestas</b> ·{" "}
+              <b>{sourceTab === "limpia" ? "Encuestas_Limpias" : "Encuestas"}</b>
             </p>
           </div>
           <div className="top-actions">
