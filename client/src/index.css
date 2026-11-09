@@ -4399,3 +4399,8 @@ body {
   .sidebar-logo { max-width: 118px !important; }
   .brand-tagline { margin-top: 0 !important; }
 }
+
+.team-section-heading { margin: 22px 2px 10px; }
+.team-section-heading .eyebrow { margin-bottom: 3px; }
+.team-section-heading h2 { margin: 0; font-size: 27px !important; }
+@media (max-width: 760px) { .team-section-heading { margin-top: 17px; } .team-section-heading h2 { font-size: 23px !important; } }

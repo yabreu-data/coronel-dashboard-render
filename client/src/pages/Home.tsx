@@ -9842,6 +9842,10 @@ function Team({
           }
         />
       </div>
+      <div className="team-section-heading">
+        <p className="eyebrow">PERSONAS</p>
+        <h2>Volumen y calidad por persona</h2>
+      </div>
       <div className="dashboard-grid team-grid">
         <section
           id="delivery-scorecard"
@@ -9992,6 +9996,10 @@ function Team({
             <Empty text="No hay datos de meseros para comparar." />
           )}
         </section>
+      </div>
+      <div className="team-section-heading">
+        <p className="eyebrow">METAS</p>
+        <h2>Objetivos del equipo</h2>
       </div>
       <section
         id="team-targets"
