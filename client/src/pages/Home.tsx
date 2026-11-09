@@ -1179,6 +1179,9 @@ export default function Home() {
             <span>Datos al día</span>
           </div>
         </div>
+        <div className="sidebar-signature">
+          Hecho con amor por Yennifer Abreu <span aria-hidden="true">❤️</span>
+        </div>
       </aside>
       <main className="main-area">
         <header className="topbar">
@@ -4669,14 +4672,16 @@ function Overview({
           <h2 className="command-greeting">
             Hola, {firstName} <span aria-hidden="true">👋</span>
           </h2>
-          <p className="command-lead">
-            Qué bueno verte. Empecemos por lo que no puede esperar.
-          </p>
-          <p className="command-summary">
-            {overdueCount
-              ? `Tienes ${plural(overdueCount, "prioridad vencida", "prioridades vencidas")} y ${plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")} por atender.`
-              : `No hay prioridades vencidas. Tienes ${plural(birthdays.length, "cumpleaños próximo", "cumpleaños próximos")} y ${plural(missingQuality, "respuesta sin calificar", "respuestas sin calificar")}.`}
-          </p>
+          <div className="command-pills">
+            <span>
+              <b>{overdueCount}</b>{" "}
+              {plural(overdueCount, "prioridad vencida", "prioridades vencidas")}
+            </span>
+            <span>
+              <b>{missingQuality}</b>{" "}
+              {plural(missingQuality, "respuesta sin calificar", "respuestas sin calificar")}
+            </span>
+          </div>
           {todayBirthdayCount > 0 ? (
             <div className="today-birthday-banner">
               <span className="today-birthday-emoji" aria-hidden="true">🎂</span>
