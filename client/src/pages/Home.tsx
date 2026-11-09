@@ -4675,11 +4675,11 @@ function Overview({
           <div className="command-pills">
             <span>
               <b>{overdueCount}</b>{" "}
-              {plural(overdueCount, "prioridad vencida", "prioridades vencidas")}
+              {overdueCount === 1 ? "prioridad vencida" : "prioridades vencidas"}
             </span>
             <span>
               <b>{missingQuality}</b>{" "}
-              {plural(missingQuality, "respuesta sin calificar", "respuestas sin calificar")}
+              {missingQuality === 1 ? "respuesta sin calificar" : "respuestas sin calificar"}
             </span>
           </div>
           {todayBirthdayCount > 0 ? (
