@@ -4089,61 +4089,69 @@ function BirthdayWorkspace({
       )}
 
       {historyRow && (
-        <div className="bw-modal-backdrop" onClick={() => setHistoryKey(null)}>
-          <div className="bw-modal bw-modal-wide" role="dialog" aria-modal="true" aria-label="Detalle de cumpleaños" onClick={event => event.stopPropagation()}>
-            <div className="bw-modal-head">
-              <h3>
-                Ficha de {historyRow.item.record.clientName || "cliente"}
-              </h3>
-              <div className="bw-modal-head-actions">
-                <button
-                  className="bw-modal-edit"
-                  onClick={() => setHistoryEditOpen(value => !value)}
-                >
-                  Editar datos
-                </button>
-                <button onClick={() => setHistoryKey(null)} aria-label="Cerrar ficha">×</button>
+        <div className="client-sheet-backdrop" onClick={() => setHistoryKey(null)}>
+          <aside
+            className="client-sheet birthday-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Ficha de cumpleaños de ${historyRow.item.record.clientName || "cliente"}`}
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="client-sheet-head">
+              <div>
+                <p className="eyebrow">FICHA DEL CUMPLEAÑOS</p>
+                <h3>{historyRow.item.record.clientName || "Cliente"}</h3>
               </div>
+              <button
+                className="icon-button"
+                onClick={() => setHistoryKey(null)}
+                aria-label="Cerrar ficha"
+              >
+                <X size={17} />
+              </button>
             </div>
-            <div className="bw-history-grid">
+
+            <div className="client-sheet-info birthday-sheet-info">
               <div>
-                <small>Teléfono</small>
-                <b>{historyRow.campaign?.phone || historyRow.item.record.phone || "—"}</b>
+                <small>TELÉFONO</small>
+                <b>{historyRow.campaign?.phone || historyRow.item.record.phone || "Sin teléfono"}</b>
               </div>
               <div>
-                <small>Cumpleaños</small>
-                <b>{historyRow.item.record.birthday || "—"}</b>
+                <small>CUMPLEAÑOS</small>
+                <b>{historyRow.item.record.birthday || "Sin fecha"}</b>
               </div>
               <div>
-                <small>Segmento</small>
-                <b>{historyRow.item.profile?.segment || "—"}</b>
-              </div>
-              <div>
-                <small>Plato favorito</small>
-                <b>{historyRow.item.profile?.dish || "—"}</b>
-              </div>
-              <div>
-                <small>Promoción</small>
-                <b>{promoteFor(historyRow)}</b>
-              </div>
-              <div>
-                <small>Responsable</small>
-                <b>{historyRow.campaign?.responsible || "Cajera"}</b>
-              </div>
-              <div>
-                <small>Próxima acción</small>
-                <b>{toDateInputValue(historyRow.campaign?.nextActionAt) || "Sin fecha"}</b>
-              </div>
-              <div>
-                <small>Familiares</small>
-                <b>
-                  {historyRow.campaign?.familyName
-                    ? `${historyRow.campaign.familyName}${historyRow.campaign.familyBirthday ? ` · ${historyRow.campaign.familyBirthday}` : ""}`
-                    : "—"}
+                <small>SEGMENTO</small>
+                <b className={historyRow.item.profile?.segment === "En riesgo" ? "segment-risk" : ""}>
+                  {historyRow.item.profile?.segment || "Sin grupo"}
                 </b>
               </div>
               <div>
-                <small>Última actualización</small>
+                <small>PLATO FAVORITO</small>
+                <b>{historyRow.item.profile?.dish || "Sin dato"}</b>
+              </div>
+              <div>
+                <small>PROMOCIÓN</small>
+                <b>{promoteFor(historyRow)}</b>
+              </div>
+              <div>
+                <small>RESPONSABLE</small>
+                <b>{historyRow.campaign?.responsible || "Cajera"}</b>
+              </div>
+              <div>
+                <small>PRÓXIMA ACCIÓN</small>
+                <b>{toDateInputValue(historyRow.campaign?.nextActionAt) || "Sin fecha"}</b>
+              </div>
+              <div>
+                <small>FAMILIARES</small>
+                <b>
+                  {historyRow.campaign?.familyName
+                    ? `${historyRow.campaign.familyName}${historyRow.campaign.familyBirthday ? ` · ${historyRow.campaign.familyBirthday}` : ""}`
+                    : "Sin dato"}
+                </b>
+              </div>
+              <div>
+                <small>ÚLTIMA ACTUALIZACIÓN</small>
                 <b>
                   {historyRow.campaign?.updatedAt
                     ? formatDateTime(historyRow.campaign.updatedAt)
@@ -4151,6 +4159,16 @@ function BirthdayWorkspace({
                 </b>
               </div>
             </div>
+
+            <div className="client-sheet-head-actions">
+              <button
+                className="btn-borde client-edit-trigger"
+                onClick={() => setHistoryEditOpen(value => !value)}
+              >
+                <Settings2 size={14} /> Editar datos
+              </button>
+            </div>
+
             {historyEditOpen && (
               <form
                 className="client-edit-form"
@@ -4160,8 +4178,7 @@ function BirthdayWorkspace({
                   const campaign = historyRow.campaign;
                   saveCampaign.mutate({
                     clientKey: historyRow.key,
-                    clientName:
-                      historyRow.item.record.clientName || "Cliente",
+                    clientName: historyRow.item.record.clientName || "Cliente",
                     phone: historyPhone,
                     stage: campaign?.stage ?? "week",
                     channel: campaign?.channel ?? "whatsapp",
@@ -4203,37 +4220,64 @@ function BirthdayWorkspace({
                 </div>
               </form>
             )}
-            <div className="bw-history-columns">
-              <div>
-                <b>Visitas y encuestas ({historyRecords.length})</b>
-                <ul>
-                  {historyRecords.slice(-8).reverse().map(record => (
-                    <li key={`${record.id}-${record.timestamp}`}>
-                      <span>{record.timestamp}</span>
-                      <span>{record.quality || "Sin calidad"}</span>
-                      <em>{record.comment || record.dish || "No dejó comentario"}</em>
-                    </li>
-                  ))}
-                  {!historyRecords.length && <li>Sin visitas registradas.</li>}
-                </ul>
-              </div>
-              <div id="bw-history-contacts">
-                <b>Contactos ({historyLogs.length})</b>
-                <ul>
-                  {historyLogs.slice(-8).reverse().map(log => (
-                    <li key={log.id}>
-                      <span>
-                        {new Date(log.callDate).toLocaleDateString("es-PE")}
-                      </span>
-                      <span>{log.outcome}</span>
-                      <em>{log.recoveryResult || log.notes || ""}</em>
-                    </li>
-                  ))}
-                  {!historyLogs.length && <li>Sin contactos registrados.</li>}
-                </ul>
-              </div>
+
+            <div className="client-sheet-signal">
+              <span className="eyebrow">CÓMO LLEGÓ</span>
+              <p>{clientSignal({ quality: historyRow.item.record.quality, comment: historyRow.item.record.comment })}</p>
             </div>
-          </div>
+
+            <div className="client-sheet-history">
+              <div className="client-sheet-section-head">
+                <span className="eyebrow">ÚLTIMAS VISITAS</span>
+                <Pill tone="neutral">{historyRecords.length}</Pill>
+              </div>
+              {historyRecords.length ? (
+                historyRecords.slice(0, 6).map(record => (
+                  <div className="client-sheet-visit" key={`${record.id}-${record.timestamp}`}>
+                    <span className={`visit-quality ${clean(record.quality)}`}>
+                      {record.quality || "Sin calificar"}
+                    </span>
+                    <span>
+                      <b>{record.dish || "Sin plato registrado"}</b>
+                      <small>{formatDate(record.timestamp)} · {record.registeredBy || "Sin mesero"}</small>
+                      {record.comment && <em>{record.comment}</em>}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <Empty text="Sin visitas registradas." />
+              )}
+            </div>
+
+            <div className="client-sheet-history" id="bw-history-contacts">
+              <div className="client-sheet-section-head">
+                <span className="eyebrow">CONTACTOS</span>
+                <Pill tone="neutral">{historyLogs.length}</Pill>
+              </div>
+              {historyLogs.length ? (
+                historyLogs.slice(0, 6).map(log => (
+                  <div className="client-sheet-visit" key={log.id}>
+                    <span className="visit-quality">
+                      {new Date(log.callDate).toLocaleDateString("es-PE")}
+                    </span>
+                    <span>
+                      <b>{log.outcome}</b>
+                      <small>{log.recoveryResult || log.notes || "Sin detalle"}</small>
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <Empty text="Sin contactos registrados." />
+              )}
+            </div>
+
+            <div className="client-sheet-footer">
+              <small>La ficha se cierra sin salir de esta pantalla.</small>
+              <button className="btn-borde" onClick={() => setHistoryKey(null)}>
+                Cerrar
+              </button>
+            </div>
+          </aside>
         </div>
       )}
 

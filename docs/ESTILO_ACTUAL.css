@@ -1460,3 +1460,19 @@ body * { font-variant-numeric: tabular-nums; }
   color: #fff !important;
   border-color: #e8795f !important;
 }
+
+/* La ficha de cumpleaños es un panel lateral, igual que la del cliente */
+.client-sheet.birthday-sheet { width: min(500px, 100%) !important; }
+.birthday-sheet .client-sheet-info { grid-template-columns: 1fr 1fr !important; }
+.birthday-sheet .client-sheet-info b { font-size: 12px !important; }
+.birthday-sheet .client-sheet-head h3 { font-size: 27px !important; }
+.birthday-sheet .client-sheet-head-actions { margin-top: 2px; }
+@media (max-width: 760px) {
+  .client-sheet.birthday-sheet {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    padding: 18px 14px 28px !important;
+  }
+}
