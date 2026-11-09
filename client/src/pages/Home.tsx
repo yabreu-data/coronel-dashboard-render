@@ -11,6 +11,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { useDialogFocus } from "@/hooks/useDialogFocus";
 import {
@@ -4088,7 +4089,8 @@ function BirthdayWorkspace({
         </div>
       )}
 
-      {historyRow && (
+      {historyRow &&
+        createPortal(
         <div className="client-sheet-backdrop" onClick={() => setHistoryKey(null)}>
           <aside
             className="client-sheet birthday-sheet"
@@ -4278,7 +4280,8 @@ function BirthdayWorkspace({
               </button>
             </div>
           </aside>
-        </div>
+        </div>,
+        document.body
       )}
 
       {templatesOpen && (
