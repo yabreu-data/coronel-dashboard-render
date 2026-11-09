@@ -5602,3 +5602,37 @@ body * { font-variant-numeric: tabular-nums; }
 }
 .bw-modal-head-actions button:hover { background: #eef8f2 !important; color: #176b45 !important; }
 .bw-modal-head > button[aria-label="Cerrar ficha"] { width: 30px; padding: 0; font-size: 18px !important; }
+
+/* Tarjeta festiva de cumpleaños próximo en Centro de mando */
+.insight-card.birthday-insight-card {
+  position: relative;
+  overflow: hidden;
+  border-color: #efc46b !important;
+  border-top: 3px solid #d89a2b !important;
+  background: linear-gradient(135deg, #fff8e8 0%, #ffe8d4 100%) !important;
+  box-shadow: 0 14px 28px -18px rgba(180,95,25,.40) !important;
+}
+.insight-card.birthday-insight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='110' viewBox='0 0 170 110'%3E%3Cg fill='none' stroke='%23d89a2b' stroke-width='1.1' opacity='.6'%3E%3Cpath d='M22 74c-8-10 0-21 8-21s16 11 8 21z' fill='%23f2b544' fill-opacity='.26'/%3E%3Cpath d='M30 74v17'/%3E%3Cpath d='M54 64c-6-8 0-17 6-17s12 9 6 17z' fill='%23e8795f' fill-opacity='.24'/%3E%3Cpath d='M60 64v26'/%3E%3Ccircle cx='128' cy='24' r='4' fill='%2377c996' fill-opacity='.35'/%3E%3Ccircle cx='148' cy='40' r='3' fill='%23f2b544' fill-opacity='.42'/%3E%3Cpath d='M94 16l2.5 5 5.5.8-4 3.7.9 5.5-4.9-2.7-4.9 2.7.9-5.5-4-3.7 5.5-.8z' fill='%23f0c45b' fill-opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 170px 110px;
+}
+.insight-card.birthday-insight-card > * { position: relative; z-index: 1; }
+.insight-card.birthday-insight-card .insight-label {
+  background: #fff1d9 !important;
+  color: #8a5717 !important;
+}
+.insight-card.birthday-insight-card h3 { color: #7a4a12 !important; }
+.insight-card.birthday-insight-card p { color: #5f625c !important; }
+.insight-card.birthday-insight-card .insight-action { color: #8a5717 !important; }
+.insight-card.birthday-insight-card .insight-meta {
+  background: #e8795f !important;
+  color: #fff !important;
+  border-color: #e8795f !important;
+}

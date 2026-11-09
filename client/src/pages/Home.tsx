@@ -706,6 +706,7 @@ function InsightCard({
   icon: Icon,
   meta,
   onClick,
+  className,
 }: {
   label: string;
   title: string;
@@ -715,6 +716,7 @@ function InsightCard({
   icon: typeof Clock3;
   meta?: string;
   onClick?: () => void;
+  className?: string;
 }) {
   const content = (
     <>
@@ -737,13 +739,13 @@ function InsightCard({
   return onClick ? (
     <button
       type="button"
-      className={`insight-card insight-${tone}`}
+      className={`insight-card insight-${tone} ${className || ""}`}
       onClick={onClick}
     >
       {content}
     </button>
   ) : (
-    <article className={`insight-card insight-${tone}`}>{content}</article>
+    <article className={`insight-card insight-${tone} ${className || ""}`}>{content}</article>
   );
 }
 
@@ -5125,6 +5127,7 @@ function Overview({
             }
           />
           <InsightCard
+            className={nextBirthday ? "birthday-insight-card" : undefined}
             label="CUMPLEAÑOS PRÓXIMO"
             tone={nextBirthday ? "neutral" : "positive"}
             icon={Cake}
