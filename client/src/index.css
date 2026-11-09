@@ -5784,3 +5784,23 @@ body * { font-variant-numeric: tabular-nums; }
   }
   .quick-call-head h3, .call-modal .modal-head h3 { font-size: 23px !important; }
 }
+
+/* Fijar el contenedor de la ficha de llamada al viewport completo */
+.call-modal-backdrop,
+.bw-modal-backdrop,
+.quick-call-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding: 14px !important;
+  z-index: 90 !important;
+}
+.call-modal, .bw-modal, .bw-modal-wide, .quick-call-modal { flex: 0 0 auto; }
+@media (max-width: 760px) {
+  .call-modal-backdrop, .bw-modal-backdrop, .quick-call-backdrop { padding: 8px !important; }
+  .call-modal, .bw-modal, .bw-modal-wide, .quick-call-modal { width: 100% !important; height: 100% !important; max-height: 100% !important; }
+}
