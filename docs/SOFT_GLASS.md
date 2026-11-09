@@ -22,7 +22,7 @@
 | `--shadow-card` | sombra verde muy suave | Volumen |
 
 ### Fondo
-- Patrón Coronel repetido a **420 px**, con capa de 95 % y visible al 5 %.
+- Patrón Coronel repetido a **820 px**, con capa de 95 % y visible al 5 %.
 - Capa blanca de 95 % para que el patrón se vea sin competir con la lectura.
 - También se aplica en login y carga.
 

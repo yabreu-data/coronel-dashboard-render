@@ -4501,3 +4501,12 @@ body {
     url("/manus-storage/patron-coronel.png") !important;
   background-size: auto, 420px !important;
 }
+
+/* Patrón de fondo grande y visible */
+body {
+  background-size: auto, 820px !important;
+}
+.loading-screen, .auth-wall {
+  background-size: auto, 820px !important;
+}
+.pdf-preview-sheet::before { background-size: 820px !important; }
