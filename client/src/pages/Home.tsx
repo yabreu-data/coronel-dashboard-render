@@ -3112,6 +3112,8 @@ function BirthdayWorkspace({
   const [callKey, setCallKey] = useState<string | null>(null);
   const [historyKey, setHistoryKey] = useState<string | null>(null);
   const [historySection, setHistorySection] = useState<"summary" | "contacts">("summary");
+  const [historyEditOpen, setHistoryEditOpen] = useState(false);
+  const [historyPhone, setHistoryPhone] = useState("");
   const [templatesOpen, setTemplatesOpen] = useState(false);
   useEffect(() => {
     if (!callKey && !historyKey && !templatesOpen) return;
@@ -3496,6 +3498,12 @@ function BirthdayWorkspace({
   const historyLogs = historyRow
     ? logs.filter(log => log.clientKey === historyRow.key)
     : [];
+  useEffect(() => {
+    setHistoryEditOpen(false);
+    setHistoryPhone(
+      (historyRow?.campaign?.phone || historyRow?.item.record.phone || "").toString()
+    );
+  }, [historyKey]);
 
   const chipButton = (key: BirthdayFilter, label: string) => (
     <button
@@ -4052,12 +4060,20 @@ function BirthdayWorkspace({
               <h3>
                 Ficha de {historyRow.item.record.clientName || "cliente"}
               </h3>
-              <button onClick={() => setHistoryKey(null)}>×</button>
+              <div className="bw-modal-head-actions">
+                <button
+                  className="bw-modal-edit"
+                  onClick={() => setHistoryEditOpen(value => !value)}
+                >
+                  Editar datos
+                </button>
+                <button onClick={() => setHistoryKey(null)} aria-label="Cerrar ficha">×</button>
+              </div>
             </div>
             <div className="bw-history-grid">
               <div>
                 <small>Teléfono</small>
-                <b>{historyRow.item.record.phone || "—"}</b>
+                <b>{historyRow.campaign?.phone || historyRow.item.record.phone || "—"}</b>
               </div>
               <div>
                 <small>Cumpleaños</small>
@@ -4100,6 +4116,58 @@ function BirthdayWorkspace({
                 </b>
               </div>
             </div>
+            {historyEditOpen && (
+              <form
+                className="client-edit-form"
+                onSubmit={event => {
+                  event.preventDefault();
+                  if (!historyRow) return;
+                  const campaign = historyRow.campaign;
+                  saveCampaign.mutate({
+                    clientKey: historyRow.key,
+                    clientName:
+                      historyRow.item.record.clientName || "Cliente",
+                    phone: historyPhone,
+                    stage: campaign?.stage ?? "week",
+                    channel: campaign?.channel ?? "whatsapp",
+                    progressStatus: campaign?.progressStatus ?? "pending",
+                    promotion: campaign?.promotion ?? undefined,
+                    responsible: campaign?.responsible ?? undefined,
+                    nextActionAt: campaign?.nextActionAt
+                      ? new Date(campaign.nextActionAt).toISOString()
+                      : null,
+                    nextActionLabel: campaign?.nextActionLabel ?? undefined,
+                    familyName: campaign?.familyName ?? undefined,
+                    familyBirthday: campaign?.familyBirthday ?? undefined,
+                    noRedeemReason: campaign?.noRedeemReason ?? undefined,
+                    notes: campaign?.notes ?? undefined,
+                  });
+                  setHistoryEditOpen(false);
+                }}
+              >
+                <label>
+                  Teléfono
+                  <input
+                    type="tel"
+                    value={historyPhone}
+                    onChange={event => setHistoryPhone(event.target.value)}
+                    placeholder="Número de contacto"
+                  />
+                </label>
+                <div className="client-edit-form-actions">
+                  <button className="btn-rojo" type="submit" disabled={saveCampaign.isPending}>
+                    {saveCampaign.isPending ? "Guardando…" : "Guardar cambios"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-borde"
+                    onClick={() => setHistoryEditOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            )}
             <div className="bw-history-columns">
               <div>
                 <b>Visitas y encuestas ({historyRecords.length})</b>
