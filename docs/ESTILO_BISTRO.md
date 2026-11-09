@@ -19,7 +19,10 @@ en verde de marca, texto negro legible y rojo solo para llamadas a la acción.
 - Títulos: **Playfair Display**, verde `#208d56`.
 - Interfaz y cuerpo: **Inter**, negro.
 - Fondo: blanco puro + patrón de Coronel al **4 %**.
-- Tarjetas: blancas, radio 16 px, sombra con tinte verde muy bajo.
+- Header/topbar: verde `#208d56` con logo blanco.
+- Sidebar: verde menta `#f2f8f5`.
+- Tarjetas métricas: blancas, borde `#87c097`, radio 16 px y sombra verde suave.
+- Paneles destacados: `rgba(135,192,151,.15)`.
 - Rojo `#f93015`: solo botones principales/CTA y precios.
 
 ## Correcciones de contraste
@@ -58,6 +61,8 @@ También hay botón directo en el encabezado de Equipo y en la tarjeta
 
 ## Capturas
 
+- [Header y sidebar](screenshots/audit/header-overview.png)
+- [Header móvil](screenshots/audit/header-mobile.png)
 - [Inicio Bistró](screenshots/audit/bistro-overview.png)
 - [Contexto de señal](screenshots/audit/bistro-context.png)
 - [Clientes](screenshots/audit/bistro-clients.png)
