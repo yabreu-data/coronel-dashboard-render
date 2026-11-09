@@ -1,7 +1,6 @@
 /* ============================================================
    CORONEL · CONFIGURACIÓN VISUAL ACTUAL
    Estilo Moderno Vivo / inspiración Rappi
-   Extraído de client/src/index.css (bloque activo final)
    ============================================================ */
 
 /* ============================================================
@@ -326,3 +325,19 @@ button:active:not(:disabled) { transform: scale(.975); }
 .pulse-card .pulse-sample, .pulse-card .pulse-legend span, .pulse-card .weekly-caption,
 .pulse-card .weekly-caption span, .pulse-card .weekly-empty { color: #55665c !important; }
 .pulse-card .weekly-caption b, .pulse-card .pulse-foot button { color: #1d7a4c !important; }
+
+/* Ajustes de legibilidad finales */
+.pulse-card .pill {
+  background: rgba(29,122,76,.12) !important;
+  color: #176b45 !important;
+  border: 1px solid rgba(29,122,76,.18) !important;
+}
+.team-tabs {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative;
+  z-index: 2;
+}
+.team-tabs button { color: #55665c !important; }
+.team-tabs button.selected { color: #ffffff !important; }
