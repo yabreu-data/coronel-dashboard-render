@@ -92,3 +92,13 @@ Se eliminó la comparación vacía que aparecía sin fechas y se movieron las me
 
 La configuración activa consolidada está en:
 [ESTILO_ACTUAL.css](ESTILO_ACTUAL.css).
+
+## Estilo Moderno Vivo (Rappi)
+
+- Fondo blanco puro con patrón a **820 px** y capa del 95 %.
+- Tarjetas `#f8faf9`, radio 24 px, sombra suave.
+- Header blanco limpio y sidebar blanca.
+- Logo blanco dentro de bloque verde en el sidebar.
+- Botones CTA rojos con radio 14 px.
+- Pestañas de Equipo: Resumen, Personas y Metas.
+- CSS activo: [ESTILO_ACTUAL.css](ESTILO_ACTUAL.css).

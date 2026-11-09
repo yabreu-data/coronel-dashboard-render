@@ -4394,3 +4394,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand-green-dark
   .command-single .today-list { grid-template-columns: 1fr; }
   .today-birthday-banner { align-items: flex-start; padding: 10px; }
 }
+
+/* Cabecera compacta: el estado de actualización no compite con las acciones */
+.topbar .sync-status { display: none !important; }
