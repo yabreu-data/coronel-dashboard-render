@@ -4679,3 +4679,21 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.035em; }
 }
 .sidebar.is-collapsed .nav-item { position: relative; }
 .sidebar.is-collapsed .nav-badge { display: none !important; }
+
+/* Logo recortado al escudo cuando el sidebar está cerrado */
+.sidebar.is-collapsed .sidebar-logo {
+  width: 52px !important;
+  height: 52px !important;
+  max-width: 52px !important;
+  object-fit: cover !important;
+  object-position: left center !important;
+}
+
+/* Cumpleaños con acentos cálidos, no verdes */
+.agenda-date {
+  background: #fff2dd !important;
+  color: #8a5717 !important;
+  border: 1px solid #f0dfc2 !important;
+  border-radius: 10px !important;
+}
+.agenda-date b, .agenda-date small { color: #8a5717 !important; }
