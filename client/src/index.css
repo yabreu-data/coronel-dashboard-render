@@ -4517,3 +4517,10 @@ button:active:not(:disabled) { transform: scale(.975); }
 }
 .team-tabs button { color: #55665c !important; }
 .team-tabs button.selected { color: #ffffff !important; }
+
+/* Contraste del indicador IC en la tarjeta clara */
+.pulse-card .pill {
+  background: #176b45 !important;
+  color: #ffffff !important;
+  border-color: #176b45 !important;
+}
