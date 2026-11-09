@@ -4067,7 +4067,7 @@ function BirthdayWorkspace({
         ))
       )}
 
-      {callRow && (
+      {callRow && createPortal(
         <div className="bw-modal-backdrop" onClick={() => setCallKey(null)}>
           <div className="bw-modal" role="dialog" aria-modal="true" aria-label="Detalle de cumpleaños" onClick={event => event.stopPropagation()}>
             <div className="bw-modal-head">
@@ -4127,6 +4127,8 @@ function BirthdayWorkspace({
             </div>
           </div>
         </div>
+        ,
+        document.body
       )}
 
       {historyRow &&
@@ -4324,7 +4326,7 @@ function BirthdayWorkspace({
         document.body
       )}
 
-      {templatesOpen && (
+      {templatesOpen && createPortal(
         <div className="bw-modal-backdrop" onClick={() => setTemplatesOpen(false)}>
           <div className="bw-modal bw-modal-wide" role="dialog" aria-modal="true" aria-label="Detalle de cumpleaños" onClick={event => event.stopPropagation()}>
             <div className="bw-modal-head">
@@ -4369,6 +4371,8 @@ function BirthdayWorkspace({
             </div>
           </div>
         </div>
+        ,
+        document.body
       )}
 
       <div className="bw-footer">
@@ -7054,7 +7058,7 @@ function QuickCallPicker({
     })
     .slice(0, 10);
 
-  return (
+  return createPortal(
     <div className="quick-call-backdrop" onClick={onClose}>
       <div
         className="quick-call-modal"
@@ -7116,7 +7120,8 @@ function QuickCallPicker({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -7184,7 +7189,7 @@ function CallLogForm({
     .sort(
       (a, b) => new Date(b.callDate).getTime() - new Date(a.callDate).getTime()
     );
-  return (
+  return createPortal(
     <div
       className="modal-backdrop call-modal-backdrop"
       onClick={event => {
@@ -7374,6 +7379,8 @@ function CallLogForm({
         {create.error && <p className="form-error">{create.error.message}</p>}
       </div>
     </div>
+    ,
+    document.body
   );
 }
 
@@ -8075,7 +8082,7 @@ function CallsHistory({
           <Empty text="Todavía no hay llamadas registradas con estos filtros." />
         )}
       </section>
-      {editLog && (
+      {editLog && createPortal(
         <div className="bw-modal-backdrop" onClick={() => setEditLog(null)}>
           <div
             className="bw-modal bw-modal-wide"
@@ -8205,6 +8212,8 @@ function CallsHistory({
             </div>
           </div>
         </div>
+        ,
+        document.body
       )}
       {pinAction && (
         <div
