@@ -5466,3 +5466,29 @@ body * { font-variant-numeric: tabular-nums; }
   .birthday-calendar-grid { gap: 3px !important; }
   .birthday-calendar-day { min-height: 42px !important; }
 }
+
+/* Ficha de cumpleaños: historial y contactos en claro */
+.bw-modal { padding: 22px !important; max-height: 90vh !important; overflow-y: auto !important; }
+.bw-history-columns { gap: 10px !important; margin-top: 12px !important; }
+.bw-history-columns > div > b { color: #0c100d !important; font-size: 13px !important; margin-bottom: 7px !important; }
+.bw-history-columns ul { max-height: 210px !important; gap: 5px !important; }
+.bw-history-columns li {
+  border: 1px solid #e7efea !important;
+  border-radius: 11px !important;
+  background: #f8faf9 !important;
+  color: #0c100d !important;
+  padding: 8px 10px !important;
+  font-size: 11px !important;
+}
+.bw-history-columns li span { color: #55665c !important; font-size: 10px !important; }
+.bw-history-columns li em { color: #0c100d !important; font-size: 10.5px !important; line-height: 1.35; }
+.bw-history-columns ul::-webkit-scrollbar { width: 6px; }
+.bw-history-columns ul::-webkit-scrollbar-thumb { background: #cfe0d5; border-radius: 99px; }
+.bw-modal-head { position: sticky; top: -1px; z-index: 2; background: #fff; padding-bottom: 8px; }
+
+/* Móvil: ficha a pantalla cómoda y sin desbordes */
+@media (max-width: 760px) {
+  .bw-modal { padding: 16px !important; max-height: 96vh !important; }
+  .bw-history-columns { grid-template-columns: 1fr !important; }
+  .bw-history-columns ul { max-height: 180px !important; }
+}
