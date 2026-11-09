@@ -4486,3 +4486,18 @@ body { background-blend-mode: normal !important; }
   .team-tabs { display: flex; width: 100%; }
   .team-tabs button { flex: 1; padding: 0 9px; }
 }
+
+/* Patrón visible: más grande y levemente más presente */
+body {
+  background-image:
+    linear-gradient(rgba(243,246,244,.95), rgba(243,246,244,.95)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 420px !important;
+  background-blend-mode: normal !important;
+}
+.loading-screen, .auth-wall {
+  background-image:
+    linear-gradient(rgba(243,246,244,.95), rgba(243,246,244,.95)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 420px !important;
+}

@@ -9673,7 +9673,10 @@ function Team({
             role="tab"
             aria-selected={teamTab === id}
             className={teamTab === id ? "selected" : ""}
-            onClick={() => setTeamTab(id)}
+            onClick={() => {
+              setTeamTab(id);
+              if (id === "metas") setTargetsOpen(true);
+            }}
           >
             {label}
           </button>

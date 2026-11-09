@@ -1,0 +1,328 @@
+/* ============================================================
+   CORONEL · CONFIGURACIÓN VISUAL ACTUAL
+   Soft Glass Dashboard + Bistró Botánico + Team Tabs
+   Extraído de client/src/index.css (bloque activo final)
+   ============================================================ */
+
+/* ============================================================
+   SOFT GLASS DASHBOARD — paleta calibrada y superficies flotantes
+   ============================================================ */
+:root {
+  --brand-green-dark: #145c36;
+  --brand-green-light: #9ed4ae;
+  --brand-accent-red: #e02f1b;
+  --bg-app: #f3f6f4;
+  --bg-card: #ffffff;
+  --text-main: #111613;
+  --text-muted: #526357;
+  --radius-dashboard: 18px;
+  --shadow-card: 0 10px 25px -5px rgba(20, 92, 54, .04), 0 1px 2px rgba(0,0,0,.02);
+  --border-subtle: 1px solid rgba(158, 212, 174, .25);
+  --canvas: #f3f6f4;
+  --surface: #ffffff;
+  --line: rgba(158,212,174,.28);
+  --ink: #111613;
+  --muted: #526357;
+  --green: #145c36;
+  --blue: #145c36;
+  --orange: #b0742f;
+  --yellow: #b0742f;
+  --red: #e02f1b;
+  --purple: #145c36;
+  --sage: #9ed4ae;
+  --font-display-title: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-interface-body: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --radius-editorial: 18px;
+}
+body {
+  background-color: var(--bg-app) !important;
+  background-image:
+    linear-gradient(rgba(243,246,244,.94), rgba(243,246,244,.94)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-repeat: repeat !important;
+  background-size: auto, 220px !important;
+  background-attachment: fixed !important;
+  color: var(--text-main) !important;
+  font-family: var(--font-interface-body) !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+body::before { display: none !important; }
+.app-shell, .main-area, .content { background: transparent !important; }
+
+/* Header blanco de vidrio; el logo vive en el sidebar */
+.topbar {
+  background: rgba(255,255,255,.80) !important;
+  color: var(--text-main) !important;
+  border-bottom: var(--border-subtle) !important;
+  box-shadow: 0 1px 0 rgba(20,92,54,.03);
+  backdrop-filter: blur(16px);
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 14px 28px !important;
+  min-height: 82px;
+}
+.topbar-copy { flex: 1 1 270px !important; min-width: 0; }
+.topbar h1 {
+  color: var(--brand-green-dark) !important;
+  font-family: var(--font-display-title) !important;
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  white-space: normal !important;
+  letter-spacing: -.04em !important;
+}
+.topbar .breadcrumb { color: var(--text-muted) !important; }
+.topbar .muted, .topbar .topbar-data-line { color: var(--text-muted) !important; }
+.topbar .topbar-data-line b { color: var(--brand-green-dark) !important; }
+.topbar .account-control { background: #fff !important; border-color: var(--brand-green-light) !important; color: var(--text-main) !important; }
+.topbar .refresh-button, .topbar .source-selector select { background: #fff !important; color: var(--brand-green-dark) !important; border-color: var(--brand-green-light) !important; }
+.topbar .sync-status { color: var(--text-muted) !important; }
+.topbar .sync-status .live-dot { background: var(--brand-green-dark) !important; }
+.top-actions { margin-left: auto !important; flex-wrap: wrap !important; gap: 8px !important; }
+
+/* Sidebar con logo en bloque sólido */
+.sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid rgba(20,92,54,.08) !important;
+  padding: 24px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+}
+.sidebar-logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 86px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--brand-green-dark);
+  box-shadow: 0 4px 12px rgba(20,92,54,.12);
+  flex: 0 0 auto;
+}
+.sidebar-logo { display: block; width: 100%; max-width: 150px; height: auto; filter: none !important; }
+.brand-tagline { display: block; color: var(--text-muted) !important; font-size: 10px !important; letter-spacing: .14em !important; text-transform: uppercase; text-align: center; margin-top: -8px; }
+.sidebar .brand { display: none !important; }
+.sidebar .nav-item, .sidebar .nav-item span, .sidebar .nav-item svg, .sidebar .nav-item .nav-arrow { color: var(--brand-green-dark) !important; }
+.sidebar .nav-item:hover { background: #f3faf6 !important; color: var(--brand-green-dark) !important; }
+.sidebar .nav-item.active { background: rgba(158,212,174,.22) !important; color: var(--brand-green-dark) !important; box-shadow: none !important; }
+.sidebar .nav-item .nav-badge, .sidebar .nav-item.active .nav-badge { background: var(--brand-accent-red) !important; color: #fff !important; }
+.sidebar .side-label, .sidebar .nav-section-label { color: var(--brand-green-dark) !important; }
+.sidebar .sidebar-bottom { border-top-color: rgba(20,92,54,.10) !important; }
+.sidebar-bottom b, .sidebar-bottom span { color: var(--brand-green-dark) !important; }
+
+/* Tarjetas de vidrio suave */
+.panel, .stat-card, .dashboard-card, .page-intro, .admin-page-intro,
+.command-copy, .clients-command-copy, .priorities-command-copy, .insights-section,
+.filter-bar, .business-guide, .clients-row, .today-task, .priority-queue-item,
+.insight-card, .calls-agenda-panel, .access-summary, .access-user-card,
+.avatar-picker-panel, .profile-security, .admin-add-panel, .admin-table-panel, .audit-panel {
+  background: rgba(255,255,255,.82) !important;
+  border: var(--border-subtle) !important;
+  border-radius: var(--radius-dashboard) !important;
+  box-shadow: var(--shadow-card) !important;
+  backdrop-filter: blur(12px);
+}
+.panel, .dashboard-card { padding: 24px !important; }
+.panel-head { border-bottom-color: rgba(20,92,54,.09) !important; }
+.page-intro, .admin-page-intro { border-left: 3px solid var(--brand-green-dark) !important; }
+.insights-section { background: rgba(158,212,174,.14) !important; }
+.insight-card { background: #ffffff !important; border-top: 2px solid var(--brand-green-light) !important; }
+.insight-positive { border-top-color: var(--brand-green-dark) !important; }
+.insight-warning { border-top-color: #b0742f !important; }
+.insight-critical { border-top-color: var(--brand-accent-red) !important; }
+.stat-card, .metric-card { background: #ffffff !important; border: 1px solid var(--brand-green-light) !important; box-shadow: var(--shadow-card) !important; }
+.stat-card strong, .metric-card strong { color: var(--brand-green-dark) !important; }
+.stat-card.accent-red { border-top: 3px solid var(--brand-accent-red) !important; }
+.stat-card.accent-green { border-top: 3px solid var(--brand-green-dark) !important; }
+.pulse-card { background: var(--brand-green-dark) !important; border: 0 !important; border-radius: var(--radius-dashboard) !important; }
+.pulse-card, .pulse-card * { color: #fff; }
+
+/* Tipografía: dashboard limpio y legible */
+h1, h2, h3, h4, .panel-head h3, .page-intro h2, .insights-head h2,
+.command-copy h2, .client-sheet-head h3, .comment-modal h3, .bw-modal h3,
+.auth-wall-card h1, .boot-title, .word-cloud-detail-head b {
+  font-family: var(--font-display-title) !important;
+  color: var(--brand-green-dark) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.035em !important;
+}
+body, p, small, label, td, th, button, input, select, textarea, a, .muted { color: var(--text-main); }
+.muted, .micro-note, .command-summary, .stat-card .muted { color: var(--text-muted) !important; }
+.eyebrow, .breadcrumb, .side-label, .panel-head .eyebrow { color: var(--brand-green-dark) !important; }
+.panel-head h3 { font-size: 24px !important; }
+.page-intro h2 { font-size: 38px !important; }
+.insight-card h3 { font-size: 20px !important; }
+.insight-card p { color: var(--text-main) !important; }
+
+/* CTA y alertas: rojo calibrado */
+.btn-rojo, .quick-call-button, .command-primary, button[class*="bg-primary"] {
+  background: var(--brand-accent-red) !important;
+  border-color: var(--brand-accent-red) !important;
+  color: #fff !important;
+}
+.btn-rojo:hover, .quick-call-button:hover { background: #bf2413 !important; border-color: #bf2413 !important; }
+.pill-red { background: rgba(224,47,27,.10) !important; color: #a82413 !important; border-color: rgba(224,47,27,.20) !important; }
+.insight-critical .insight-label, .insight-critical .insight-icon { color: #a82413 !important; }
+.birthday-signal.today { background: var(--brand-accent-red) !important; color: var(--brand-accent-red) !important; }
+
+/* Controles, formularios y modales legibles */
+input, select, textarea { background: #fff !important; color: var(--text-main) !important; border-color: rgba(20,92,54,.20) !important; border-radius: 10px !important; }
+input:focus, select:focus, textarea:focus { border-color: var(--brand-green-dark) !important; box-shadow: 0 0 0 3px rgba(158,212,174,.28) !important; }
+.btn-borde, .secondary-action { background: #fff !important; color: var(--brand-green-dark) !important; border-color: var(--brand-green-light) !important; }
+.comment-modal, .bw-modal, .call-modal, .client-sheet, .avatar-picker-modal, .priority-pin-modal, .pdf-preview-modal {
+  background: #ffffff !important; color: var(--text-main) !important; border-color: var(--brand-green-light) !important; border-radius: var(--radius-dashboard) !important;
+}
+.comment-modal .muted, .comment-modal p, .comment-modal-count { color: var(--text-main) !important; }
+.highlight-comments article { background: rgba(243,246,244,.7) !important; border-color: rgba(20,92,54,.10) !important; }
+.highlight-comments article p { color: var(--text-main) !important; }
+
+/* Imagen de marca en carga y bienvenida */
+.loading-screen, .auth-wall { background-color: var(--bg-app) !important; background-image: linear-gradient(rgba(243,246,244,.90), rgba(243,246,244,.90)), url("/manus-storage/patron-coronel.png") !important; background-size: auto, 220px !important; }
+.loading-screen h2, .auth-wall-card h1 { color: var(--brand-green-dark) !important; }
+
+/* Espacio y contraste */
+.content { padding: 26px 32px 36px !important; max-width: 1680px !important; }
+.content > section + section, .content > .dashboard-grid + .dashboard-grid { margin-top: 20px !important; }
+.insights-grid, .stats-grid, .dashboard-grid, .command-grid { gap: 16px !important; }
+.page-intro { margin-bottom: 18px !important; }
+.panel-head { margin-bottom: 18px !important; }
+.today-client b, .risk-row b, .product-row b { color: var(--text-main) !important; font-size: 13px !important; white-space: normal !important; }
+.today-client small, .risk-row small, .product-row small { color: var(--text-muted) !important; font-size: 12px !important; white-space: normal !important; }
+.product-row strong, .product-quality-percent { color: var(--brand-green-dark) !important; font-weight: 800 !important; }
+@media (max-width: 760px) {
+  .topbar { padding: 12px 15px !important; min-height: 0; }
+  .topbar h1 { font-size: 25px !important; }
+  .sidebar { padding: 16px 14px !important; gap: 14px !important; }
+  .sidebar-logo-box { min-height: 70px; max-width: 180px; }
+  .content { padding: 16px 16px 92px !important; }
+  .panel, .dashboard-card { padding: 17px !important; }
+  .page-intro h2 { font-size: 31px !important; }
+}
+
+/* Patrón textil sutil: no debe competir con las tarjetas */
+body {
+  background-image:
+    linear-gradient(rgba(243,246,244,.97), rgba(243,246,244,.97)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 220px !important;
+}
+.panel, .stat-card, .dashboard-card, .page-intro, .admin-page-intro,
+.command-copy, .clients-command-copy, .priorities-command-copy, .insights-section,
+.filter-bar, .business-guide, .clients-row, .today-task, .priority-queue-item,
+.insight-card, .calls-agenda-panel, .access-summary, .access-user-card,
+.avatar-picker-panel, .profile-security, .admin-add-panel, .admin-table-panel, .audit-panel {
+  background: rgba(255,255,255,.93) !important;
+  backdrop-filter: blur(14px);
+}
+.insight-card, .stat-card { background: rgba(255,255,255,.96) !important; }
+.insights-section { background: rgba(158,212,174,.10) !important; }
+@media (max-width: 760px) {
+  .sidebar-logo-box { width: 150px !important; min-height: 62px !important; padding: 9px 12px !important; margin: 0 auto !important; }
+  .sidebar-logo { max-width: 118px !important; }
+  .brand-tagline { margin-top: 0 !important; }
+}
+
+.team-section-heading { margin: 22px 2px 10px; }
+.team-section-heading .eyebrow { margin-bottom: 3px; }
+.team-section-heading h2 { margin: 0; font-size: 27px !important; }
+@media (max-width: 760px) { .team-section-heading { margin-top: 17px; } .team-section-heading h2 { font-size: 23px !important; } }
+
+/* Centro de mando más humano y sin duplicar el pulso */
+.command-grid.command-single { grid-template-columns: minmax(0, 1fr) !important; }
+.command-single .today-panel { max-width: none; }
+.command-single .today-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.command-single .today-list > * { margin: 0 !important; }
+@media (max-width: 760px) { .command-single .today-list { grid-template-columns: 1fr; } }
+
+/* Patrón más grande y más transparente */
+body {
+  background-image:
+    linear-gradient(rgba(243,246,244,.98), rgba(243,246,244,.98)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 360px !important;
+}
+.loading-screen, .auth-wall {
+  background-image:
+    linear-gradient(rgba(243,246,244,.97), rgba(243,246,244,.97)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 360px !important;
+}
+.pdf-preview-sheet::before { background-size: 520px !important; opacity: .03 !important; }
+
+/* Evitar que el patrón se mezcle con multiply y vuelva a dominar */
+body { background-blend-mode: normal !important; }
+
+/* Aviso humano de cumpleaños de hoy */
+.today-birthday-banner {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 14px 0 4px;
+  padding: 11px 13px;
+  border: 1px solid rgba(158,212,174,.65);
+  border-left: 3px solid var(--brand-green-dark);
+  border-radius: 12px;
+  background: linear-gradient(100deg, #f5fcf7, #eef8f2);
+}
+.today-birthday-emoji { font-size: 26px; line-height: 1; flex: 0 0 auto; }
+.today-birthday-banner > div { flex: 1; min-width: 0; }
+.today-birthday-banner b { display: block; color: var(--text-main); font-size: 12.5px; }
+.today-birthday-banner small { display: block; margin-top: 2px; color: var(--text-muted); font-size: 11px; }
+.today-birthday-banner button { flex: 0 0 auto; min-height: 32px; padding: 0 11px; border: 1px solid var(--brand-green-light); border-radius: 8px; background: #fff; color: var(--brand-green-dark); font-size: 11px; font-weight: 800; }
+.today-birthday-banner button:hover { background: #eef8f2; }
+
+/* Calidad positiva explicada */
+.quality-human-row { display: flex; align-items: center; gap: 10px; }
+.quality-human-face { font-size: 34px; line-height: 1; }
+.quality-human-lead { margin: 0 0 8px; color: #e9f8f0; font-size: 12px; font-weight: 600; }
+@media (max-width: 760px) {
+  .today-birthday-banner { align-items: flex-start; padding: 10px; }
+  .today-birthday-banner button { min-height: 30px; }
+}
+
+/* Pestañas de Equipo */
+.team-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 0 16px;
+  padding: 4px;
+  border: 1px solid rgba(158,212,174,.40);
+  border-radius: 12px;
+  background: rgba(255,255,255,.86);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
+}
+.team-tabs button {
+  min-height: 34px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.team-tabs button:hover { background: #f2f8f5; color: var(--brand-green-dark); }
+.team-tabs button.selected { background: var(--brand-green-dark); color: #fff; }
+@media (max-width: 760px) {
+  .team-tabs { display: flex; width: 100%; }
+  .team-tabs button { flex: 1; padding: 0 9px; }
+}
+
+/* Patrón visible: más grande y levemente más presente */
+body {
+  background-image:
+    linear-gradient(rgba(243,246,244,.95), rgba(243,246,244,.95)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 420px !important;
+  background-blend-mode: normal !important;
+}
+.loading-screen, .auth-wall {
+  background-image:
+    linear-gradient(rgba(243,246,244,.95), rgba(243,246,244,.95)),
+    url("/manus-storage/patron-coronel.png") !important;
+  background-size: auto, 420px !important;
+}

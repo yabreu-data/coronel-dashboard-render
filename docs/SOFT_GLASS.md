@@ -22,8 +22,8 @@
 | `--shadow-card` | sombra verde muy suave | Volumen |
 
 ### Fondo
-- Patrón Coronel repetido a **360 px**, más grande y al 2 % de visibilidad.
-- Capa blanca de 98 % para que el patrón se vea sin competir con la lectura.
+- Patrón Coronel repetido a **420 px**, con capa de 95 % y visible al 5 %.
+- Capa blanca de 95 % para que el patrón se vea sin competir con la lectura.
 - También se aplica en login y carga.
 
 ### Tarjetas
@@ -81,3 +81,14 @@ Se eliminó la comparación vacía que aparecía sin fechas y se movieron las me
 
 - Voz: insights primero, word cloud interactivo y contexto de la señal legible. Aún conserva paneles secundarios que se pueden reducir.
 - Equipo: período primero, insights, KPI, personas y metas al final; la comparación solo aparece con fechas completas.
+
+## Pestañas de Equipo
+
+- **Resumen:** período, insights, KPI y comparación.
+- **Personas:** delivery, volumen y desempeño.
+- **Metas:** formulario de metas, que se abre automáticamente al entrar.
+
+## Código de estilo
+
+La configuración activa consolidada está en:
+[ESTILO_ACTUAL.css](ESTILO_ACTUAL.css).
