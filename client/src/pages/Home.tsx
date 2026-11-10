@@ -3396,7 +3396,7 @@ function PdfPreviewModal({
                     : { text: "No hay clientes a recuperar con los filtros actuales." }),
                 });
               }
-              downloadReportPdf(
+              const downloadPromise = downloadReportPdf(
                 `Reporte de encuestas · ${areaLabel}`,
                 `Rango: ${dateLabel} · ${filterLabel}`,
                 [
@@ -3421,7 +3421,7 @@ function PdfPreviewModal({
                   logo: includeLogo,
                 }
               );
-              onClose();
+              void downloadPromise.then(onClose);
             }}
           >
             <FileText size={15} /> Descargar PDF
@@ -11790,8 +11790,8 @@ function downloadReportPdf(
   sections: PdfReportSection[],
   filename?: string,
   options: PdfDownloadOptions = {}
-) {
-  void (async () => {
+): Promise<void> {
+  return (async () => {
     try {
     console.log("REPORT_PDF_START");
     const { logo, pattern } = await loadPdfAssets();
