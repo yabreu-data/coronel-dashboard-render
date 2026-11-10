@@ -3613,15 +3613,24 @@ function BirthdayWorkspace({
     "Próxima acción",
     "Días",
   ];
+  const birthdayStatusLabel = (progress: string) =>
+    ({
+      pending: "Sin contactar",
+      contacted: "Ya saludado",
+      accepted: "Aceptó promo",
+      redeemed: "Usó promo",
+      rejected: "No vino",
+      noanswer: "No contestó",
+    })[progress] || progress;
   const birthdayExportRows = rows.map(row => [
     row.item.record.clientName || "Sin nombre",
     row.item.record.birthday || "",
     row.campaign?.phone || row.item.record.phone || "",
     promoteFor(row),
-    row.progress,
+    birthdayStatusLabel(row.progress),
     row.campaign?.responsible || "Cajera",
     toDateInputValue(row.campaign?.nextActionAt) || "Sin fecha",
-    row.item.days,
+    daysLabel(row.item.days),
   ]);
   const exportBirthdays = () =>
     downloadGenericCsv(
