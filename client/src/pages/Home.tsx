@@ -3602,8 +3602,9 @@ function BirthdayWorkspace({
       })
     : "";
 
-  const promoteFor = (row: (typeof rows)[number]) =>
-    row.campaign?.promotion || row.item.promotion;
+  function promoteFor(row: (typeof rows)[number]) {
+    return row.campaign?.promotion || row.item.promotion;
+  }
 
   const templateFor = (row: (typeof rows)[number]) =>
     templateByKey.get(BIRTHDAY_TEMPLATE_KEYS[row.horizon]) ??
