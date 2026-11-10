@@ -1643,7 +1643,14 @@ export default function Home() {
                 <b>Vista compacta</b>
                 <small>Ocultamos las secciones de detalle para acortar la página.</small>
               </span>
-              <button onClick={() => setCompactMode(false)}>Mostrar todo</button>
+              <button
+                onClick={() => {
+                  setCompactMode(false);
+                  scrollAppToTop("smooth");
+                }}
+              >
+                Mostrar todo
+              </button>
             </div>
           )}
           {showGlobalFilters && (
@@ -1850,7 +1857,11 @@ export default function Home() {
       <div className="floating-tools" aria-label="Controles de vista">
         <button
           className={compactMode ? "active" : ""}
-          onClick={() => setCompactMode(value => !value)}
+          onClick={() => {
+            const next = !compactMode;
+            setCompactMode(next);
+            scrollAppToTop("smooth");
+          }}
           title={compactMode ? "Mostrar todas las secciones" : "Ocultar secciones de detalle"}
           aria-label={compactMode ? "Mostrar todas las secciones" : "Ocultar secciones de detalle"}
         >
