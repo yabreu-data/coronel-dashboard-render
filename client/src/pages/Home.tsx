@@ -769,18 +769,18 @@ function InsightCard({
 function PageHint({
   title,
   children,
-  compact = false,
+  compact = true,
 }: {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   compact?: boolean;
 }) {
   return (
     <div className={compact ? "page-hint page-hint-compact" : "page-hint"}>
-      <HelpCircle size={17} />
+      <HelpCircle size={15} />
       <span>
         <b>{title}</b>
-        <small>{children}</small>
+        {children ? <small>{children}</small> : null}
       </span>
     </div>
   );
@@ -5478,10 +5478,7 @@ function BirthdayPage({
         </div>
       </div>
 
-      <PageHint title="Cómo abrir una ficha">
-        Toca el <b>nombre</b> o la <b>fecha</b> de una tarjeta para ver visitas,
-        llamadas, comentarios y editar el contacto.
-      </PageHint>
+      <PageHint title="Toca el nombre o la fecha de una tarjeta para abrir su ficha." />
       <BusinessGuide
         title="Cómo felicitar a tus clientes"
         steps={[
@@ -8557,10 +8554,7 @@ function CallsHistory({
           </small>
         </div>
       </div>
-      <PageHint title="Las tarjetas de arriba también te llevan al detalle">
-        Toca <b>Llamadas</b>, <b>Contactados</b> o <b>Recuperados</b> para bajar al
-        historial. Dentro de cada fila puedes editar o volver a llamar.
-      </PageHint>
+      <PageHint title="Toca las tarjetas para bajar al historial." />
       <section className="panel calls-agenda-panel">
         <div className="panel-head">
           <div>
@@ -9418,10 +9412,7 @@ function TargetHistory({
           </span>
         </div>
       </div>
-      <PageHint title="Cómo leer esta página">
-        Las tarjetas de arriba resumen el período. Toca una barra o una tarjeta
-        para bajar a los resultados; usa las fechas para acotar el mes.
-      </PageHint>
+      <PageHint title="Toca una tarjeta o barra para ver los resultados." />
       <section className="insights-section">
         <div className="insights-head">
           <div>
@@ -10932,9 +10923,7 @@ function Team({
           </button>
         </div>
       </div>
-      <PageHint compact title="Muévete por estas tres pestañas:">
-        Resumen · Personas · Metas
-      </PageHint>
+      <PageHint compact title="Muévete por: Resumen · Personas · Metas." />
       <div className="team-tabs" role="tablist" aria-label="Secciones de Equipo">
         {([
           ["resumen", "Resumen"],
