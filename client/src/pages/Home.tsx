@@ -2874,6 +2874,10 @@ function ExportPreviewModal({
         aria-label={`Vista previa PDF: ${data.title}`}
         onClick={event => event.stopPropagation()}
       >
+        <div className="export-preview-brand">
+          <img src="/manus-storage/logo-coronel.png" alt="Coronel · Pollos y Parrillas" />
+          <span>CORONEL · POLLOS Y PARRILLAS</span>
+        </div>
         <div className="pdf-preview-top">
           <div>
             <p className="eyebrow">VISTA PREVIA PDF</p>
@@ -11258,6 +11262,31 @@ function buildRequestComments(comments: RecordItem[]) {
 }
 
 
+let pdfAssetsPromise: Promise<{ logo: string | null; pattern: string | null }> | null = null;
+function loadPdfAssets() {
+  if (pdfAssetsPromise) return pdfAssetsPromise;
+  const toDataUrl = async (src: string) => {
+    try {
+      const response = await fetch(src);
+      if (!response.ok) return null;
+      const blob = await response.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return null;
+    }
+  };
+  pdfAssetsPromise = Promise.all([
+    toDataUrl("/manus-storage/logo-blanco.png"),
+    toDataUrl("/manus-storage/patron-coronel.png"),
+  ]).then(([logo, pattern]) => ({ logo, pattern }));
+  return pdfAssetsPromise;
+}
+
 function downloadTablePdf(
   title: string,
   subtitle: string,
@@ -11265,41 +11294,83 @@ function downloadTablePdf(
   rows: unknown[][],
   filename?: string
 ) {
-  const doc = new jsPDF({
-    orientation: columns.length > 6 ? "landscape" : "portrait",
-    unit: "pt",
-    format: "a4",
-  });
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(20, 92, 54);
-  doc.text(title, 40, 42);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(85, 102, 92);
-  doc.text(subtitle, 40, 58);
-  autoTable(doc, {
-    head: [columns],
-    body: rows.map(row => row.map(value => String(value ?? ""))),
-    startY: 72,
-    margin: { left: 36, right: 36, bottom: 34 },
-    styles: { fontSize: 7.5, cellPadding: 4, overflow: "linebreak", textColor: [12, 16, 13] },
-    headStyles: { fillColor: [20, 92, 54], textColor: 255, fontStyle: "bold" },
-    alternateRowStyles: { fillColor: [247, 251, 248] },
-    theme: "grid",
-  });
-  const pageCount = doc.getNumberOfPages();
-  for (let index = 1; index <= pageCount; index += 1) {
-    doc.setPage(index);
-    doc.setFontSize(7);
-    doc.setTextColor(124, 139, 130);
-    doc.text(
-      `Coronel · ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCount}`,
-      40,
-      doc.internal.pageSize.getHeight() - 18
+  void (async () => {
+    const { logo, pattern } = await loadPdfAssets();
+    const doc = new jsPDF({
+      orientation: columns.length > 6 ? "landscape" : "portrait",
+      unit: "pt",
+      format: "a4",
+    });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // Cabecera de marca
+    doc.setFillColor(20, 92, 54);
+    doc.rect(0, 0, pageWidth, 78, "F");
+    if (logo) {
+      doc.addImage(logo, "PNG", 34, 14, 70, 48, undefined, "FAST");
+    }
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(17);
+    doc.text(title, logo ? 118 : 36, 38);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(225, 245, 232);
+    doc.text(subtitle, logo ? 118 : 36, 56);
+    if (!logo) doc.text("CORONEL · POLLOS Y PARRILLAS", 36, 70);
+
+    autoTable(doc, {
+      head: [columns],
+      body: rows.map(row => row.map(value => String(value ?? ""))),
+      startY: 94,
+      margin: { left: 34, right: 34, bottom: 38 },
+      styles: {
+        fontSize: 7.5,
+        cellPadding: 4,
+        overflow: "linebreak",
+        textColor: [12, 16, 13],
+        lineColor: [226, 237, 230],
+        lineWidth: 0.3,
+      },
+      headStyles: { fillColor: [29, 122, 76], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [247, 251, 248] },
+      theme: "grid",
+    });
+
+    const pageCount = doc.getNumberOfPages();
+    for (let index = 1; index <= pageCount; index += 1) {
+      doc.setPage(index);
+      // Patrón de marca sutil sobre el cuerpo, sin tapar la cabecera.
+      if (pattern) {
+        doc.saveGraphicsState();
+        doc.setGState(new (doc as unknown as { GState: new (value: { opacity: number }) => unknown }).GState({ opacity: 0.045 }));
+        for (let x = 0; x < pageWidth; x += 185) {
+          for (let y = 82; y < pageHeight; y += 185) {
+            doc.addImage(pattern, "PNG", x, y, 185, 185, undefined, "FAST");
+          }
+        }
+        doc.restoreGraphicsState();
+      }
+      // Línea y pie
+      doc.setDrawColor(190, 220, 202);
+      doc.setLineWidth(0.6);
+      doc.line(34, pageHeight - 28, pageWidth - 34, pageHeight - 28);
+      doc.setFontSize(7);
+      doc.setTextColor(110, 128, 117);
+      doc.text("CORONEL · POLLOS Y PARRILLAS", 36, pageHeight - 15);
+      doc.text(
+        `Generado ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCount}`,
+        pageWidth - 36,
+        pageHeight - 15,
+        { align: "right" }
+      );
+    }
+    doc.save(
+      filename ||
+        `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`
     );
-  }
-  doc.save(filename || `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`);
+  })();
 }
 
 function downloadGenericCsv(
