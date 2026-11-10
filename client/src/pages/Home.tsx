@@ -3071,7 +3071,7 @@ function PdfPreviewModal({
           </button>
           <button
             className="small-action"
-            onClick={() =>
+            onClick={() => {
               downloadTablePdf(
                 `Reporte de encuestas · ${areaLabel}`,
                 `Rango: ${dateLabel} · ${filterLabel}`,
@@ -3084,8 +3084,9 @@ function PdfPreviewModal({
                   record.quality,
                   record.comment,
                 ])
-              )
-            }
+              );
+              onClose();
+            }}
           >
             <FileText size={15} /> Descargar PDF
           </button>
