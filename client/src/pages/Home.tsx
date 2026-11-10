@@ -3413,7 +3413,7 @@ function PdfPreviewModal({
                 ],
                 summary,
                 reportSections,
-                undefined,
+                "reporte-centro-accion.pdf",
                 {
                   pageSize,
                   orientation: pageOrientation,
