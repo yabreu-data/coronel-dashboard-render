@@ -765,6 +765,19 @@ function InsightCard({
   );
 }
 
+
+function PageHint({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="page-hint">
+      <HelpCircle size={17} />
+      <span>
+        <b>{title}</b>
+        <small>{children}</small>
+      </span>
+    </div>
+  );
+}
+
 function Empty({ text }: { text: string }) {
   return (
     <div className="empty">
@@ -4353,15 +4366,33 @@ function BirthdayWorkspace({
                       </svg>
                     )}
                     <div className="bw-card-top">
-                      <div className="bw-date">
+                      <button
+                        type="button"
+                        className="bw-date"
+                        onClick={() => {
+                          setHistoryKey(row.key);
+                          setHistorySection("summary");
+                        }}
+                        title="Abrir ficha del cliente"
+                      >
                         <b>{date.split(" ")[0]}</b>
                         <small>{date.split(" ")[1]?.replace(".", "")}</small>
-                      </div>
+                      </button>
                       <div className="bw-main">
                         <div className="bw-title">
-                          <b>
-                            {item.record.clientName || "Cliente sin nombre"}
-                          </b>
+                          <button
+                            type="button"
+                            className="bw-name-link"
+                            onClick={() => {
+                              setHistoryKey(row.key);
+                              setHistorySection("summary");
+                            }}
+                            title="Abrir ficha del cliente"
+                          >
+                            <b>
+                              {item.record.clientName || "Cliente sin nombre"}
+                            </b>
+                          </button>
                           {item.profile?.segment && (
                             <Pill
                               tone={
@@ -5419,6 +5450,10 @@ function BirthdayPage({
         </div>
       </div>
 
+      <PageHint title="Cómo abrir una ficha">
+        Toca el <b>nombre</b> o la <b>fecha</b> de una tarjeta para ver visitas,
+        llamadas, comentarios y editar el contacto.
+      </PageHint>
       <BusinessGuide
         title="Cómo felicitar a tus clientes"
         steps={[
@@ -8494,6 +8529,10 @@ function CallsHistory({
           </small>
         </div>
       </div>
+      <PageHint title="Las tarjetas de arriba también te llevan al detalle">
+        Toca <b>Llamadas</b>, <b>Contactados</b> o <b>Recuperados</b> para bajar al
+        historial. Dentro de cada fila puedes editar o volver a llamar.
+      </PageHint>
       <section className="panel calls-agenda-panel">
         <div className="panel-head">
           <div>
@@ -8555,6 +8594,11 @@ function CallsHistory({
           value={visible.length}
           detail="en este período"
           icon={Phone}
+          onClick={() =>
+            document
+              .getElementById("calls-history-panel")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />
         <Stat
           label="CONTACTADOS"
@@ -8562,6 +8606,11 @@ function CallsHistory({
           detail="con contacto logrado"
           accent="green"
           icon={Users}
+          onClick={() =>
+            document
+              .getElementById("calls-history-panel")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />
         <Stat
           label="RECUPERADOS"
@@ -8569,9 +8618,14 @@ function CallsHistory({
           detail="con recuperación registrada"
           accent="purple"
           icon={Sparkles}
+          onClick={() =>
+            document
+              .getElementById("calls-history-panel")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />
       </div>
-      <section className="panel calls-history-panel">
+      <section className="panel calls-history-panel" id="calls-history-panel">
         <div className="calls-filter-row">
           <label>
             Desde
@@ -9336,6 +9390,10 @@ function TargetHistory({
           </span>
         </div>
       </div>
+      <PageHint title="Cómo leer esta página">
+        Las tarjetas de arriba resumen el período. Toca una barra o una tarjeta
+        para bajar a los resultados; usa las fechas para acotar el mes.
+      </PageHint>
       <section className="insights-section">
         <div className="insights-head">
           <div>
@@ -9463,7 +9521,7 @@ function TargetHistory({
         </div>
       </section>
       <TargetPerformanceChart rows={rows} />
-      <section className="panel admin-table-panel">
+      <section className="panel admin-table-panel" id="history-results">
         <div className="panel-head">
           <div>
             <p className="eyebrow">DESEMPEÑO POR EQUIPO / MESERO</p>
@@ -9667,6 +9725,11 @@ function TargetPerformanceChart({
                 className="target-bar-row"
                 key={row.server}
                 title={`${row.server}: ${row.surveys} encuestas · ${row.positive === null ? "sin calidad" : `${row.positive}% positivo · IC95 ${ci ? `${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%` : "—"}`}`}
+                onClick={() =>
+                  document
+                    .getElementById("history-results")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
               >
                 <span className="target-bar-name">{row.server}</span>
                 <span className="target-bar-track">
@@ -10840,6 +10903,10 @@ function Team({
           </button>
         </div>
       </div>
+      <PageHint title="Hay tres vistas en Equipo">
+        Usa <b>Resumen</b> para el período e insights, <b>Personas</b> para el
+        desempeño individual y <b>Metas</b> para editar objetivos.
+      </PageHint>
       <div className="team-tabs" role="tablist" aria-label="Secciones de Equipo">
         {([
           ["resumen", "Resumen"],

@@ -6220,3 +6220,44 @@ body * { font-variant-numeric: tabular-nums; }
     line-height: 1;
   }
 }
+
+/* Guías breves por sección */
+.page-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 12px 0 14px;
+  padding: 11px 13px;
+  border: 1px solid #dcebe2;
+  border-left: 3px solid #1d7a4c;
+  border-radius: 12px;
+  background: #f6fbf8;
+}
+.page-hint > svg { flex: 0 0 auto; margin-top: 1px; color: #1d7a4c; }
+.page-hint b { display: block; color: #0c100d; font-size: 11.5px; }
+.page-hint small { display: block; margin-top: 2px; color: #66756b; font-size: 10.5px; line-height: 1.4; }
+
+/* Nombre y fecha de cumpleaños como accesos a la ficha */
+button.bw-date {
+  font: inherit;
+  border: 1px solid #f0dfc2 !important;
+  background: #fff7e8 !important;
+  color: #8a5717 !important;
+  cursor: pointer;
+  border-radius: 12px !important;
+  padding: 6px 4px !important;
+}
+button.bw-date:hover { background: #fff1d4 !important; border-color: #dfb25c !important; }
+button.bw-date b, button.bw-date small { color: #8a5717 !important; }
+.bw-name-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bw-name-link b:hover { color: #1d7a4c; text-decoration: underline; text-underline-offset: 2px; }
+.bw-title .bw-name-link { min-width: 0; }
+.target-bar-row { cursor: pointer; }
