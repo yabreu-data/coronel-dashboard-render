@@ -2952,8 +2952,20 @@ function ExportPreviewModal({
     );
     onClose();
   };
+  const formatLabel = `${pageSize.toUpperCase()} · ${
+    orientation === "auto"
+      ? selectedColumns.length > 6
+        ? "HORIZONTAL"
+        : "VERTICAL"
+      : orientation === "landscape"
+        ? "HORIZONTAL"
+        : "VERTICAL"
+  }`;
   return createPortal(
-    <div className="modal-backdrop pdf-preview-backdrop export-preview-backdrop" onClick={onClose}>
+    <div
+      className="modal-backdrop pdf-preview-backdrop export-preview-backdrop"
+      onClick={onClose}
+    >
       <div
         className="pdf-preview-modal export-preview-modal"
         role="dialog"
@@ -2961,109 +2973,215 @@ function ExportPreviewModal({
         aria-label={`Vista previa PDF: ${data.title}`}
         onClick={event => event.stopPropagation()}
       >
-        <div className="export-preview-brand">
-          <img src="/manus-storage/logo-coronel.png" alt="Coronel · Pollos y Parrillas" />
-          <span>CORONEL · POLLOS Y PARRILLAS</span>
-        </div>
-        <div className="pdf-preview-top">
+        <div className="modal-head">
           <div>
-            <p className="eyebrow">VISTA PREVIA PDF</p>
-            <h3>{data.title}</h3>
-            <p className="muted">{data.subtitle}</p>
+            <p className="eyebrow">EXPORTACIÓN PDF</p>
+            <h3>Vista previa del reporte</h3>
+            <p className="muted">
+              Selecciona contenido y rango antes de descargarlo.
+            </p>
           </div>
-          <button className="icon-button" onClick={onClose} aria-label="Cerrar vista previa">
-            <X size={17} />
+          <button
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Cerrar vista previa"
+          >
+            ×
           </button>
         </div>
-        <div className="export-preview-controls">
-          {data.dates && (
-            <>
-              <label>
-                Desde
-                <input type="date" value={fromDate} onChange={event => setFromDate(event.target.value)} />
-              </label>
-              <label>
-                Hasta
-                <input type="date" value={toDate} onChange={event => setToDate(event.target.value)} />
-              </label>
-            </>
-          )}
-          <label className="export-preview-search">
-            Buscar
-            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Filtra por cualquier dato…" />
-          </label>
-          <label>
-            Tamaño
-            <select value={pageSize} onChange={event => setPageSize(event.target.value as "a4" | "letter")}>
-              <option value="a4">A4</option>
-              <option value="letter">Carta</option>
-            </select>
-          </label>
-          <label>
-            Orientación
-            <select value={orientation} onChange={event => setOrientation(event.target.value as typeof orientation)}>
-              <option value="auto">Automática</option>
-              <option value="portrait">Vertical</option>
-              <option value="landscape">Horizontal</option>
-            </select>
-          </label>
-          <label>
-            Letra
-            <select value={paperFont} onChange={event => setPaperFont(event.target.value as typeof paperFont)}>
-              <option value="compact">Compacta</option>
-              <option value="normal">Normal</option>
-              <option value="large">Grande</option>
-            </select>
-          </label>
-          <label className="export-preview-check">
-            <input type="checkbox" checked={includePattern} onChange={event => setIncludePattern(event.target.checked)} />
-            Patrón
-          </label>
-          <label className="export-preview-check">
-            <input type="checkbox" checked={includeLogo} onChange={event => setIncludeLogo(event.target.checked)} />
-            Logo
-          </label>
-        </div>
-        <details className="export-preview-columns">
-          <summary>Columnas del PDF ({selectedColumns.length}/{data.columns.length})</summary>
-          <div>
-            {data.columns.map((column, index) => (
-              <label key={column}>
-                <input
-                  type="checkbox"
-                  checked={visibleColumns[index] ?? true}
-                  onChange={() =>
-                    setVisibleColumns(current =>
-                      current.map((value, i) => (i === index ? !value : value))
-                    )
-                  }
-                />
-                {column}
-              </label>
-            ))}
+        <div className="pdf-preview-layout">
+          <aside className="pdf-section-picker">
+            <b>Contenido del PDF</b>
+            {data.dates && (
+              <>
+                <label className="pdf-date-field">
+                  <span>Desde</span>
+                  <input
+                    type="date"
+                    value={fromDate}
+                    onChange={event => setFromDate(event.target.value)}
+                  />
+                </label>
+                <label className="pdf-date-field">
+                  <span>Hasta</span>
+                  <input
+                    type="date"
+                    value={toDate}
+                    onChange={event => setToDate(event.target.value)}
+                  />
+                </label>
+              </>
+            )}
+            <label className="pdf-date-field">
+              <span>Buscar</span>
+              <input
+                value={query}
+                onChange={event => setQuery(event.target.value)}
+                placeholder="Cualquier dato…"
+              />
+            </label>
+            <label className="pdf-date-field">
+              <span>Tamaño</span>
+              <select
+                value={pageSize}
+                onChange={event =>
+                  setPageSize(event.target.value as "a4" | "letter")
+                }
+              >
+                <option value="a4">A4</option>
+                <option value="letter">Carta</option>
+              </select>
+            </label>
+            <label className="pdf-date-field">
+              <span>Orientación</span>
+              <select
+                value={orientation}
+                onChange={event =>
+                  setOrientation(event.target.value as typeof orientation)
+                }
+              >
+                <option value="auto">Automática</option>
+                <option value="portrait">Vertical</option>
+                <option value="landscape">Horizontal</option>
+              </select>
+            </label>
+            <label className="pdf-date-field">
+              <span>Letra</span>
+              <select
+                value={paperFont}
+                onChange={event =>
+                  setPaperFont(event.target.value as typeof paperFont)
+                }
+              >
+                <option value="compact">Compacta</option>
+                <option value="normal">Normal</option>
+                <option value="large">Grande</option>
+              </select>
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={includePattern}
+                onChange={event => setIncludePattern(event.target.checked)}
+              />
+              <span>Incluir patrón</span>
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={includeLogo}
+                onChange={event => setIncludeLogo(event.target.checked)}
+              />
+              <span>Incluir logo</span>
+            </label>
+            <details className="pdf-column-picker">
+              <summary>
+                Columnas ({selectedColumns.length}/{data.columns.length})
+              </summary>
+              <div>
+                {data.columns.map((column, index) => (
+                  <label key={column}>
+                    <input
+                      type="checkbox"
+                      checked={visibleColumns[index] ?? true}
+                      onChange={() =>
+                        setVisibleColumns(current =>
+                          current.map((value, i) =>
+                            i === index ? !value : value
+                          )
+                        )
+                      }
+                    />
+                    {column}
+                  </label>
+                ))}
+              </div>
+            </details>
+            <small>
+              La vista previa y las métricas se actualizan al instante.
+            </small>
+          </aside>
+          <div className="pdf-preview-sheet">
+            <div className="pdf-preview-brand">
+              <img
+                src="/manus-storage/logo-coronel.png"
+                alt="Coronel · Pollos y Parrillas"
+              />
+              <div>
+                <b>CORONEL · REPORTE</b>
+                <small>
+                  {data.subtitle} · {filteredRows.length} registros visibles
+                </small>
+              </div>
+            </div>
+            <section className="pdf-preview-summary">
+              <strong>Resumen del reporte</strong>
+              <span>
+                {data.title} · {fromDate || "inicio"} a {toDate || "hoy"} ·{" "}
+                {selectedColumns.length} columnas · {formatLabel}.
+              </span>
+            </section>
+            <section className="pdf-preview-section">
+              <h4>Resumen ejecutivo</h4>
+              <div className="pdf-preview-metrics">
+                <span>
+                  <b>{filteredRows.length}</b>
+                  <small>Registros visibles</small>
+                </span>
+                <span>
+                  <b>{data.rows.length}</b>
+                  <small>Registros totales</small>
+                </span>
+                <span>
+                  <b>{selectedColumns.length}</b>
+                  <small>Columnas</small>
+                </span>
+                <span>
+                  <b>{pageSize.toUpperCase()}</b>
+                  <small>Formato</small>
+                </span>
+              </div>
+            </section>
+            <section className="pdf-preview-section">
+              <h4>{data.title}</h4>
+              <div className="export-preview-table">
+                <table>
+                  <thead>
+                    <tr>
+                      {selectedColumns.map(column => (
+                        <th key={column}>{column}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedRows.map((row, index) => (
+                      <tr key={index}>
+                        {row.map((value, cellIndex) => (
+                          <td key={cellIndex}>{String(value ?? "")}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {!filteredRows.length && (
+                  <Empty text="No hay registros con esos filtros." />
+                )}
+              </div>
+            </section>
           </div>
-        </details>
-        <p className="export-preview-count">
-          {filteredRows.length} de {data.rows.length} registros
-        </p>
-        <div className="export-preview-table">
-          <table>
-            <thead>
-              <tr>{selectedColumns.map(column => <th key={column}>{column}</th>)}</tr>
-            </thead>
-            <tbody>
-              {selectedRows.map((row, index) => (
-                <tr key={index}>
-                  {row.map((value, cellIndex) => <td key={cellIndex}>{String(value ?? "")}</td>)}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!filteredRows.length && <Empty text="No hay registros con esos filtros." />}
         </div>
         <div className="modal-actions pdf-preview-actions">
-          <button className="secondary-action" onClick={onClose}>Cancelar</button>
-          <button className="small-action" onClick={download} disabled={!filteredRows.length || !selectedColumns.length}>
+          <button className="secondary-action" onClick={onClose}>
+            Cancelar
+          </button>
+          <button className="secondary-action" onClick={() => window.print()}>
+            Imprimir vista
+          </button>
+          <button
+            className="small-action"
+            onClick={download}
+            disabled={!filteredRows.length || !selectedColumns.length}
+          >
             <FileText size={15} /> Descargar detalle PDF
           </button>
         </div>
