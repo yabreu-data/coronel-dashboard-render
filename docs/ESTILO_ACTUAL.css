@@ -2315,3 +2315,22 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
   flex: 0 0 13px !important;
   accent-color: #1d7a4c !important;
 }
+
+/* Contadores circulares en filtros de Clientes y otras pestañas */
+.segment-tabs button span {
+  display: inline-grid !important;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px !important;
+  background: rgba(27, 59, 42, .09) !important;
+  color: #1b3b2a !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  line-height: 1;
+}
+.segment-tabs button.selected span {
+  background: rgba(255, 255, 255, .20) !important;
+  color: #ffffff !important;
+}
