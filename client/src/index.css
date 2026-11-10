@@ -6261,3 +6261,12 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
 .bw-name-link b:hover { color: #1d7a4c; text-decoration: underline; text-underline-offset: 2px; }
 .bw-title .bw-name-link { min-width: 0; }
 .target-bar-row { cursor: pointer; }
+
+.birthday-progress-item {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.birthday-progress-item:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -16px rgba(20,92,54,.4); }

@@ -4228,9 +4228,16 @@ function BirthdayWorkspace({
             ? Math.round((stage.value / counts.todos) * 100)
             : 0;
           return (
-            <div
+            <button
+              type="button"
               className={`birthday-progress-item tone-${stage.tone}`}
               key={stage.label}
+              title="Ver cumpleaños del mes"
+              onClick={() =>
+                document
+                  .getElementById("bw-list")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
             >
               <div className="birthday-progress-top">
                 <span>{stage.label}</span>
@@ -4246,7 +4253,7 @@ function BirthdayWorkspace({
               <small>
                 {index === 0 ? "cumpleaños este mes" : `${pct}% del total`}
               </small>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -4315,7 +4322,7 @@ function BirthdayWorkspace({
               </small>
               <span className="bw-group-count">{group.rows.length}</span>
             </div>
-            <div className="bw-list">
+            <div className="bw-list" id="bw-list">
               {group.rows.map(row => {
                 const item = row.item;
                 const campaign = row.campaign;
