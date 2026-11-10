@@ -11438,29 +11438,65 @@ function downloadTablePdf(
       unit: "pt",
       format: options.pageSize ?? "a4",
     });
+    doc.setProperties({
+      title,
+      subject: subtitle,
+      author: "Restaurante Coronel",
+      creator: "Coronel Dashboard",
+    });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
+    const green = [29, 122, 76] as const;
+    const coral = [224, 47, 27] as const;
+    const ink = [12, 16, 13] as const;
 
-    // Cabecera de marca
-    doc.setFillColor(20, 92, 54);
-    doc.rect(0, 0, pageWidth, 78, "F");
+    // Cabecera de marca, verde viva.
+    doc.setFillColor(...green);
+    doc.rect(0, 0, pageWidth, 82, "F");
+    doc.setFillColor(...coral);
+    doc.rect(0, 82, pageWidth, 4, "F");
     if (logo && options.logo !== false) {
-      doc.addImage(logo, "PNG", 34, 14, 70, 48, undefined, "FAST");
+      doc.addImage(logo, "PNG", 34, 16, 72, 48, undefined, "FAST");
     }
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("REPORTE CORONEL", logo ? 122 : 36, 29);
     doc.setFontSize(17);
-    doc.text(title, logo ? 118 : 36, 38);
+    doc.text(title, logo ? 122 : 36, 49);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.setTextColor(225, 245, 232);
-    doc.text(subtitle, logo ? 118 : 36, 56);
-    if (!logo) doc.text("CORONEL · POLLOS Y PARRILLAS", 36, 70);
+    doc.setTextColor(228, 247, 236);
+    doc.text(subtitle, logo ? 122 : 36, 65);
+
+    // Tarjetas de resumen.
+    const cards = [
+      ["REGISTROS", String(rows.length), [234, 248, 241]],
+      ["GENERADO", new Date().toLocaleDateString("es-PE"), [255, 248, 237]],
+      ["FORMATO", `${(options.pageSize ?? "a4").toUpperCase()} · ${pageOrientation === "landscape" ? "HORIZONTAL" : "VERTICAL"}`, [255, 236, 231]],
+    ] as const;
+    const cardGap = 10;
+    const cardWidth = (pageWidth - 68 - cardGap * 2) / 3;
+    cards.forEach(([label, value, fill], index) => {
+      const x = 34 + index * (cardWidth + cardGap);
+      const y = 102;
+      doc.setFillColor(fill[0], fill[1], fill[2]);
+      doc.setDrawColor(220, 235, 225);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(x, y, cardWidth, 46, 8, 8, "FD");
+      doc.setTextColor(95, 111, 101);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(6.5);
+      doc.text(label, x + 10, y + 14);
+      doc.setTextColor(29, 122, 76);
+      doc.setFontSize(index === 2 ? 8 : 14);
+      doc.text(value, x + 10, y + 33);
+    });
 
     autoTable(doc, {
       head: [columns],
       body: rows.map(row => row.map(value => String(value ?? ""))),
-      startY: 94,
+      startY: 164,
       margin: {
         left: options.margin ?? 34,
         right: options.margin ?? 34,
@@ -11468,42 +11504,55 @@ function downloadTablePdf(
       },
       styles: {
         fontSize: options.fontSize ?? 7.5,
-        cellPadding: 4,
+        cellPadding: 5,
         overflow: "linebreak",
         textColor: [12, 16, 13],
-        lineColor: [226, 237, 230],
-        lineWidth: 0.3,
+        lineColor: [216, 233, 222],
+        lineWidth: 0.35,
       },
-      headStyles: { fillColor: [29, 122, 76], textColor: 255, fontStyle: "bold" },
+      headStyles: {
+        fillColor: [29, 122, 76],
+        textColor: 255,
+        fontStyle: "bold",
+        fontSize: Math.max(7, (options.fontSize ?? 7.5) - 0.3),
+        cellPadding: 5,
+      },
       alternateRowStyles: { fillColor: [247, 251, 248] },
+      bodyStyles: { fillColor: 255 },
       theme: "grid",
     });
 
     const pageCount = doc.getNumberOfPages();
     for (let index = 1; index <= pageCount; index += 1) {
       doc.setPage(index);
-      // Patrón de marca sutil sobre el cuerpo, sin tapar la cabecera.
+      // Patrón de Coronel visible, sin invadir la cabecera.
       if (pattern && options.pattern !== false) {
-        doc.saveGraphicsState();
-        doc.setGState(new (doc as unknown as { GState: new (value: { opacity: number }) => unknown }).GState({ opacity: 0.045 }));
-        for (let x = 0; x < pageWidth; x += 185) {
-          for (let y = 82; y < pageHeight; y += 185) {
-            doc.addImage(pattern, "PNG", x, y, 185, 185, undefined, "FAST");
+        const GStateCtor = (doc as unknown as {
+          GState?: new (value: { opacity: number }) => unknown;
+        }).GState;
+        if (GStateCtor) {
+          doc.saveGraphicsState();
+          doc.setGState(new GStateCtor({ opacity: 0.09 }));
+          for (let x = 0; x < pageWidth; x += 210) {
+            for (let y = 88; y < pageHeight - 28; y += 210) {
+              doc.addImage(pattern, "PNG", x, y, 210, 210, undefined, "FAST");
+            }
           }
+          doc.restoreGraphicsState();
         }
-        doc.restoreGraphicsState();
       }
-      // Línea y pie
       doc.setDrawColor(190, 220, 202);
-      doc.setLineWidth(0.6);
-      doc.line(34, pageHeight - 28, pageWidth - 34, pageHeight - 28);
+      doc.setLineWidth(0.7);
+      doc.line(34, pageHeight - 30, pageWidth - 34, pageHeight - 30);
+      doc.setFillColor(...green);
+      doc.circle(38, pageHeight - 19, 2.2, "F");
       doc.setFontSize(7);
-      doc.setTextColor(110, 128, 117);
-      doc.text("CORONEL · POLLOS Y PARRILLAS", 36, pageHeight - 15);
+      doc.setTextColor(95, 111, 101);
+      doc.text("CORONEL · POLLOS Y PARRILLAS", 46, pageHeight - 16);
       doc.text(
         `Generado ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCount}`,
         pageWidth - 36,
-        pageHeight - 15,
+        pageHeight - 16,
         { align: "right" }
       );
     }
