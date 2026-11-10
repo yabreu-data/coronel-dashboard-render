@@ -11792,6 +11792,7 @@ function downloadReportPdf(
     try {
     console.log("REPORT_PDF_START");
     const { logo, pattern } = await loadPdfAssets();
+    console.log("ASSETS", Boolean(logo), Boolean(pattern));
     const widest = sections.reduce(
       (max, section) => Math.max(max, section.columns?.length ?? 0),
       1
@@ -11850,6 +11851,7 @@ function downloadReportPdf(
     const contentWidth = pageWidth - margin * 2;
     const cardWidth = (contentWidth - cardGap * (cards.length - 1)) / Math.max(cards.length, 1);
     cards.forEach(([label, value], index) => {
+      console.log("CARD", label);
       const x = margin + index * (cardWidth + cardGap);
       doc.setFillColor(...soft);
       doc.setDrawColor(...line);
@@ -11863,6 +11865,7 @@ function downloadReportPdf(
       doc.setFontSize(13);
       doc.text(value, x + 11, 133);
     });
+    console.log("BEFORE_SUMMARY");
     let cursorY = 166;
     const summaryLines = doc.splitTextToSize(summary, contentWidth - 20);
     doc.setFillColor(248, 251, 249);
@@ -11879,6 +11882,7 @@ function downloadReportPdf(
     cursorY += Math.max(44, summaryLines.length * 12 + 24);
 
     const renderTable = (section: PdfReportSection) => {
+      console.log("RENDER_TABLE", section.heading);
       if (!section.columns?.length) return;
       const start = cursorY;
       autoTable(doc, {
@@ -11920,6 +11924,7 @@ function downloadReportPdf(
           }
         },
       });
+      console.log("AFTER_TABLE", section.heading);
       const finalY = (
         doc as unknown as { lastAutoTable?: { finalY?: number } }
       ).lastAutoTable?.finalY;
@@ -11927,6 +11932,7 @@ function downloadReportPdf(
     };
 
     sections.forEach(section => {
+      console.log("SECTION", section.heading);
       if (cursorY > pageHeight - 110) {
         doc.addPage();
         paintPattern();
