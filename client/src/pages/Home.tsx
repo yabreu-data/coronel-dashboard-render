@@ -9725,11 +9725,12 @@ function TargetPerformanceChart({
                 className="target-bar-row"
                 key={row.server}
                 title={`${row.server}: ${row.surveys} encuestas · ${row.positive === null ? "sin calidad" : `${row.positive}% positivo · IC95 ${ci ? `${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%` : "—"}`}`}
-                onClick={() =>
-                  document
-                    .getElementById("history-results")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
-                }
+                onClick={() => {
+                  const target =
+                    document.getElementById("history-results") ||
+                    document.getElementById("team-scorecard");
+                  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
               >
                 <span className="target-bar-name">{row.server}</span>
                 <span className="target-bar-track">
