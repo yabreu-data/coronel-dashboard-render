@@ -11620,7 +11620,22 @@ function downloadTablePdf(
 
     autoTable(doc, {
       head: [columns],
-      body: rows.map(row => row.map(value => String(value ?? ""))),
+      body: rows.map(row =>
+        row.map((value, columnIndex) => {
+          if (columnIndex !== daysColumn) return String(value ?? "");
+          const normalized = normalizeText(String(value ?? ""));
+          if (normalized.includes("hoy") || /faltan\s+[1-3]\s+d/.test(normalized)) {
+            return {
+              content: String(value ?? ""),
+              styles: { textColor: [...coral], fontStyle: "bold" as const },
+            };
+          }
+          if (normalized.startsWith("hace")) {
+            return { content: String(value ?? ""), styles: { textColor: [...muted] } };
+          }
+          return String(value ?? "");
+        })
+      ),
       startY: 166,
       margin: { left: margin, right: margin, bottom: 42 },
       theme: "plain",
