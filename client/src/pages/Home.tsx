@@ -11746,8 +11746,11 @@ function downloadTablePdf(
       },
     });
 
+    console.log("BEFORE_FOOTER");
     const pageCount = doc.getNumberOfPages();
+    console.log("PAGECOUNT", pageCount);
     for (let index = 1; index <= pageCount; index += 1) {
+      console.log("FOOTER_PAGE", index);
       doc.setPage(index);
       if (index > 1) paintPattern();
       doc.setDrawColor(...line);
