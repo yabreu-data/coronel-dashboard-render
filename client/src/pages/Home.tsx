@@ -4403,7 +4403,11 @@ function BirthdayWorkspace({
                 />
               </div>
               <small>
-                {index === 0 ? "cumpleaños este mes" : `${pct}% del total`}
+                {index === 0
+                  ? allMonths
+                    ? "cumpleaños en total"
+                    : "cumpleaños este mes"
+                  : `${pct}% del total`}
               </small>
             </button>
           );
