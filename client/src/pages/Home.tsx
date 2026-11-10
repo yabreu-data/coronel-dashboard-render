@@ -11469,6 +11469,24 @@ function downloadTablePdf(
     doc.setTextColor(228, 247, 236);
     doc.text(subtitle, logo ? 122 : 36, 65);
 
+    // Patrón de fondo detrás del contenido de la primera página.
+    const paintPattern = (opacity: number) => {
+      if (!pattern || options.pattern === false) return;
+      const GStateCtor = (doc as unknown as {
+        GState?: new (value: { opacity: number }) => unknown;
+      }).GState;
+      if (!GStateCtor) return;
+      doc.saveGraphicsState();
+      doc.setGState(new GStateCtor({ opacity }));
+      for (let x = 0; x < pageWidth; x += 220) {
+        for (let y = 90; y < pageHeight - 28; y += 220) {
+          doc.addImage(pattern, "PNG", x, y, 220, 220, undefined, "FAST");
+        }
+      }
+      doc.restoreGraphicsState();
+    };
+    paintPattern(0.16);
+
     // Tarjetas de resumen.
     const cards = [
       ["REGISTROS", String(rows.length), [234, 248, 241]],
@@ -11525,22 +11543,9 @@ function downloadTablePdf(
     const pageCount = doc.getNumberOfPages();
     for (let index = 1; index <= pageCount; index += 1) {
       doc.setPage(index);
-      // Patrón de Coronel visible, sin invadir la cabecera.
-      if (pattern && options.pattern !== false) {
-        const GStateCtor = (doc as unknown as {
-          GState?: new (value: { opacity: number }) => unknown;
-        }).GState;
-        if (GStateCtor) {
-          doc.saveGraphicsState();
-          doc.setGState(new GStateCtor({ opacity: 0.09 }));
-          for (let x = 0; x < pageWidth; x += 210) {
-            for (let y = 88; y < pageHeight - 28; y += 210) {
-              doc.addImage(pattern, "PNG", x, y, 210, 210, undefined, "FAST");
-            }
-          }
-          doc.restoreGraphicsState();
-        }
-      }
+      // Las páginas adicionales reciben una capa muy suave; la primera
+      // ya tiene el patrón detrás de todo el contenido.
+      if (index > 1) paintPattern(0.07);
       doc.setDrawColor(190, 220, 202);
       doc.setLineWidth(0.7);
       doc.line(34, pageHeight - 30, pageWidth - 34, pageHeight - 30);
