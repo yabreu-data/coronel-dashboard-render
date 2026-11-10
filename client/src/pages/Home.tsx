@@ -11496,7 +11496,7 @@ function loadPdfAssets() {
     }
   };
   pdfAssetsPromise = Promise.all([
-    toDataUrl("/manus-storage/logo-blanco.png"),
+    toDataUrl("/manus-storage/logo-coronel.png"),
     toDataUrl("/manus-storage/patron-pdf.png"),
   ]).then(([logo, pattern]) => ({ logo, pattern }));
   return pdfAssetsPromise;
@@ -11538,113 +11538,160 @@ function downloadTablePdf(
       author: "Restaurante Coronel",
       creator: "Coronel Dashboard",
     });
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const green = [29, 122, 76] as const;
+    const margin = options.margin ?? 42;
+    const forest = [20, 92, 54] as const;
+    const sage = [158, 212, 174] as const;
     const coral = [224, 47, 27] as const;
     const ink = [12, 16, 13] as const;
+    const muted = [95, 111, 101] as const;
+    const line = [238, 242, 240] as const;
+    const soft = [244, 247, 245] as const;
 
-    // Cabecera de marca, verde viva.
-    doc.setFillColor(...green);
-    doc.rect(0, 0, pageWidth, 82, "F");
-    doc.setFillColor(...coral);
-    doc.rect(0, 82, pageWidth, 4, "F");
-    if (logo && options.logo !== false) {
-      doc.addImage(logo, "PNG", 34, 16, 72, 48, undefined, "FAST");
-    }
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("REPORTE CORONEL", logo ? 122 : 36, 29);
-    doc.setFontSize(17);
-    doc.text(title, logo ? 122 : 36, 49);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(228, 247, 236);
-    doc.text(subtitle, logo ? 122 : 36, 65);
+    const daysColumn = columns.findIndex(column =>
+      normalizeText(column).includes("d")
+    ) >= 0
+      ? columns.findIndex(column => normalizeText(column).includes("d"))
+      : columns.findIndex(column => normalizeText(column) === "dias");
 
-    // Patrón de fondo detrás del contenido de la primera página.
-    const paintPattern = (opacity: number) => {
+    // Patrón de marca muy sutil, solo en el cuerpo.
+    const paintPattern = () => {
       if (!pattern || options.pattern === false) return;
-      for (let x = 0; x < pageWidth; x += 260) {
-        for (let y = 90; y < pageHeight - 28; y += 260) {
-          doc.addImage(pattern, "PNG", x, y, 260, 260, undefined, "FAST");
+      // El asset patron-pdf.png ya está preatenuado: se incrusta sin GState.
+      for (let x = 0; x < pageWidth; x += 250) {
+        for (let y = 104; y < pageHeight - 34; y += 250) {
+          doc.addImage(pattern, "PNG", x, y, 250, 250, undefined, "FAST");
         }
       }
     };
-    paintPattern(0.26);
+    paintPattern();
 
-    // Tarjetas de resumen.
+    // Cabecera editorial: blanca, logo verde a la izquierda y título a la derecha.
+    if (logo && options.logo !== false) {
+      doc.addImage(logo, "PNG", margin, 28, 78, 44, undefined, "FAST");
+    }
+    doc.setTextColor(...muted);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.text("REPORTE CORONEL", pageWidth - margin, 30, { align: "right" });
+    doc.setTextColor(...forest);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text(title, pageWidth - margin, 52, { align: "right" });
+    doc.setTextColor(...muted);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(subtitle, pageWidth - margin, 68, { align: "right" });
+    doc.setDrawColor(...line);
+    doc.setLineWidth(1);
+    doc.line(margin, 88, pageWidth - margin, 88);
+
+    // Tarjetas de resumen independientes.
     const cards = [
-      ["REGISTROS", String(rows.length), [234, 248, 241]],
-      ["GENERADO", new Date().toLocaleDateString("es-PE"), [255, 248, 237]],
-      ["FORMATO", `${(options.pageSize ?? "a4").toUpperCase()} · ${pageOrientation === "landscape" ? "HORIZONTAL" : "VERTICAL"}`, [255, 236, 231]],
+      ["REGISTROS", String(rows.length)],
+      ["GENERADO", new Date().toLocaleDateString("es-PE")],
+      [
+        "FORMATO",
+        `${(options.pageSize ?? "a4").toUpperCase()} · ${
+          pageOrientation === "landscape" ? "HORIZONTAL" : "VERTICAL"
+        }`,
+      ],
     ] as const;
     const cardGap = 10;
-    const cardWidth = (pageWidth - 68 - cardGap * 2) / 3;
-    cards.forEach(([label, value, fill], index) => {
-      const x = 34 + index * (cardWidth + cardGap);
+    const contentWidth = pageWidth - margin * 2;
+    const cardWidth = (contentWidth - cardGap * 2) / 3;
+    cards.forEach(([label, value], index) => {
+      const x = margin + index * (cardWidth + cardGap);
       const y = 102;
-      doc.setFillColor(fill[0], fill[1], fill[2]);
-      doc.setDrawColor(220, 235, 225);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(x, y, cardWidth, 46, 8, 8, "FD");
-      doc.setTextColor(95, 111, 101);
+      doc.setFillColor(...soft);
+      doc.setDrawColor(...line);
+      doc.setLineWidth(0.7);
+      doc.roundedRect(x, y, cardWidth, 48, 12, 12, "FD");
+      doc.setTextColor(...muted);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(6.5);
-      doc.text(label, x + 10, y + 14);
-      doc.setTextColor(29, 122, 76);
+      doc.text(label, x + 13, y + 16);
+      doc.setTextColor(...forest);
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(index === 2 ? 8 : 14);
-      doc.text(value, x + 10, y + 33);
+      doc.text(value, x + 13, y + 35);
     });
 
     autoTable(doc, {
       head: [columns],
       body: rows.map(row => row.map(value => String(value ?? ""))),
-      startY: 164,
-      margin: {
-        left: options.margin ?? 34,
-        right: options.margin ?? 34,
-        bottom: 38,
-      },
+      startY: 166,
+      margin: { left: margin, right: margin, bottom: 42 },
+      theme: "plain",
       styles: {
-        fontSize: options.fontSize ?? 7.5,
-        cellPadding: 5,
+        font: "helvetica",
+        fontSize: options.fontSize ?? 7.6,
+        cellPadding: { top: 8, right: 8, bottom: 8, left: 8 },
         overflow: "linebreak",
-        textColor: [12, 16, 13],
-        lineColor: [216, 233, 222],
-        lineWidth: 0.35,
+        textColor: [...ink],
+        fillColor: [255, 255, 255],
+        lineWidth: 0,
       },
       headStyles: {
-        fillColor: [29, 122, 76],
-        textColor: 255,
+        fillColor: [...sage],
+        textColor: [...forest],
         fontStyle: "bold",
-        fontSize: Math.max(7, (options.fontSize ?? 7.5) - 0.3),
-        cellPadding: 5,
+        fontSize: 7.2,
+        cellPadding: { top: 9, right: 8, bottom: 9, left: 8 },
       },
-      alternateRowStyles: { fillColor: [247, 251, 248] },
-      bodyStyles: { fillColor: 255 },
-      theme: "grid",
+      alternateRowStyles: { fillColor: [248, 251, 249] },
+      columnStyles:
+        columns.length > 0
+          ? { 0: { textColor: [...forest], fontStyle: "bold" } }
+          : {},
+      didParseCell: data => {
+        const isDaysColumn =
+          daysColumn >= 0 && data.column.index === daysColumn;
+        if (isDaysColumn && data.section === "body") {
+          const value = normalizeText(String(data.cell.raw ?? ""));
+          if (value.includes("hoy") || /faltan\s+[1-3]\s+d/.test(value)) {
+            data.cell.styles.textColor = [...coral];
+            data.cell.styles.fontStyle = "bold";
+          } else if (value.startsWith("hace")) {
+            data.cell.styles.textColor = [...muted];
+          }
+        }
+        if (data.section === "body" && data.column.index === daysColumn) {
+          data.cell.styles.fillColor = [255, 255, 255];
+        }
+      },
+      didDrawCell: data => {
+        if (data.section === "body" || data.section === "head") {
+          doc.setDrawColor(...line);
+          doc.setLineWidth(0.45);
+          doc.line(
+            data.cell.x,
+            data.cell.y + data.cell.height,
+            data.cell.x + data.cell.width,
+            data.cell.y + data.cell.height
+          );
+        }
+      },
     });
 
     const pageCount = doc.getNumberOfPages();
     for (let index = 1; index <= pageCount; index += 1) {
       doc.setPage(index);
-      // Las páginas adicionales reciben una capa muy suave; la primera
-      // ya tiene el patrón detrás de todo el contenido.
-      if (index > 1) paintPattern(0.12);
-      doc.setDrawColor(190, 220, 202);
+      if (index > 1) paintPattern();
+      doc.setDrawColor(...line);
       doc.setLineWidth(0.7);
-      doc.line(34, pageHeight - 30, pageWidth - 34, pageHeight - 30);
-      doc.setFillColor(...green);
-      doc.circle(38, pageHeight - 19, 2.2, "F");
-      doc.setFontSize(7);
-      doc.setTextColor(95, 111, 101);
-      doc.text("CORONEL · POLLOS Y PARRILLAS", 46, pageHeight - 16);
+      doc.line(margin, pageHeight - 32, pageWidth - margin, pageHeight - 32);
+      doc.setFillColor(...forest);
+      doc.circle(margin + 3, pageHeight - 20, 2, "F");
+      doc.setFontSize(6.8);
+      doc.setTextColor(...muted);
+      doc.text("CORONEL · POLLOS Y PARRILLAS", margin + 11, pageHeight - 17);
       doc.text(
         `Generado ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCount}`,
-        pageWidth - 36,
-        pageHeight - 16,
+        pageWidth - margin,
+        pageHeight - 17,
         { align: "right" }
       );
     }
