@@ -11966,9 +11966,12 @@ function downloadReportPdf(
         renderTable(section);
       }
     });
+    console.log("BEFORE_FOOTER_REPORT");
 
-    const pageCount = doc.getNumberOfPages();
-    for (let index = 1; index <= pageCount; index += 1) {
+    const pageCountReport = doc.getNumberOfPages();
+    console.log("PAGECOUNT_REPORT", pageCountReport);
+    for (let index = 1; index <= pageCountReport; index += 1) {
+      console.log("FOOTER_REPORT_PAGE", index);
       doc.setPage(index);
       doc.setDrawColor(...line);
       doc.setLineWidth(0.7);
@@ -11979,12 +11982,13 @@ function downloadReportPdf(
       doc.setTextColor(...muted);
       doc.text("CORONEL · POLLOS Y PARRILLAS", margin + 11, pageHeight - 17);
       doc.text(
-        `Generado ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCount}`,
+        `Generado ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCountReport}`,
         pageWidth - margin,
         pageHeight - 17,
         { align: "right" }
       );
     }
+    console.log("REPORT_PDF_BEFORE_SAVE");
     doc.save(
       filename ||
         `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`
