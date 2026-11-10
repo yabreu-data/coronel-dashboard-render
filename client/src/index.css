@@ -6013,3 +6013,70 @@ body * { font-variant-numeric: tabular-nums; }
   .pdf-preview-layout { grid-template-columns: 1fr !important; }
   .pdf-section-picker { max-height: 220px; overflow-y: auto; }
 }
+
+/* Vista previa genérica de exportaciones */
+.export-preview-modal {
+  width: min(980px, 100%) !important;
+  max-height: 94dvh !important;
+  padding: 20px !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+}
+.pdf-preview-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pdf-preview-top h3 { margin: 3px 0; color: #145c36 !important; font-size: 25px !important; }
+.pdf-preview-top .muted { color: #55665c !important; font-size: 12px; }
+.export-preview-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 14px 0 8px;
+  padding: 10px;
+  border: 1px solid #e7efea;
+  border-radius: 13px;
+  background: #f8faf9;
+}
+.export-preview-controls label { display: grid; gap: 4px; color: #66756b; font-size: 10px; font-weight: 800; }
+.export-preview-controls input { min-height: 34px; border: 1px solid #dcebe2; border-radius: 9px; background: #fff; color: #0c100d; padding: 0 8px; font-size: 11px; }
+.export-preview-search { flex: 1 1 190px; }
+.export-preview-count { color: #7c8b82; font-size: 10.5px; margin: 4px 0 8px; }
+.export-preview-table {
+  max-height: 52dvh;
+  overflow: auto;
+  border: 1px solid #e7efea;
+  border-radius: 13px;
+}
+.export-preview-table table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.export-preview-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px;
+  border-bottom: 1px solid #e7efea;
+  background: #f1f8f4;
+  color: #176b45;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.export-preview-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #f0f4f1;
+  color: #0c100d;
+  font-size: 10.5px;
+  vertical-align: top;
+}
+.export-preview-table tr:nth-child(even) td { background: #fbfdfc; }
+@media (max-width: 760px) {
+  .export-preview-modal { width: 100% !important; max-height: 100dvh !important; height: 100dvh !important; border-radius: 0 !important; padding: 14px !important; }
+  .export-preview-table { max-height: 44dvh; }
+  .export-preview-controls { align-items: stretch; }
+  .export-preview-controls label { flex: 1 1 120px; }
+}

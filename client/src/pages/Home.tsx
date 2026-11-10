@@ -136,6 +136,15 @@ type ClientProfile = {
   birthday: string;
 };
 type ServerCatalogItem = { id: string; name: string; active: boolean };
+type ExportPreviewData = {
+  title: string;
+  subtitle: string;
+  columns: string[];
+  rows: unknown[][];
+  dates?: (Date | null)[];
+  filename?: string;
+};
+
 type PriorityPersisted = {
   id: number;
   priorityKey: string;
@@ -1135,49 +1144,53 @@ export default function Home() {
   const exportPagePdf = () => {
     const dateLabel = new Date().toLocaleDateString("es-PE");
     if (page === "clients") {
-      downloadTablePdf(
-        "Clientes Coronel",
-        `${profiles.length} clientes · ${dateLabel}`,
-        ["Cliente", "Teléfono", "Grupo", "Visitas", "Calidad", "Último comentario"],
-        profiles.map(profile => [
+      setExportPreview({
+        title: "Clientes Coronel",
+        subtitle: `${profiles.length} clientes · ${dateLabel}`,
+        columns: ["Cliente", "Teléfono", "Grupo", "Visitas", "Calidad", "Último comentario"],
+        rows: profiles.map(profile => [
           profile.name,
           profile.phone,
           segmentLabelFor(profile.segment),
           profile.count,
           profile.quality,
           profile.comment,
-        ])
-      );
+        ]),
+      });
       return;
     }
     if (page === "voice") {
-      downloadTablePdf(
-        "Voz del cliente",
-        `${comments.length} comentarios · ${dateLabel}`,
-        ["Fecha", "Cliente", "Producto", "Calidad", "Comentario"],
-        comments.map(record => [
+      setExportPreview({
+        title: "Voz del cliente",
+        subtitle: `${comments.length} comentarios · ${dateLabel}`,
+        columns: ["Fecha", "Cliente", "Producto", "Calidad", "Comentario"],
+        rows: comments.map(record => [
           formatDateTime(record.timestamp),
           record.clientName,
           record.dish,
           record.quality,
           record.comment,
-        ])
-      );
+        ]),
+        dates: comments.map(record => parseDate(record.timestamp)),
+      });
       return;
     }
     if (page === "priorities") {
-      downloadTablePdf(
-        "Prioridades",
-        `${persistedPriorities.length} registros · ${dateLabel}`,
-        ["Prioridad", "Estado", "Responsable", "Vence", "Actualizado por"],
-        persistedPriorities.map(priority => [
+      setExportPreview({
+        title: "Prioridades",
+        subtitle: `${persistedPriorities.length} registros · ${dateLabel}`,
+        columns: ["Prioridad", "Estado", "Responsable", "Vence", "Actualizado por"],
+        rows: persistedPriorities.map(priority => [
           priority.priorityKey,
           priority.status,
           priority.responsible,
           priority.dueDate,
           priority.updatedBy,
-        ])
-      );
+        ]),
+        dates: persistedPriorities.map(priority =>
+          priority.dueDate ? parseDate(String(priority.dueDate)) : null
+        ),
+      });
       return;
     }
     if (page === "team") {
@@ -1189,17 +1202,17 @@ export default function Home() {
         if (clean(record.quality) === "bueno") item.good += 1;
         grouped.set(server, item);
       });
-      downloadTablePdf(
-        "Equipo y operación",
-        `${filtered.length} encuestas · ${dateLabel}`,
-        ["Equipo / mesero", "Encuestas", "Bueno", "Calidad positiva"],
-        Array.from(grouped.entries()).map(([server, value]) => [
+      setExportPreview({
+        title: "Equipo y operación",
+        subtitle: `${filtered.length} encuestas · ${dateLabel}`,
+        columns: ["Equipo / mesero", "Encuestas", "Bueno", "Calidad positiva"],
+        rows: Array.from(grouped.entries()).map(([server, value]) => [
           server,
           value.count,
           value.good,
           value.count ? `${Math.round((value.good / value.count) * 100)}%` : "—",
-        ])
-      );
+        ]),
+      });
       return;
     }
     downloadTablePdf(
@@ -1217,6 +1230,7 @@ export default function Home() {
     );
   };
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+  const [exportPreview, setExportPreview] = useState<ExportPreviewData | null>(null);
   const isSearching = Boolean(search.trim());
   const showGlobalFilters = [
     "overview",
@@ -1881,6 +1895,12 @@ export default function Home() {
             </div>
           </div>
         </div>
+      )}
+      {exportPreview && (
+        <ExportPreviewModal
+          data={exportPreview}
+          onClose={() => setExportPreview(null)}
+        />
       )}
       <PdfPreviewModal
         open={pdfPreviewOpen}
@@ -2810,6 +2830,108 @@ function SearchResults({
     </>
   );
 }
+
+function ExportPreviewModal({
+  data,
+  onClose,
+}: {
+  data: ExportPreviewData;
+  onClose: () => void;
+}) {
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [query, setQuery] = useState("");
+  const filteredRows = useMemo(() => {
+    const search = normalizeText(query.trim());
+    return data.rows.filter((row, index) => {
+      if (search && !normalizeText(row.join(" ")).includes(search)) return false;
+      const date = data.dates?.[index];
+      if (fromDate || toDate) {
+        if (!date || Number.isNaN(date.getTime())) return false;
+        const day = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        if (fromDate && day < fromDate) return false;
+        if (toDate && day > toDate) return false;
+      }
+      return true;
+    });
+  }, [data, fromDate, toDate, query]);
+  const download = () => {
+    downloadTablePdf(
+      data.title,
+      `${data.subtitle} · ${filteredRows.length} registros`,
+      data.columns,
+      filteredRows,
+      data.filename
+    );
+    onClose();
+  };
+  return createPortal(
+    <div className="modal-backdrop pdf-preview-backdrop export-preview-backdrop" onClick={onClose}>
+      <div
+        className="pdf-preview-modal export-preview-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Vista previa PDF: ${data.title}`}
+        onClick={event => event.stopPropagation()}
+      >
+        <div className="pdf-preview-top">
+          <div>
+            <p className="eyebrow">VISTA PREVIA PDF</p>
+            <h3>{data.title}</h3>
+            <p className="muted">{data.subtitle}</p>
+          </div>
+          <button className="icon-button" onClick={onClose} aria-label="Cerrar vista previa">
+            <X size={17} />
+          </button>
+        </div>
+        <div className="export-preview-controls">
+          {data.dates && (
+            <>
+              <label>
+                Desde
+                <input type="date" value={fromDate} onChange={event => setFromDate(event.target.value)} />
+              </label>
+              <label>
+                Hasta
+                <input type="date" value={toDate} onChange={event => setToDate(event.target.value)} />
+              </label>
+            </>
+          )}
+          <label className="export-preview-search">
+            Buscar
+            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Filtra por cualquier dato…" />
+          </label>
+        </div>
+        <p className="export-preview-count">
+          {filteredRows.length} de {data.rows.length} registros
+        </p>
+        <div className="export-preview-table">
+          <table>
+            <thead>
+              <tr>{data.columns.map(column => <th key={column}>{column}</th>)}</tr>
+            </thead>
+            <tbody>
+              {filteredRows.slice(0, 100).map((row, index) => (
+                <tr key={index}>
+                  {row.map((value, cellIndex) => <td key={cellIndex}>{String(value ?? "")}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!filteredRows.length && <Empty text="No hay registros con esos filtros." />}
+        </div>
+        <div className="modal-actions pdf-preview-actions">
+          <button className="secondary-action" onClick={onClose}>Cancelar</button>
+          <button className="small-action" onClick={download} disabled={!filteredRows.length}>
+            <FileText size={15} /> Descargar PDF
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 function PdfPreviewModal({
   open,
   onClose,
@@ -3479,6 +3601,8 @@ function BirthdayWorkspace({
     () => new Map(rows.map(row => [row.key, row])),
     [rows]
   );
+  const [birthdayPdfPreview, setBirthdayPdfPreview] =
+    useState<ExportPreviewData | null>(null);
   const birthdayExportColumns = [
     "Cliente",
     "Cumpleaños",
@@ -3506,12 +3630,14 @@ function BirthdayWorkspace({
       birthdayExportRows
     );
   const exportBirthdaysPdf = () =>
-    downloadTablePdf(
-      "Cumpleaños Coronel",
-      `${rows.length} clientes · ${monthName}`,
-      birthdayExportColumns,
-      birthdayExportRows
-    );
+    setBirthdayPdfPreview({
+      title: "Cumpleaños Coronel",
+      subtitle: `${rows.length} clientes · ${monthName}`,
+      columns: birthdayExportColumns,
+      rows: birthdayExportRows,
+      dates: rows.map(row => row.item.target),
+      filename: `cumpleanos-coronel-${new Date().toISOString().slice(0, 10)}.pdf`,
+    });
 
   const nextActionDateOf = (campaign?: BirthdayCampaign) =>
     campaign?.nextActionAt ? new Date(campaign.nextActionAt) : null;
@@ -4716,6 +4842,12 @@ function BirthdayWorkspace({
         document.body
       )}
 
+      {birthdayPdfPreview && (
+        <ExportPreviewModal
+          data={birthdayPdfPreview}
+          onClose={() => setBirthdayPdfPreview(null)}
+        />
+      )}
       <div className="bw-footer">
         <small>
           Responsable sugerido: <b>cajera</b> en horario de baja demanda.
@@ -8160,6 +8292,7 @@ function CallsHistory({
     "Etapa campaña",
     "Canal campaña",
   ];
+  const [callsPdfPreview, setCallsPdfPreview] = useState<ExportPreviewData | null>(null);
   const callExportRows = visible.map(log => [
     formatDateTime(log.callDate),
     log.clientName,
@@ -8182,12 +8315,14 @@ function CallsHistory({
       callExportRows
     );
   const exportCallsPdf = () =>
-    downloadTablePdf(
-      "Historial de llamadas",
-      `${visible.length} llamadas · ${fromDate || "inicio"} a ${toDate || "hoy"}`,
-      callExportColumns,
-      callExportRows
-    );
+    setCallsPdfPreview({
+      title: "Historial de llamadas",
+      subtitle: `${visible.length} llamadas · ${fromDate || "inicio"} a ${toDate || "hoy"}`,
+      columns: callExportColumns,
+      rows: callExportRows,
+      dates: visible.map(log => parseDate(String(log.callDate))),
+      filename: `historial-llamadas-coronel-${new Date().toISOString().slice(0, 10)}.pdf`,
+    });
   return (
     <>
       <div className="page-intro admin-page-intro">
@@ -9004,6 +9139,7 @@ function TargetHistory({
     "Calidad respondida",
     "Calidad positiva",
   ];
+  const [historyPdfPreview, setHistoryPdfPreview] = useState<ExportPreviewData | null>(null);
   const historyExportRows = rows.map(row => [
     row.month,
     row.server,
@@ -9018,12 +9154,13 @@ function TargetHistory({
       historyExportRows
     );
   const exportHistoryPdf = () =>
-    downloadTablePdf(
-      "Historial de metas",
-      `${rows.length} registros · ${fromDate || "inicio"} a ${toDate || "hoy"}`,
-      historyExportColumns,
-      historyExportRows
-    );
+    setHistoryPdfPreview({
+      title: "Historial de metas",
+      subtitle: `${rows.length} registros · ${fromDate || "inicio"} a ${toDate || "hoy"}`,
+      columns: historyExportColumns,
+      rows: historyExportRows,
+      filename: `historial-metas-coronel-${new Date().toISOString().slice(0, 10)}.pdf`,
+    });
   return (
     <>
       <div className="page-intro admin-page-intro">
