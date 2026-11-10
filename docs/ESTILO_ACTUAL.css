@@ -2094,3 +2094,43 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
   transition: transform .18s ease, box-shadow .18s ease;
 }
 .birthday-progress-item:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -16px rgba(20,92,54,.4); }
+
+/* Vista compacta: acorta la página ocultando detalle secundario */
+.app-shell.is-compact .insights-section,
+.app-shell.is-compact .monthly-comparison,
+.app-shell.is-compact .period-comparison,
+.app-shell.is-compact .admin-table-panel,
+.app-shell.is-compact .team-grid,
+.app-shell.is-compact .voice-grid,
+.app-shell.is-compact .calls-agenda-panel,
+.app-shell.is-compact .bw-calendar,
+.app-shell.is-compact .targets-panel {
+  display: none !important;
+}
+.compact-mode-notice {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #dcebe2;
+  border-left: 3px solid #1d7a4c;
+  border-radius: 12px;
+  background: #f6fbf8;
+}
+.compact-mode-notice > svg { flex: 0 0 auto; color: #1d7a4c; }
+.compact-mode-notice span { display: grid; gap: 1px; flex: 1; }
+.compact-mode-notice b { color: #0c100d; font-size: 11px; }
+.compact-mode-notice small { color: #66756b; font-size: 10px; }
+.compact-mode-notice button {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #1d7a4c;
+  border-radius: 9px;
+  background: #fff;
+  color: #145c36;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}

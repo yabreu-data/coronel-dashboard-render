@@ -1628,6 +1628,16 @@ export default function Home() {
           </div>
         </div>
         <div className="content" data-page={page}>
+          {compactMode && (
+            <div className="compact-mode-notice">
+              <Rows3 size={16} />
+              <span>
+                <b>Vista compacta</b>
+                <small>Ocultamos las secciones de detalle para acortar la página.</small>
+              </span>
+              <button onClick={() => setCompactMode(false)}>Mostrar todo</button>
+            </div>
+          )}
           {showGlobalFilters && (
             <FilterBar
               search={search}
@@ -1833,11 +1843,11 @@ export default function Home() {
         <button
           className={compactMode ? "active" : ""}
           onClick={() => setCompactMode(value => !value)}
-          title={compactMode ? "Vista normal" : "Compactar vista"}
-          aria-label={compactMode ? "Vista normal" : "Compactar vista"}
+          title={compactMode ? "Mostrar todas las secciones" : "Ocultar secciones de detalle"}
+          aria-label={compactMode ? "Mostrar todas las secciones" : "Ocultar secciones de detalle"}
         >
           <Rows3 size={17} />
-          <span>{compactMode ? "Normal" : "Compacto"}</span>
+          <span>{compactMode ? "Ver todo" : "Compacto"}</span>
         </button>
         <button
           onClick={() => scrollAppToTop("smooth")}
