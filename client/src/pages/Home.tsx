@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { trpc } from "@/lib/trpc";
-import { jsPDF, GState } from "jspdf";
+import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -11403,7 +11403,7 @@ function loadPdfAssets() {
   };
   pdfAssetsPromise = Promise.all([
     toDataUrl("/manus-storage/logo-blanco.png"),
-    toDataUrl("/manus-storage/patron-coronel.png"),
+    toDataUrl("/manus-storage/patron-pdf.png"),
   ]).then(([logo, pattern]) => ({ logo, pattern }));
   return pdfAssetsPromise;
 }
@@ -11472,14 +11472,11 @@ function downloadTablePdf(
     // Patrón de fondo detrás del contenido de la primera página.
     const paintPattern = (opacity: number) => {
       if (!pattern || options.pattern === false) return;
-      doc.saveGraphicsState();
-      doc.setGState(new GState({ opacity }));
       for (let x = 0; x < pageWidth; x += 260) {
         for (let y = 90; y < pageHeight - 28; y += 260) {
           doc.addImage(pattern, "PNG", x, y, 260, 260, undefined, "FAST");
         }
       }
-      doc.restoreGraphicsState();
     };
     paintPattern(0.26);
 
