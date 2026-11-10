@@ -11790,6 +11790,7 @@ function downloadReportPdf(
 ) {
   void (async () => {
     try {
+    console.log("REPORT_PDF_START");
     const { logo, pattern } = await loadPdfAssets();
     const widest = sections.reduce(
       (max, section) => Math.max(max, section.columns?.length ?? 0),
