@@ -1799,7 +1799,18 @@ export default function Home() {
             <div className="client-sheet-info">
               <div>
                 <small>TELÉFONO</small>
-                <b>{displayDetailPhone || "Sin teléfono"}</b>
+                <b>
+                  {displayDetailPhone ? (
+                    <a
+                      className="client-contact-link"
+                      href={`tel:${displayDetailPhone.replace(/[^\d+]/g, "")}`}
+                    >
+                      {displayDetailPhone}
+                    </a>
+                  ) : (
+                    "Sin teléfono"
+                  )}
+                </b>
               </div>
               <div>
                 <small>GRUPO</small>
@@ -1907,13 +1918,28 @@ export default function Home() {
               </form>
             )}
             <div className="client-sheet-actions">
-              {detailProfile.phone && (
+              {displayDetailPhone && (
                 <a
                   className="btn-borde"
-                  href={`tel:${detailProfile.phone}`}
+                  href={`tel:${displayDetailPhone.replace(/[^\d+]/g, "")}`}
                   aria-label={`Llamar a ${detailProfile.name}`}
                 >
                   <Phone size={14} /> Llamar
+                </a>
+              )}
+              {displayDetailPhone && (
+                <a
+                  className="btn-borde whatsapp-action"
+                  href={`https://wa.me/${
+                    displayDetailPhone.replace(/\D/g, "").length === 9 &&
+                    displayDetailPhone.replace(/\D/g, "").startsWith("9")
+                      ? `51${displayDetailPhone.replace(/\D/g, "")}`
+                      : displayDetailPhone.replace(/\D/g, "")
+                  }`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MessageSquareText size={14} /> WhatsApp
                 </a>
               )}
               <button
@@ -3580,6 +3606,8 @@ function BirthdayWorkspace({
   const historyLogs = historyRow
     ? logs.filter(log => log.clientKey === historyRow.key)
     : [];
+  const historyDisplayPhone =
+    historyRow?.campaign?.phone || historyRow?.item.record.phone || "";
   useEffect(() => {
     setHistoryEditOpen(false);
     setHistoryPhone(
@@ -4183,7 +4211,18 @@ function BirthdayWorkspace({
             <div className="client-sheet-info birthday-sheet-info">
               <div>
                 <small>TELÉFONO</small>
-                <b>{historyRow.campaign?.phone || historyRow.item.record.phone || "Sin teléfono"}</b>
+                <b>
+                  {historyDisplayPhone ? (
+                    <a
+                      className="client-contact-link"
+                      href={`tel:${historyDisplayPhone.replace(/[^\d+]/g, "")}`}
+                    >
+                      {historyDisplayPhone}
+                    </a>
+                  ) : (
+                    "Sin teléfono"
+                  )}
+                </b>
               </div>
               <div>
                 <small>CUMPLEAÑOS</small>
@@ -4229,6 +4268,31 @@ function BirthdayWorkspace({
               </div>
             </div>
 
+            <div className="client-sheet-actions birthday-actions">
+              {historyDisplayPhone && (
+                <a
+                  className="btn-borde"
+                  href={`tel:${historyDisplayPhone.replace(/[^\d+]/g, "")}`}
+                >
+                  <Phone size={14} /> Llamar
+                </a>
+              )}
+              {historyDisplayPhone && (
+                <a
+                  className="btn-borde whatsapp-action"
+                  href={`https://wa.me/${
+                    historyDisplayPhone.replace(/\D/g, "").length === 9 &&
+                    historyDisplayPhone.replace(/\D/g, "").startsWith("9")
+                      ? `51${historyDisplayPhone.replace(/\D/g, "")}`
+                      : historyDisplayPhone.replace(/\D/g, "")
+                  }`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MessageSquareText size={14} /> WhatsApp
+                </a>
+              )}
+            </div>
             <div className="client-sheet-head-actions">
               <button
                 className="btn-borde client-edit-trigger"
@@ -6470,7 +6534,15 @@ function Clients({
         <div className="client-sheet-info priority-detail-info">
           <div>
             <small>TELÉFONO</small>
-            <b>{focusedProfile.phone || "Sin teléfono"}</b>
+            <b>
+              {focusedProfile.phone ? (
+                <a className="client-contact-link" href={`tel:${focusedProfile.phone.replace(/[^\d+]/g, "")}`}>
+                  {focusedProfile.phone}
+                </a>
+              ) : (
+                "Sin teléfono"
+              )}
+            </b>
           </div>
           <div>
             <small>GRUPO</small>
@@ -6725,8 +6797,8 @@ function Clients({
     <>
       <section className="clients-command">
         <div className="clients-command-copy">
-          <p className="eyebrow">TUS CLIENTES</p>
-          <h2>¿A quién puedes llamar hoy?</h2>
+          <p className="eyebrow">TUS CLIENTES · CRM</p>
+          <h2>Tu CRM de clientes</h2>
           <p>
             Cada encuesta es una visita. Si volvió 3 veces o más es{" "}
             <b>frecuente</b>; si volvió 2, <b>repite</b>; si es su primera vez,{" "}

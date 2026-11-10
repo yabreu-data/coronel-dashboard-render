@@ -5969,3 +5969,10 @@ body * { font-variant-numeric: tabular-nums; }
   padding: 0 13px !important;
 }
 .bw-modal-actions .bw-action:disabled { opacity: .65; }
+
+/* Teléfonos y WhatsApp como acciones directas */
+.client-contact-link { color: #176b45 !important; text-decoration: underline; text-underline-offset: 2px; }
+.client-contact-link:hover { color: #b82412 !important; }
+.whatsapp-action { border-color: #bfe1cd !important; background: #f3fbf6 !important; color: #176b45 !important; text-decoration: none; }
+.whatsapp-action:hover { background: #e3f6ea !important; }
+.birthday-actions { margin-bottom: 8px; }
