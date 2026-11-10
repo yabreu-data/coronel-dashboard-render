@@ -3787,6 +3787,7 @@ function BirthdayWorkspace({
   campaigns,
   templates,
   monthName,
+  allMonths = false,
   selectedDate,
   onClearDate,
 }: {
@@ -3798,6 +3799,7 @@ function BirthdayWorkspace({
   campaigns: BirthdayCampaign[];
   templates: MessageTemplateItem[];
   monthName: string;
+  allMonths?: boolean;
   selectedDate: string | null;
   onClearDate: () => void;
 }) {
@@ -4369,7 +4371,7 @@ function BirthdayWorkspace({
 
       <div className="birthday-progress-grid" aria-label="Avance de la campaña">
         {[
-          { label: "Total del mes", value: counts.todos, tone: "total" },
+          { label: allMonths ? "Total de cumpleaños" : "Total del mes", value: counts.todos, tone: "total" },
           { label: "Ya saludados", value: contactedCount, tone: "contacted" },
           { label: "Aceptaron promo", value: acceptedCount, tone: "accepted" },
           { label: "Usaron promo", value: redeemedCount, tone: "redeemed" },
@@ -5204,9 +5206,10 @@ function buildBirthdayMarketing(
   records: RecordItem[],
   profiles: ClientProfile[],
   promotions: PromotionItem[],
-  monthCursor?: Date
+  monthCursor?: Date | null
 ) {
   const now = new Date();
+  const includeAllMonths = monthCursor === null;
   const viewedMonth = monthCursor ?? now;
   const monthStart = new Date(
     viewedMonth.getFullYear(),
@@ -5224,12 +5227,23 @@ function buildBirthdayMarketing(
     .map(record => {
       const birthday = parseBirthdayDate(record.birthday);
       if (!birthday) return null;
-      const target = new Date(
-        viewedMonth.getFullYear(),
+      let target = new Date(
+        includeAllMonths ? now.getFullYear() : viewedMonth.getFullYear(),
         birthday.getMonth(),
         birthday.getDate()
       );
-      if (target < monthStart || target > monthEnd) return null;
+      if (includeAllMonths) {
+        // En "Todos" mostramos siempre la próxima ocurrencia de cada cliente.
+        if (target < todayStart) {
+          target = new Date(
+            now.getFullYear() + 1,
+            birthday.getMonth(),
+            birthday.getDate()
+          );
+        }
+      } else if (target < monthStart || target > monthEnd) {
+        return null;
+      }
       const key = clientKeyOf(record);
       if (seen.has(key)) return null;
       seen.add(key);
@@ -5523,14 +5537,22 @@ function BirthdayPage({
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showAllBirthdays, setShowAllBirthdays] = useState(true);
   const items = useMemo(
-    () => buildBirthdayMarketing(records, profiles, promotions, calendarMonth),
-    [records, profiles, promotions, calendarMonth]
+    () =>
+      buildBirthdayMarketing(
+        records,
+        profiles,
+        promotions,
+        showAllBirthdays ? null : calendarMonth
+      ),
+    [records, profiles, promotions, calendarMonth, showAllBirthdays]
   );
   const monthName = new Intl.DateTimeFormat("es-PE", {
     month: "long",
     year: "numeric",
   }).format(calendarMonth);
+  const activeMonthName = showAllBirthdays ? "Todos los meses" : monthName;
   const monthLabel = monthName.charAt(0).toUpperCase() + monthName.slice(1);
   const daysInMonth = new Date(
     calendarMonth.getFullYear(),
@@ -5561,6 +5583,7 @@ function BirthdayPage({
     setCalendarMonth(
       current => new Date(current.getFullYear(), current.getMonth() + offset, 1)
     );
+    setShowAllBirthdays(false);
     setSelectedDate(null);
   };
   const goToday = () => {
@@ -5586,7 +5609,9 @@ function BirthdayPage({
           >
             <ChevronLeft size={16} />
           </button>
-          <b className="birthday-toolbar-month">{monthLabel}</b>
+          <b className="birthday-toolbar-month">
+            {showAllBirthdays ? "Todos los cumpleaños" : monthLabel}
+          </b>
           <button
             className="birthday-toolbar-arrow"
             onClick={() => changeMonth(1)}
@@ -5594,12 +5619,33 @@ function BirthdayPage({
           >
             <ChevronRight size={16} />
           </button>
-          <button className="birthday-toolbar-action" onClick={goToday}>
+          <button
+            className={`birthday-toolbar-action ${showAllBirthdays ? "active" : ""}`}
+            onClick={() => {
+              setShowAllBirthdays(true);
+              setSelectedDate(null);
+            }}
+            aria-pressed={showAllBirthdays}
+          >
+            Todos
+          </button>
+          <button
+            className="birthday-toolbar-action"
+            onClick={() => {
+              setShowAllBirthdays(false);
+              goToday();
+            }}
+          >
             Hoy
           </button>
           <button
             className={`birthday-toolbar-action ${showCalendar ? "active" : ""}`}
-            onClick={() => setShowCalendar(value => !value)}
+            onClick={() => {
+              setShowCalendar(value => !value);
+              if (!showCalendar) {
+                setShowAllBirthdays(false);
+              }
+            }}
             aria-pressed={showCalendar}
           >
             {showCalendar ? "Ocultar calendario" : "Ver calendario"}
@@ -5714,7 +5760,8 @@ function BirthdayPage({
         promotions={promotions}
         campaigns={campaigns}
         templates={templates}
-        monthName={monthName}
+        monthName={activeMonthName}
+        allMonths={showAllBirthdays}
         selectedDate={selectedDate}
         onClearDate={() => setSelectedDate(null)}
       />
