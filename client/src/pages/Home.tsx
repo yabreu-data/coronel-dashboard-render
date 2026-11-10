@@ -11988,11 +11988,18 @@ function downloadReportPdf(
         { align: "right" }
       );
     }
-    console.log("REPORT_PDF_BEFORE_SAVE");
-    doc.save(
+    const reportFilename =
       filename ||
-        `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`
-    );
+      `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`;
+    const reportBlob = doc.output("blob");
+    const reportUrl = URL.createObjectURL(reportBlob);
+    const reportLink = document.createElement("a");
+    reportLink.href = reportUrl;
+    reportLink.download = reportFilename;
+    document.body.appendChild(reportLink);
+    reportLink.click();
+    reportLink.remove();
+    window.setTimeout(() => URL.revokeObjectURL(reportUrl), 1500);
     } catch (error) {
       console.error("PDF_REPORT_ERROR", error);
     }
