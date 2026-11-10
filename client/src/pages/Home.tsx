@@ -11478,14 +11478,14 @@ function downloadTablePdf(
       if (!GStateCtor) return;
       doc.saveGraphicsState();
       doc.setGState(new GStateCtor({ opacity }));
-      for (let x = 0; x < pageWidth; x += 220) {
-        for (let y = 90; y < pageHeight - 28; y += 220) {
-          doc.addImage(pattern, "PNG", x, y, 220, 220, undefined, "FAST");
+      for (let x = 0; x < pageWidth; x += 260) {
+        for (let y = 90; y < pageHeight - 28; y += 260) {
+          doc.addImage(pattern, "PNG", x, y, 260, 260, undefined, "FAST");
         }
       }
       doc.restoreGraphicsState();
     };
-    paintPattern(0.16);
+    paintPattern(0.26);
 
     // Tarjetas de resumen.
     const cards = [
@@ -11545,7 +11545,7 @@ function downloadTablePdf(
       doc.setPage(index);
       // Las páginas adicionales reciben una capa muy suave; la primera
       // ya tiene el patrón detrás de todo el contenido.
-      if (index > 1) paintPattern(0.07);
+      if (index > 1) paintPattern(0.12);
       doc.setDrawColor(190, 220, 202);
       doc.setLineWidth(0.7);
       doc.line(34, pageHeight - 30, pageWidth - 34, pageHeight - 30);
