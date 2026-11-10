@@ -11550,11 +11550,10 @@ function downloadTablePdf(
     const line = [238, 242, 240] as const;
     const soft = [244, 247, 245] as const;
 
-    const daysColumn = columns.findIndex(column =>
-      normalizeText(column).includes("d")
-    ) >= 0
-      ? columns.findIndex(column => normalizeText(column).includes("d"))
-      : columns.findIndex(column => normalizeText(column) === "dias");
+    const daysColumn = columns.findIndex(column => {
+      const normalized = normalizeText(column);
+      return normalized === "dias" || normalized.startsWith("dias ");
+    });
 
     // Patrón de marca muy sutil, solo en el cuerpo.
     const paintPattern = () => {
