@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { trpc } from "@/lib/trpc";
-import { jsPDF } from "jspdf";
+import { jsPDF, GState } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -11472,12 +11472,8 @@ function downloadTablePdf(
     // Patrón de fondo detrás del contenido de la primera página.
     const paintPattern = (opacity: number) => {
       if (!pattern || options.pattern === false) return;
-      const GStateCtor = (doc as unknown as {
-        GState?: new (value: { opacity: number }) => unknown;
-      }).GState;
-      if (!GStateCtor) return;
       doc.saveGraphicsState();
-      doc.setGState(new GStateCtor({ opacity }));
+      doc.setGState(new GState({ opacity }));
       for (let x = 0; x < pageWidth; x += 260) {
         for (let y = 90; y < pageHeight - 28; y += 260) {
           doc.addImage(pattern, "PNG", x, y, 260, 260, undefined, "FAST");
