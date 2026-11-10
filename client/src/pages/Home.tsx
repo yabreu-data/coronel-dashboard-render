@@ -3471,7 +3471,7 @@ function FilterBar({
         <button title="Descargar CSV" onClick={onCsv}>
           <Download size={14} /> CSV
         </button>
-        <button title="Imprimir o guardar como PDF" onClick={onPdf}>
+        <button title="Abrir vista previa del PDF" onClick={onPdf}>
           <FileText size={14} /> PDF
         </button>
       </div>

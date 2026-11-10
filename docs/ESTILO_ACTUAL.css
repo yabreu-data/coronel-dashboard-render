@@ -2153,3 +2153,5 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
 @media (max-width: 760px) {
   .page-hint.page-hint-compact { border-radius: 10px; align-items: flex-start; }
 }
+
+@media print { .pdf-preview-backdrop { position:static!important; display:block!important; padding:0!important; background:#fff!important; }.pdf-preview-modal { width:100%!important; max-height:none!important; overflow:visible!important; padding:0!important; border:0!important; box-shadow:none!important; background:#fff!important; }.pdf-preview-modal > .modal-head,.pdf-section-picker,.pdf-preview-actions { display:none!important; }.pdf-preview-layout { display:block!important; }.pdf-preview-sheet { box-shadow:none!important; border-radius:0!important; }.app-shell { display:block!important; }.app-shell:has(.pdf-preview-backdrop) > :not(.pdf-preview-backdrop) { display:none!important; } }
