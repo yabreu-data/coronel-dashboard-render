@@ -3064,7 +3064,7 @@ function ExportPreviewModal({
         <div className="modal-actions pdf-preview-actions">
           <button className="secondary-action" onClick={onClose}>Cancelar</button>
           <button className="small-action" onClick={download} disabled={!filteredRows.length || !selectedColumns.length}>
-            <FileText size={15} /> Descargar PDF
+            <FileText size={15} /> Descargar detalle PDF
           </button>
         </div>
       </div>

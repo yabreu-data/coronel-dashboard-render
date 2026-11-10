@@ -2200,3 +2200,7 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
     margin: 0 !important;
   }
 }
+
+@media print {
+  .export-preview-top .icon-button { display: none !important; }
+}
