@@ -2841,6 +2841,21 @@ function ExportPreviewModal({
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [query, setQuery] = useState("");
+  const [pageSize, setPageSize] = useState<"a4" | "letter">("a4");
+  const [orientation, setOrientation] = useState<
+    "auto" | "portrait" | "landscape"
+  >("auto");
+  const [paperFont, setPaperFont] = useState<"compact" | "normal" | "large">(
+    "normal"
+  );
+  const [includePattern, setIncludePattern] = useState(true);
+  const [includeLogo, setIncludeLogo] = useState(true);
+  const [visibleColumns, setVisibleColumns] = useState<boolean[]>(
+    data.columns.map(() => true)
+  );
+  useEffect(() => {
+    setVisibleColumns(data.columns.map(() => true));
+  }, [data]);
   const filteredRows = useMemo(() => {
     const search = normalizeText(query.trim());
     return data.rows.filter((row, index) => {
@@ -2855,13 +2870,35 @@ function ExportPreviewModal({
       return true;
     });
   }, [data, fromDate, toDate, query]);
+  const selectedIndexes = data.columns
+    .map((_, index) => index)
+    .filter(index => visibleColumns[index]);
+  const selectedColumns = selectedIndexes.map(index => data.columns[index]);
+  const selectedRows = filteredRows.map(row =>
+    selectedIndexes.map(index => row[index])
+  );
   const download = () => {
     downloadTablePdf(
       data.title,
-      `${data.subtitle} · ${filteredRows.length} registros`,
-      data.columns,
-      filteredRows,
-      data.filename
+      `${data.subtitle} · ${filteredRows.length} registros · ${pageSize.toUpperCase()} · ${
+        orientation === "auto"
+          ? selectedColumns.length > 6
+            ? "horizontal"
+            : "vertical"
+          : orientation === "landscape"
+            ? "horizontal"
+            : "vertical"
+      }`,
+      selectedColumns,
+      selectedRows,
+      data.filename,
+      {
+        pageSize,
+        orientation,
+        fontSize: paperFont === "compact" ? 6.5 : paperFont === "large" ? 9 : 7.5,
+        pattern: includePattern,
+        logo: includeLogo,
+      }
     );
     onClose();
   };
@@ -2905,17 +2942,67 @@ function ExportPreviewModal({
             Buscar
             <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Filtra por cualquier dato…" />
           </label>
+          <label>
+            Tamaño
+            <select value={pageSize} onChange={event => setPageSize(event.target.value as "a4" | "letter")}>
+              <option value="a4">A4</option>
+              <option value="letter">Carta</option>
+            </select>
+          </label>
+          <label>
+            Orientación
+            <select value={orientation} onChange={event => setOrientation(event.target.value as typeof orientation)}>
+              <option value="auto">Automática</option>
+              <option value="portrait">Vertical</option>
+              <option value="landscape">Horizontal</option>
+            </select>
+          </label>
+          <label>
+            Letra
+            <select value={paperFont} onChange={event => setPaperFont(event.target.value as typeof paperFont)}>
+              <option value="compact">Compacta</option>
+              <option value="normal">Normal</option>
+              <option value="large">Grande</option>
+            </select>
+          </label>
+          <label className="export-preview-check">
+            <input type="checkbox" checked={includePattern} onChange={event => setIncludePattern(event.target.checked)} />
+            Patrón
+          </label>
+          <label className="export-preview-check">
+            <input type="checkbox" checked={includeLogo} onChange={event => setIncludeLogo(event.target.checked)} />
+            Logo
+          </label>
         </div>
+        <details className="export-preview-columns">
+          <summary>Columnas del PDF ({selectedColumns.length}/{data.columns.length})</summary>
+          <div>
+            {data.columns.map((column, index) => (
+              <label key={column}>
+                <input
+                  type="checkbox"
+                  checked={visibleColumns[index] ?? true}
+                  onChange={() =>
+                    setVisibleColumns(current =>
+                      current.map((value, i) => (i === index ? !value : value))
+                    )
+                  }
+                />
+                {column}
+              </label>
+            ))}
+          </div>
+        </details>
         <p className="export-preview-count">
           {filteredRows.length} de {data.rows.length} registros
         </p>
         <div className="export-preview-table">
           <table>
             <thead>
-              <tr>{data.columns.map(column => <th key={column}>{column}</th>)}</tr>
+              <tr>{selectedColumns.map(column => <th key={column}>{column}</th>)}</tr>
             </thead>
             <tbody>
-              {filteredRows.slice(0, 100).map((row, index) => (
+              {selectedRows.slice(0, 100).map((row, index) => (
                 <tr key={index}>
                   {row.map((value, cellIndex) => <td key={cellIndex}>{String(value ?? "")}</td>)}
                 </tr>
@@ -2926,7 +3013,7 @@ function ExportPreviewModal({
         </div>
         <div className="modal-actions pdf-preview-actions">
           <button className="secondary-action" onClick={onClose}>Cancelar</button>
-          <button className="small-action" onClick={download} disabled={!filteredRows.length}>
+          <button className="small-action" onClick={download} disabled={!filteredRows.length || !selectedColumns.length}>
             <FileText size={15} /> Descargar PDF
           </button>
         </div>
@@ -2967,6 +3054,10 @@ function PdfPreviewModal({
   });
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [pageSize, setPageSize] = useState<"a4" | "letter">("a4");
+  const [pageOrientation, setPageOrientation] = useState<"auto" | "portrait" | "landscape">("auto");
+  const [includePattern, setIncludePattern] = useState(true);
+  const [includeLogo, setIncludeLogo] = useState(true);
   const dialogRef = useDialogFocus(open, onClose);
   const scopedRecords = records.filter(record => {
     const date = parseDate(record.timestamp);
@@ -3060,6 +3151,29 @@ function PdfPreviewModal({
                 value={toDate}
                 onChange={event => setToDate(event.target.value)}
               />
+            </label>
+            <label className="pdf-date-field">
+              <span>Tamaño</span>
+              <select value={pageSize} onChange={event => setPageSize(event.target.value as "a4" | "letter")}>
+                <option value="a4">A4</option>
+                <option value="letter">Carta</option>
+              </select>
+            </label>
+            <label className="pdf-date-field">
+              <span>Orientación</span>
+              <select value={pageOrientation} onChange={event => setPageOrientation(event.target.value as typeof pageOrientation)}>
+                <option value="auto">Automática</option>
+                <option value="portrait">Vertical</option>
+                <option value="landscape">Horizontal</option>
+              </select>
+            </label>
+            <label>
+              <input type="checkbox" checked={includePattern} onChange={event => setIncludePattern(event.target.checked)} />
+              <span>Incluir patrón</span>
+            </label>
+            <label>
+              <input type="checkbox" checked={includeLogo} onChange={event => setIncludeLogo(event.target.checked)} />
+              <span>Incluir logo</span>
             </label>
             {(
               [
@@ -3209,7 +3323,14 @@ function PdfPreviewModal({
                   record.dish,
                   record.quality,
                   record.comment,
-                ])
+                ]),
+                undefined,
+                {
+                  pageSize,
+                  orientation: pageOrientation,
+                  pattern: includePattern,
+                  logo: includeLogo,
+                }
               );
               onClose();
             }}
@@ -11287,19 +11408,35 @@ function loadPdfAssets() {
   return pdfAssetsPromise;
 }
 
+type PdfDownloadOptions = {
+  pageSize?: "a4" | "letter";
+  orientation?: "portrait" | "landscape" | "auto";
+  fontSize?: number;
+  pattern?: boolean;
+  logo?: boolean;
+  margin?: number;
+};
+
 function downloadTablePdf(
   title: string,
   subtitle: string,
   columns: string[],
   rows: unknown[][],
-  filename?: string
+  filename?: string,
+  options: PdfDownloadOptions = {}
 ) {
   void (async () => {
     const { logo, pattern } = await loadPdfAssets();
+    const pageOrientation =
+      options.orientation && options.orientation !== "auto"
+        ? options.orientation
+        : columns.length > 6
+          ? "landscape"
+          : "portrait";
     const doc = new jsPDF({
-      orientation: columns.length > 6 ? "landscape" : "portrait",
+      orientation: pageOrientation,
       unit: "pt",
-      format: "a4",
+      format: options.pageSize ?? "a4",
     });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -11307,7 +11444,7 @@ function downloadTablePdf(
     // Cabecera de marca
     doc.setFillColor(20, 92, 54);
     doc.rect(0, 0, pageWidth, 78, "F");
-    if (logo) {
+    if (logo && options.logo !== false) {
       doc.addImage(logo, "PNG", 34, 14, 70, 48, undefined, "FAST");
     }
     doc.setTextColor(255, 255, 255);
@@ -11324,9 +11461,13 @@ function downloadTablePdf(
       head: [columns],
       body: rows.map(row => row.map(value => String(value ?? ""))),
       startY: 94,
-      margin: { left: 34, right: 34, bottom: 38 },
+      margin: {
+        left: options.margin ?? 34,
+        right: options.margin ?? 34,
+        bottom: 38,
+      },
       styles: {
-        fontSize: 7.5,
+        fontSize: options.fontSize ?? 7.5,
         cellPadding: 4,
         overflow: "linebreak",
         textColor: [12, 16, 13],
@@ -11342,7 +11483,7 @@ function downloadTablePdf(
     for (let index = 1; index <= pageCount; index += 1) {
       doc.setPage(index);
       // Patrón de marca sutil sobre el cuerpo, sin tapar la cabecera.
-      if (pattern) {
+      if (pattern && options.pattern !== false) {
         doc.saveGraphicsState();
         doc.setGState(new (doc as unknown as { GState: new (value: { opacity: number }) => unknown }).GState({ opacity: 0.045 }));
         for (let x = 0; x < pageWidth; x += 185) {

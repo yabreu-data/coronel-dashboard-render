@@ -1925,3 +1925,63 @@ body * { font-variant-numeric: tabular-nums; }
 .export-preview-brand img { width: 88px; height: auto; display: block; }
 .export-preview-brand span { color: #176b45; font-size: 9px; font-weight: 900; letter-spacing: .14em; }
 .pdf-preview-top { position: relative; }
+
+/* Controles del editor de PDF */
+.export-preview-controls select,
+.pdf-section-picker select {
+  min-height: 34px;
+  padding: 0 8px;
+  border: 1px solid #dcebe2;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #0c100d;
+  font-size: 11px;
+  font-weight: 600;
+}
+.export-preview-check {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  align-self: end;
+  min-height: 34px;
+  color: #55665c;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.export-preview-check input { min-height: 0 !important; width: 14px; height: 14px; }
+.export-preview-columns {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid #e7efea;
+  border-radius: 12px;
+  background: #f8faf9;
+}
+.export-preview-columns summary {
+  color: #176b45;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.export-preview-columns > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px 12px;
+  margin-top: 8px;
+}
+.export-preview-columns label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #55665c;
+  font-size: 10px;
+  font-weight: 600;
+}
+.export-preview-columns input { width: 13px; height: 13px; }
+.pdf-section-picker label { display: flex; align-items: center; gap: 6px; }
+.pdf-section-picker .pdf-date-field { display: grid; gap: 3px; }
+.pdf-section-picker .pdf-date-field span { color: #66756b; font-size: 9px; font-weight: 800; }
+.pdf-section-picker input[type="checkbox"] { width: 14px; height: 14px; }
+@media (max-width: 760px) {
+  .export-preview-columns > div { grid-template-columns: 1fr 1fr; }
+  .export-preview-controls select { width: 100%; }
+}
