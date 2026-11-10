@@ -3992,7 +3992,7 @@ function BirthdayWorkspace({
         <button className="bw-templates-button" onClick={openTemplates}>
           Cambiar mensaje
         </button>
-        <div className="export-group">
+        <div className="export-group birthday-export-group">
           <button onClick={exportBirthdays}>
             <Download size={14} /> CSV
           </button>
