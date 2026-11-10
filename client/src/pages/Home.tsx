@@ -766,9 +766,17 @@ function InsightCard({
 }
 
 
-function PageHint({ title, children }: { title: string; children: React.ReactNode }) {
+function PageHint({
+  title,
+  children,
+  compact = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  compact?: boolean;
+}) {
   return (
-    <div className="page-hint">
+    <div className={compact ? "page-hint page-hint-compact" : "page-hint"}>
       <HelpCircle size={17} />
       <span>
         <b>{title}</b>
@@ -10921,9 +10929,8 @@ function Team({
           </button>
         </div>
       </div>
-      <PageHint title="Hay tres vistas en Equipo">
-        Usa <b>Resumen</b> para el período e insights, <b>Personas</b> para el
-        desempeño individual y <b>Metas</b> para editar objetivos.
+      <PageHint compact title="Muévete por estas tres pestañas:">
+        Resumen · Personas · Metas
       </PageHint>
       <div className="team-tabs" role="tablist" aria-label="Secciones de Equipo">
         {([
