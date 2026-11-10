@@ -1985,3 +1985,62 @@ body * { font-variant-numeric: tabular-nums; }
   .export-preview-columns > div { grid-template-columns: 1fr 1fr; }
   .export-preview-controls select { width: 100%; }
 }
+
+/* Botones flotantes con etiqueta clara */
+.floating-tools { gap: 7px; }
+.floating-tools button {
+  width: auto !important;
+  min-width: 0;
+  height: 38px !important;
+  padding: 0 12px 0 10px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px !important;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+.floating-tools button span { display: inline; white-space: nowrap; }
+
+/* En móvil solo navegación inferior, sin duplicar pestañas */
+.mobile-topbar-logo { display: none; }
+@media (max-width: 760px) {
+  .sidebar { display: none !important; }
+  .app-shell { display: block !important; }
+  .main-area { width: 100% !important; }
+  .topbar { padding: 12px 14px !important; }
+  .topbar-copy {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr);
+    column-gap: 8px;
+    align-items: center;
+  }
+  .mobile-topbar-logo {
+    display: block;
+    width: 42px;
+    height: auto;
+    grid-row: 1 / span 3;
+  }
+  .topbar-copy .breadcrumb { display: none !important; }
+  .topbar-copy h1, .topbar-copy .topbar-data-line { grid-column: 2; }
+  .topbar-copy h1 { margin: 0 !important; }
+  .mobile-bottom-nav button { position: relative; }
+  .mobile-nav-badge {
+    position: absolute;
+    top: 2px;
+    right: calc(50% - 25px);
+    display: inline-grid;
+    place-items: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #e02f1b;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 900;
+    line-height: 1;
+  }
+}

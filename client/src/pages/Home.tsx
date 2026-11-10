@@ -270,8 +270,10 @@ const promotionCatalog = [
 ];
 const scrollAppToTop = (behavior: ScrollBehavior = "smooth") => {
   const scroller = document.querySelector<HTMLElement>(".main-area");
-  if (scroller) scroller.scrollTo({ top: 0, behavior });
-  else window.scrollTo({ top: 0, behavior });
+  scroller?.scrollTo({ top: 0, behavior });
+  document.documentElement.scrollTo({ top: 0, behavior });
+  document.body.scrollTo({ top: 0, behavior });
+  window.scrollTo({ top: 0, behavior });
 };
 const clean = (value: string) => value.trim().toLowerCase();
 const normalizeText = (value: string) =>
@@ -1417,6 +1419,11 @@ export default function Home() {
       <main className="main-area">
         <header className="topbar">
           <div className="topbar-copy">
+            <img
+              className="mobile-topbar-logo"
+              src="/manus-storage/logo-coronel.png"
+              alt="Coronel · Pollos y Parrillas"
+            />
             <p className="breadcrumb">
               RESTAURANTE CORONEL
             </p>
@@ -1817,6 +1824,7 @@ export default function Home() {
           aria-label={compactMode ? "Vista normal" : "Compactar vista"}
         >
           <Rows3 size={17} />
+          <span>{compactMode ? "Normal" : "Compacto"}</span>
         </button>
         <button
           onClick={() => scrollAppToTop("smooth")}
@@ -1824,6 +1832,7 @@ export default function Home() {
           aria-label="Volver arriba"
         >
           <ArrowUp size={18} />
+          <span>Arriba</span>
         </button>
       </div>
       <nav className="mobile-bottom-nav" aria-label="Navegación principal">
@@ -1843,6 +1852,16 @@ export default function Home() {
             >
               <Icon size={19} />
               <span>{item.label}</span>
+              {item.id === "overview" && priorityCount > 0 && (
+                <span className="mobile-nav-badge" aria-label={`${priorityCount} acciones vencidas`}>
+                  {priorityCount > 99 ? "99+" : priorityCount}
+                </span>
+              )}
+              {item.id === "birthdays" && birthdays.length > 0 && (
+                <span className="mobile-nav-badge" aria-label={`${birthdays.length} cumpleaños próximos`}>
+                  {birthdays.length > 99 ? "99+" : birthdays.length}
+                </span>
+              )}
             </button>
           );
         })}
