@@ -3359,61 +3359,25 @@ function PdfPreviewModal({
           <button className="secondary-action" onClick={onClose}>
             Cancelar
           </button>
+          <button className="secondary-action" onClick={() => window.print()}>
+            Imprimir vista
+          </button>
           <button
             className="small-action"
             onClick={() => {
-              const reportSections: PdfReportSection[] = [];
-              if (sections.comparison) {
-                reportSections.push({
-                  heading: "Comparación mensual acumulada",
-                  text: `Encuestas con calidad: ${scopedGood + scopedRegular + scopedBad} · Bueno: ${scopedGood} · Regular: ${scopedRegular} · Malo: ${scopedBad}`,
-                });
-              }
-              if (sections.products) {
-                reportSections.push({
-                  heading: "Productos más consumidos y mejor valorados",
-                  columns: ["Producto", "Encuestas", "Bueno"],
-                  rows: products.map(([name, value]) => [
-                    name,
-                    value.count,
-                    value.answered
-                      ? `${Math.round((value.good / value.answered) * 100)}%`
-                      : "—",
-                  ]),
-                });
-              }
-              if (sections.clients) {
-                reportSections.push({
-                  heading: "Clientes a recuperar",
-                  columns: ["Cliente", "Calidad", "Último comentario"],
-                  rows: risky.map(profile => [
-                    profile.name,
-                    profile.quality || "—",
-                    noCommentLabel(profile),
-                  ]),
-                  ...(risky.length
-                    ? {}
-                    : { text: "No hay clientes a recuperar con los filtros actuales." }),
-                });
-              }
-              const downloadPromise = downloadReportPdf(
+              downloadTablePdf(
                 `Reporte de encuestas · ${areaLabel}`,
                 `Rango: ${dateLabel} · ${filterLabel}`,
-                [
-                  ["REGISTROS", String(scopedRecords.length)],
-                  ["CALIDAD POSITIVA", `${Math.round(scopedPositive * 100)}%`],
-                  ["MALAS", String(scopedBad)],
-                  [
-                    "FIELES",
-                    String(
-                      scopedProfiles.filter(profile => profile.segment === "Fiel")
-                        .length
-                    ),
-                  ],
-                ],
-                summary,
-                reportSections,
-                "reporte-centro-accion.pdf",
+                ["Fecha", "Cliente", "Teléfono", "Producto", "Calidad", "Comentario"],
+                scopedRecords.map(record => [
+                  formatDateTime(record.timestamp),
+                  record.clientName,
+                  record.phone,
+                  record.dish,
+                  record.quality,
+                  record.comment,
+                ]),
+                undefined,
                 {
                   pageSize,
                   orientation: pageOrientation,
@@ -3421,7 +3385,7 @@ function PdfPreviewModal({
                   logo: includeLogo,
                 }
               );
-              void downloadPromise.then(onClose);
+              onClose();
             }}
           >
             <FileText size={15} /> Descargar PDF
@@ -11746,11 +11710,8 @@ function downloadTablePdf(
       },
     });
 
-    console.log("BEFORE_FOOTER");
     const pageCount = doc.getNumberOfPages();
-    console.log("PAGECOUNT", pageCount);
     for (let index = 1; index <= pageCount; index += 1) {
-      console.log("FOOTER_PAGE", index);
       doc.setPage(index);
       if (index > 1) paintPattern();
       doc.setDrawColor(...line);
@@ -11775,229 +11736,6 @@ function downloadTablePdf(
   })();
 }
 
-type PdfReportSection = {
-  heading: string;
-  text?: string;
-  columns?: string[];
-  rows?: unknown[][];
-};
-
-function downloadReportPdf(
-  title: string,
-  subtitle: string,
-  cards: Array<[string, string]>,
-  summary: string,
-  sections: PdfReportSection[],
-  filename?: string,
-  options: PdfDownloadOptions = {}
-): Promise<void> {
-  return (async () => {
-    try {
-    console.log("REPORT_PDF_START");
-    const { logo, pattern } = await loadPdfAssets();
-    console.log("ASSETS", Boolean(logo), Boolean(pattern));
-    const widest = sections.reduce(
-      (max, section) => Math.max(max, section.columns?.length ?? 0),
-      1
-    );
-    const pageOrientation =
-      options.orientation && options.orientation !== "auto"
-        ? options.orientation
-        : widest > 6
-          ? "landscape"
-          : "portrait";
-    const doc = new jsPDF({
-      orientation: pageOrientation,
-      unit: "pt",
-      format: options.pageSize ?? "a4",
-    });
-    doc.setProperties({ title, subject: subtitle, author: "Restaurante Coronel" });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = options.margin ?? 42;
-    const forest = [20, 92, 54] as const;
-    const sage = [158, 212, 174] as const;
-    const ink = [12, 16, 13] as const;
-    const muted = [95, 111, 101] as const;
-    const line = [238, 242, 240] as const;
-    const soft = [244, 247, 245] as const;
-
-    const paintPattern = () => {
-      if (!pattern || options.pattern === false) return;
-      for (let x = 0; x < pageWidth; x += 250) {
-        for (let y = 104; y < pageHeight - 34; y += 250) {
-          doc.addImage(pattern, "PNG", x, y, 250, 250, undefined, "FAST");
-        }
-      }
-    };
-    paintPattern();
-
-    if (logo && options.logo !== false) {
-      doc.addImage(logo, "PNG", margin, 28, 78, 44, undefined, "FAST");
-    }
-    doc.setTextColor(...muted);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.5);
-    doc.text("REPORTE CORONEL", pageWidth - margin, 30, { align: "right" });
-    doc.setTextColor(...forest);
-    doc.setFontSize(19);
-    doc.text(title, pageWidth - margin, 52, { align: "right" });
-    doc.setTextColor(...muted);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text(subtitle, pageWidth - margin, 68, { align: "right" });
-    doc.setDrawColor(...line);
-    doc.setLineWidth(1);
-    doc.line(margin, 88, pageWidth - margin, 88);
-
-    const cardGap = 8;
-    const contentWidth = pageWidth - margin * 2;
-    const cardWidth = (contentWidth - cardGap * (cards.length - 1)) / Math.max(cards.length, 1);
-    cards.forEach(([label, value], index) => {
-      console.log("CARD", label);
-      const x = margin + index * (cardWidth + cardGap);
-      doc.setFillColor(...soft);
-      doc.setDrawColor(...line);
-      doc.setLineWidth(0.7);
-      doc.roundedRect(x, 102, cardWidth, 44, 12, 12, "FD");
-      doc.setTextColor(...muted);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(6.2);
-      doc.text(label, x + 11, 116);
-      doc.setTextColor(...forest);
-      doc.setFontSize(13);
-      doc.text(value, x + 11, 133);
-    });
-    console.log("BEFORE_SUMMARY");
-    let cursorY = 166;
-    const summaryLines = doc.splitTextToSize(summary, contentWidth - 20);
-    doc.setFillColor(248, 251, 249);
-    doc.setDrawColor(...line);
-    doc.roundedRect(margin, cursorY, contentWidth, Math.max(34, summaryLines.length * 12 + 16), 10, 10, "FD");
-    doc.setTextColor(...forest);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
-    doc.text("LECTURA EJECUTIVA", margin + 11, cursorY + 14);
-    doc.setTextColor(...ink);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text(summaryLines, margin + 11, cursorY + 27);
-    cursorY += Math.max(44, summaryLines.length * 12 + 24);
-
-    const renderTable = (section: PdfReportSection) => {
-      console.log("RENDER_TABLE", section.heading);
-      if (!section.columns?.length) return;
-      const start = cursorY;
-      autoTable(doc, {
-        head: [section.columns],
-        body: (section.rows ?? []).map(row =>
-          row.map(value => String(value ?? ""))
-        ),
-        startY: start,
-        margin: { left: margin, right: margin, bottom: 42 },
-        theme: "plain",
-        styles: {
-          font: "helvetica",
-          fontSize: options.fontSize ?? 7.4,
-          cellPadding: { top: 7, right: 8, bottom: 7, left: 8 },
-          overflow: "linebreak",
-          textColor: [...ink],
-          fillColor: [255, 255, 255],
-          lineWidth: 0,
-        },
-        headStyles: {
-          fillColor: [...sage],
-          textColor: [...forest],
-          fontStyle: "bold",
-          fontSize: 7,
-          cellPadding: { top: 8, right: 8, bottom: 8, left: 8 },
-        },
-        alternateRowStyles: { fillColor: [248, 251, 249] },
-        columnStyles: { 0: { textColor: [...forest], fontStyle: "bold" } },
-        didDrawCell: data => {
-          if (data.section === "body" || data.section === "head") {
-            doc.setDrawColor(...line);
-            doc.setLineWidth(0.45);
-            doc.line(
-              data.cell.x,
-              data.cell.y + data.cell.height,
-              data.cell.x + data.cell.width,
-              data.cell.y + data.cell.height
-            );
-          }
-        },
-      });
-      console.log("AFTER_TABLE", section.heading);
-      const finalY = (
-        doc as unknown as { lastAutoTable?: { finalY?: number } }
-      ).lastAutoTable?.finalY;
-      cursorY = (finalY ?? start + 48) + 22;
-    };
-
-    sections.forEach(section => {
-      console.log("SECTION", section.heading);
-      if (cursorY > pageHeight - 110) {
-        doc.addPage();
-        paintPattern();
-        cursorY = 50;
-      }
-      doc.setTextColor(...forest);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.text(section.heading, margin, cursorY);
-      doc.setDrawColor(...line);
-      doc.setLineWidth(0.8);
-      doc.line(margin, cursorY + 7, pageWidth - margin, cursorY + 7);
-      cursorY += 20;
-      if (section.text) {
-        const lines = doc.splitTextToSize(section.text, contentWidth);
-        doc.setTextColor(...muted);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(8);
-        doc.text(lines, margin, cursorY);
-        cursorY += lines.length * 11 + 12;
-      }
-      if (section.columns?.length) {
-        if (cursorY > pageHeight - 100) {
-          doc.addPage();
-          paintPattern();
-          cursorY = 50;
-        }
-        renderTable(section);
-      }
-    });
-    console.log("BEFORE_FOOTER_REPORT");
-
-    const pageCountReport = doc.getNumberOfPages();
-    console.log("PAGECOUNT_REPORT", pageCountReport);
-    for (let index = 1; index <= pageCountReport; index += 1) {
-      console.log("FOOTER_REPORT_PAGE", index);
-      doc.setPage(index);
-      doc.setDrawColor(...line);
-      doc.setLineWidth(0.7);
-      doc.line(margin, pageHeight - 32, pageWidth - margin, pageHeight - 32);
-      doc.setFillColor(...forest);
-      doc.circle(margin + 3, pageHeight - 20, 2, "F");
-      doc.setFontSize(6.8);
-      doc.setTextColor(...muted);
-      doc.text("CORONEL · POLLOS Y PARRILLAS", margin + 11, pageHeight - 17);
-      doc.text(
-        `Generado ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCountReport}`,
-        pageWidth - margin,
-        pageHeight - 17,
-        { align: "right" }
-      );
-    }
-    const reportFilename =
-      filename ||
-      `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`;
-    console.log("REPORT_PDF_SAVE", reportFilename);
-    doc.save(reportFilename);
-    } catch (error) {
-      console.error("PDF_REPORT_ERROR", error);
-    }
-  })();
-}
 
 function downloadGenericCsv(
   filename: string,
