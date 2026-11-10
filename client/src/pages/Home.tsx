@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import { trpc } from "@/lib/trpc";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { createPortal } from "react-dom";
@@ -1063,7 +1065,157 @@ export default function Home() {
     setOverviewFocus(null);
     setMobileMenuOpen(false);
   };
-  const exportCsv = () => downloadCsv(filtered);
+  const exportPageCsv = () => {
+    if (page === "clients") {
+      downloadGenericCsv(
+        `clientes-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["Cliente", "Teléfono", "Grupo", "Visitas", "Calidad", "Último comentario"],
+        profiles.map(profile => [
+          profile.name,
+          profile.phone,
+          segmentLabelFor(profile.segment),
+          profile.count,
+          profile.quality,
+          profile.comment,
+        ])
+      );
+      return;
+    }
+    if (page === "voice") {
+      downloadGenericCsv(
+        `voz-cliente-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["Fecha", "Cliente", "Producto", "Calidad", "Comentario"],
+        comments.map(record => [
+          formatDateTime(record.timestamp),
+          record.clientName,
+          record.dish,
+          record.quality,
+          record.comment,
+        ])
+      );
+      return;
+    }
+    if (page === "priorities") {
+      downloadGenericCsv(
+        `prioridades-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["Prioridad", "Estado", "Responsable", "Vence", "Actualizado por"],
+        persistedPriorities.map(priority => [
+          priority.priorityKey,
+          priority.status,
+          priority.responsible,
+          priority.dueDate,
+          priority.updatedBy,
+        ])
+      );
+      return;
+    }
+    if (page === "team") {
+      const grouped = new Map<string, { count: number; good: number }>();
+      filtered.forEach(record => {
+        const server = displayServer(record.registeredBy);
+        const item = grouped.get(server) ?? { count: 0, good: 0 };
+        item.count += 1;
+        if (clean(record.quality) === "bueno") item.good += 1;
+        grouped.set(server, item);
+      });
+      downloadGenericCsv(
+        `equipo-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["Equipo / mesero", "Encuestas", "Bueno", "Calidad positiva"],
+        Array.from(grouped.entries()).map(([server, value]) => [
+          server,
+          value.count,
+          value.good,
+          value.count ? `${Math.round((value.good / value.count) * 100)}%` : "—",
+        ])
+      );
+      return;
+    }
+    downloadCsv(filtered);
+  };
+  const exportPagePdf = () => {
+    const dateLabel = new Date().toLocaleDateString("es-PE");
+    if (page === "clients") {
+      downloadTablePdf(
+        "Clientes Coronel",
+        `${profiles.length} clientes · ${dateLabel}`,
+        ["Cliente", "Teléfono", "Grupo", "Visitas", "Calidad", "Último comentario"],
+        profiles.map(profile => [
+          profile.name,
+          profile.phone,
+          segmentLabelFor(profile.segment),
+          profile.count,
+          profile.quality,
+          profile.comment,
+        ])
+      );
+      return;
+    }
+    if (page === "voice") {
+      downloadTablePdf(
+        "Voz del cliente",
+        `${comments.length} comentarios · ${dateLabel}`,
+        ["Fecha", "Cliente", "Producto", "Calidad", "Comentario"],
+        comments.map(record => [
+          formatDateTime(record.timestamp),
+          record.clientName,
+          record.dish,
+          record.quality,
+          record.comment,
+        ])
+      );
+      return;
+    }
+    if (page === "priorities") {
+      downloadTablePdf(
+        "Prioridades",
+        `${persistedPriorities.length} registros · ${dateLabel}`,
+        ["Prioridad", "Estado", "Responsable", "Vence", "Actualizado por"],
+        persistedPriorities.map(priority => [
+          priority.priorityKey,
+          priority.status,
+          priority.responsible,
+          priority.dueDate,
+          priority.updatedBy,
+        ])
+      );
+      return;
+    }
+    if (page === "team") {
+      const grouped = new Map<string, { count: number; good: number }>();
+      filtered.forEach(record => {
+        const server = displayServer(record.registeredBy);
+        const item = grouped.get(server) ?? { count: 0, good: 0 };
+        item.count += 1;
+        if (clean(record.quality) === "bueno") item.good += 1;
+        grouped.set(server, item);
+      });
+      downloadTablePdf(
+        "Equipo y operación",
+        `${filtered.length} encuestas · ${dateLabel}`,
+        ["Equipo / mesero", "Encuestas", "Bueno", "Calidad positiva"],
+        Array.from(grouped.entries()).map(([server, value]) => [
+          server,
+          value.count,
+          value.good,
+          value.count ? `${Math.round((value.good / value.count) * 100)}%` : "—",
+        ])
+      );
+      return;
+    }
+    downloadTablePdf(
+      "Encuestas Coronel",
+      `${filtered.length} registros · ${dateLabel}`,
+      ["Fecha", "Cliente", "Teléfono", "Producto", "Calidad", "Comentario"],
+      filtered.map(record => [
+        formatDateTime(record.timestamp),
+        record.clientName,
+        record.phone,
+        record.dish,
+        record.quality,
+        record.comment,
+      ])
+    );
+  };
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const isSearching = Boolean(search.trim());
   const showGlobalFilters = [
@@ -1456,8 +1608,11 @@ export default function Home() {
                 setSearchScope("all");
                 setQualityFilter("Todos");
               }}
-              onCsv={exportCsv}
-              onPdf={() => setPdfPreviewOpen(true)}
+              onCsv={exportPageCsv}
+              onPdf={() => {
+                if (page === "overview") setPdfPreviewOpen(true);
+                else exportPagePdf();
+              }}
             />
           )}
           {isSearching ? (
@@ -2520,27 +2675,29 @@ function SearchResults({
   const groupedClients = Array.from(
     new Map(records.map(record => [clientKeyOf(record), record])).values()
   );
+  const searchExportColumns = [
+    "Fecha",
+    "Cliente",
+    "Teléfono",
+    "Producto",
+    "Comentario",
+    "Mesero",
+    "Calidad",
+  ];
+  const searchExportRows = records.map(record => [
+    record.timestamp,
+    record.clientName,
+    record.phone,
+    record.dish,
+    record.comment,
+    record.registeredBy,
+    record.quality,
+  ]);
   const exportResults = () =>
     downloadGenericCsv(
       `busqueda-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
-      [
-        "Fecha",
-        "Cliente",
-        "Teléfono",
-        "Producto",
-        "Comentario",
-        "Mesero",
-        "Calidad",
-      ],
-      records.map(record => [
-        record.timestamp,
-        record.clientName,
-        record.phone,
-        record.dish,
-        record.comment,
-        record.registeredBy,
-        record.quality,
-      ])
+      searchExportColumns,
+      searchExportRows
     );
   return (
     <>
@@ -2595,7 +2752,16 @@ function SearchResults({
                 <button onClick={exportResults}>
                   <Download size={14} /> CSV
                 </button>
-                <button onClick={() => printReport()}>
+                <button
+                  onClick={() =>
+                    downloadTablePdf(
+                      "Resultados de búsqueda",
+                      `${records.length} registros relacionados`,
+                      searchExportColumns,
+                      searchExportRows
+                    )
+                  }
+                >
                   <FileText size={14} /> PDF
                 </button>
               </div>
@@ -2906,8 +3072,18 @@ function PdfPreviewModal({
           <button
             className="small-action"
             onClick={() =>
-              printReport(
-                `Área: ${areaLabel} · Rango: ${dateLabel} · ${filterLabel}`
+              downloadTablePdf(
+                `Reporte de encuestas · ${areaLabel}`,
+                `Rango: ${dateLabel} · ${filterLabel}`,
+                ["Fecha", "Cliente", "Teléfono", "Producto", "Calidad", "Comentario"],
+                scopedRecords.map(record => [
+                  formatDateTime(record.timestamp),
+                  record.clientName,
+                  record.phone,
+                  record.dish,
+                  record.quality,
+                  record.comment,
+                ])
               )
             }
           >
@@ -3302,6 +3478,39 @@ function BirthdayWorkspace({
     () => new Map(rows.map(row => [row.key, row])),
     [rows]
   );
+  const birthdayExportColumns = [
+    "Cliente",
+    "Cumpleaños",
+    "Teléfono",
+    "Promoción",
+    "Estado",
+    "Responsable",
+    "Próxima acción",
+    "Días",
+  ];
+  const birthdayExportRows = rows.map(row => [
+    row.item.record.clientName || "Sin nombre",
+    row.item.record.birthday || "",
+    row.campaign?.phone || row.item.record.phone || "",
+    promoteFor(row),
+    row.progress,
+    row.campaign?.responsible || "Cajera",
+    toDateInputValue(row.campaign?.nextActionAt) || "Sin fecha",
+    row.item.days,
+  ]);
+  const exportBirthdays = () =>
+    downloadGenericCsv(
+      `cumpleanos-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
+      birthdayExportColumns,
+      birthdayExportRows
+    );
+  const exportBirthdaysPdf = () =>
+    downloadTablePdf(
+      "Cumpleaños Coronel",
+      `${rows.length} clientes · ${monthName}`,
+      birthdayExportColumns,
+      birthdayExportRows
+    );
 
   const nextActionDateOf = (campaign?: BirthdayCampaign) =>
     campaign?.nextActionAt ? new Date(campaign.nextActionAt) : null;
@@ -3782,6 +3991,14 @@ function BirthdayWorkspace({
         <button className="bw-templates-button" onClick={openTemplates}>
           Cambiar mensaje
         </button>
+        <div className="export-group">
+          <button onClick={exportBirthdays}>
+            <Download size={14} /> CSV
+          </button>
+          <button onClick={exportBirthdaysPdf}>
+            <FileText size={14} /> PDF
+          </button>
+        </div>
       </div>
 
       {groups.length === 0 ? (
@@ -7926,38 +8143,48 @@ function CallsHistory({
     .sort((a, b) => a.date.getTime() - b.date.getTime());
   const upcomingCalls = scheduledCalls.filter(item => item.date >= todayStart);
   const overdueCalls = scheduledCalls.filter(item => item.date < todayStart);
+  const callExportColumns = [
+    "Fecha",
+    "Cliente",
+    "Teléfono",
+    "Resultado",
+    "Promoción",
+    "Redimida",
+    "Seguimiento",
+    "Próxima llamada",
+    "Notas",
+    "Usuario",
+    "Asignado a",
+    "Etapa campaña",
+    "Canal campaña",
+  ];
+  const callExportRows = visible.map(log => [
+    formatDateTime(log.callDate),
+    log.clientName,
+    log.phone,
+    log.outcome,
+    log.promotion,
+    log.promotionRedeemed ? "Sí" : "No",
+    log.recoveryResult,
+    log.nextCallDate ? formatDate(log.nextCallDate) : "",
+    log.notes,
+    log.createdBy,
+    log.assignedTo,
+    log.campaignStage,
+    log.campaignChannel,
+  ]);
   const exportCalls = () =>
     downloadGenericCsv(
       `historial-llamadas-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
-      [
-        "Fecha",
-        "Cliente",
-        "Teléfono",
-        "Resultado",
-        "Promoción",
-        "Redimida",
-        "Seguimiento",
-        "Próxima llamada",
-        "Notas",
-        "Usuario",
-        "Etapa campaña",
-        "Canal campaña",
-      ],
-      visible.map(log => [
-        log.callDate,
-        log.clientName,
-        log.phone,
-        log.outcome,
-        log.promotion,
-        log.promotionRedeemed ? "Sí" : "No",
-        log.recoveryResult,
-        log.nextCallDate,
-        log.notes,
-        log.createdBy,
-        log.assignedTo,
-        log.campaignStage,
-        log.campaignChannel,
-      ])
+      callExportColumns,
+      callExportRows
+    );
+  const exportCallsPdf = () =>
+    downloadTablePdf(
+      "Historial de llamadas",
+      `${visible.length} llamadas · ${fromDate || "inicio"} a ${toDate || "hoy"}`,
+      callExportColumns,
+      callExportRows
     );
   return (
     <>
@@ -8120,13 +8347,7 @@ function CallsHistory({
             <button onClick={exportCalls}>
               <Download size={14} /> CSV
             </button>
-            <button
-              onClick={() =>
-                printReport(
-                  `Desde: ${fromDate || "inicio"} · Hasta: ${toDate || "hoy"} · Resultado: ${outcome} · Promoción: ${promotion}`
-                )
-              }
-            >
+            <button onClick={exportCallsPdf}>
               <FileText size={14} /> PDF
             </button>
           </div>
@@ -8774,23 +8995,32 @@ function TargetHistory({
   const topServer = Object.entries(serverTotals).sort(
     (a, b) => b[1].surveys - a[1].surveys
   )[0];
+  const historyExportColumns = [
+    "Mes",
+    "Equipo/Mesero",
+    "Encuestas",
+    "Calidad respondida",
+    "Calidad positiva",
+  ];
+  const historyExportRows = rows.map(row => [
+    row.month,
+    row.server,
+    row.surveys,
+    row.answered,
+    row.positive === null ? "" : `${row.positive}%`,
+  ]);
   const exportHistory = () =>
     downloadGenericCsv(
       `historial-metas-coronel-${new Date().toISOString().slice(0, 10)}.csv`,
-      [
-        "Mes",
-        "Equipo/Mesero",
-        "Encuestas",
-        "Calidad respondida",
-        "Calidad positiva",
-      ],
-      rows.map(row => [
-        row.month,
-        row.server,
-        row.surveys,
-        row.answered,
-        row.positive === null ? "" : `${row.positive}%`,
-      ])
+      historyExportColumns,
+      historyExportRows
+    );
+  const exportHistoryPdf = () =>
+    downloadTablePdf(
+      "Historial de metas",
+      `${rows.length} registros · ${fromDate || "inicio"} a ${toDate || "hoy"}`,
+      historyExportColumns,
+      historyExportRows
     );
   return (
     <>
@@ -8951,13 +9181,7 @@ function TargetHistory({
             <button onClick={exportHistory}>
               <Download size={14} /> CSV
             </button>
-            <button
-              onClick={() =>
-                printReport(
-                  `Desde: ${fromDate || "inicio"} · Hasta: ${toDate || "hoy"} · Vista: equipo y mesero`
-                )
-              }
-            >
+            <button onClick={exportHistoryPdf}>
               <FileText size={14} /> PDF
             </button>
           </div>
@@ -10883,6 +11107,51 @@ function buildRequestComments(comments: RecordItem[]) {
   return comments.filter(record =>
     REQUEST_PATTERN.test(normalizeText(record.comment))
   );
+}
+
+
+function downloadTablePdf(
+  title: string,
+  subtitle: string,
+  columns: string[],
+  rows: unknown[][],
+  filename?: string
+) {
+  const doc = new jsPDF({
+    orientation: columns.length > 6 ? "landscape" : "portrait",
+    unit: "pt",
+    format: "a4",
+  });
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(20, 92, 54);
+  doc.text(title, 40, 42);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(85, 102, 92);
+  doc.text(subtitle, 40, 58);
+  autoTable(doc, {
+    head: [columns],
+    body: rows.map(row => row.map(value => String(value ?? ""))),
+    startY: 72,
+    margin: { left: 36, right: 36, bottom: 34 },
+    styles: { fontSize: 7.5, cellPadding: 4, overflow: "linebreak", textColor: [12, 16, 13] },
+    headStyles: { fillColor: [20, 92, 54], textColor: 255, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [247, 251, 248] },
+    theme: "grid",
+  });
+  const pageCount = doc.getNumberOfPages();
+  for (let index = 1; index <= pageCount; index += 1) {
+    doc.setPage(index);
+    doc.setFontSize(7);
+    doc.setTextColor(124, 139, 130);
+    doc.text(
+      `Coronel · ${new Date().toLocaleString("es-PE")} · Página ${index}/${pageCount}`,
+      40,
+      doc.internal.pageSize.getHeight() - 18
+    );
+  }
+  doc.save(filename || `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`);
 }
 
 function downloadGenericCsv(
