@@ -6442,3 +6442,18 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
   .pdf-column-picker > div { max-height: 120px; }
   .pdf-preview-sheet .export-preview-table { max-height: 38dvh; }
 }
+
+@media print {
+  .pdf-preview-sheet .export-preview-table {
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+  }
+  .pdf-preview-sheet .export-preview-table th {
+    position: static !important;
+  }
+  .pdf-preview-sheet .export-preview-table table {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
