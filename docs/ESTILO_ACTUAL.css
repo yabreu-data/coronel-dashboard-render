@@ -2188,3 +2188,15 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
   .export-preview-table th { position: static !important; }
   .export-preview-count { margin: 4px 0 8px !important; }
 }
+
+/* La vista previa genérica es un portal: en impresión debe empezar en la página 1 */
+@media print {
+  body:has(.export-preview-backdrop) { margin: 0 !important; }
+  .export-preview-backdrop {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
