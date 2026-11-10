@@ -11789,6 +11789,7 @@ function downloadReportPdf(
   options: PdfDownloadOptions = {}
 ) {
   void (async () => {
+    try {
     const { logo, pattern } = await loadPdfAssets();
     const widest = sections.reduce(
       (max, section) => Math.max(max, section.columns?.length ?? 0),
@@ -11856,15 +11857,11 @@ function downloadReportPdf(
       doc.setTextColor(...muted);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(6.2);
-      doc.text(label, x + 11, ySafeTop());
+      doc.text(label, x + 11, 116);
       doc.setTextColor(...forest);
       doc.setFontSize(13);
       doc.text(value, x + 11, 133);
     });
-    function ySafeTop() {
-      return 116;
-    }
-
     let cursorY = 166;
     const summaryLines = doc.splitTextToSize(summary, contentWidth - 20);
     doc.setFillColor(248, 251, 249);
@@ -11982,6 +11979,9 @@ function downloadReportPdf(
       filename ||
         `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`
     );
+    } catch (error) {
+      console.error("PDF_REPORT_ERROR", error);
+    }
   })();
 }
 
