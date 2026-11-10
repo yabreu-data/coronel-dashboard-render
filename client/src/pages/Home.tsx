@@ -1313,7 +1313,7 @@ export default function Home() {
     );
   return (
     <AdminPinProvider>
-    <div className="app-shell">
+    <div className={`app-shell ${compactMode ? "is-compact" : ""}`}>
       <aside className={`sidebar ${sidebarCollapsed ? "is-collapsed" : ""}`}>
         <button
           className="sidebar-collapse"
