@@ -1785,7 +1785,7 @@ export default function Home() {
           >
             <div className="client-sheet-head">
               <div>
-                <p className="eyebrow">FICHA 360 · CRM DEL CLIENTE</p>
+                <p className="eyebrow">FICHA DEL CLIENTE</p>
                 <h3>{detailProfile.name}</h3>
               </div>
               <button
@@ -3608,6 +3608,30 @@ function BirthdayWorkspace({
     : [];
   const historyDisplayPhone =
     historyRow?.campaign?.phone || historyRow?.item.record.phone || "";
+  const resetHistoryContact = () => {
+    if (!historyRow) return;
+    const confirmed = window.confirm(
+      `¿Marcar a ${historyRow.item.record.clientName || "este cliente"} como “Sin contactar”? El historial de visitas y llamadas se conserva.`
+    );
+    if (!confirmed) return;
+    const campaign = historyRow.campaign;
+    saveCampaign.mutate({
+      clientKey: historyRow.key,
+      clientName: historyRow.item.record.clientName || "Cliente",
+      phone: historyDisplayPhone,
+      stage: campaign?.stage ?? "week",
+      channel: campaign?.channel ?? "whatsapp",
+      progressStatus: "pending",
+      promotion: campaign?.promotion ?? undefined,
+      responsible: campaign?.responsible ?? undefined,
+      nextActionAt: null,
+      nextActionLabel: campaign?.nextActionLabel ?? undefined,
+      familyName: campaign?.familyName ?? undefined,
+      familyBirthday: campaign?.familyBirthday ?? undefined,
+      noRedeemReason: campaign?.noRedeemReason ?? undefined,
+      notes: campaign?.notes ?? undefined,
+    });
+  };
   useEffect(() => {
     setHistoryEditOpen(false);
     setHistoryPhone(
@@ -4294,6 +4318,15 @@ function BirthdayWorkspace({
               )}
             </div>
             <div className="client-sheet-head-actions">
+              {historyRow.campaign?.progressStatus &&
+                historyRow.campaign.progressStatus !== "pending" && (
+                  <button
+                    className="btn-borde contact-reset-button"
+                    onClick={resetHistoryContact}
+                  >
+                    Marcar sin contactar
+                  </button>
+                )}
               <button
                 className="btn-borde client-edit-trigger"
                 onClick={() => setHistoryEditOpen(value => !value)}
@@ -6797,8 +6830,8 @@ function Clients({
     <>
       <section className="clients-command">
         <div className="clients-command-copy">
-          <p className="eyebrow">TUS CLIENTES · CRM</p>
-          <h2>Tu CRM de clientes</h2>
+          <p className="eyebrow">TUS CLIENTES</p>
+          <h2>¿A quién puedes llamar hoy?</h2>
           <p>
             Cada encuesta es una visita. Si volvió 3 veces o más es{" "}
             <b>frecuente</b>; si volvió 2, <b>repite</b>; si es su primera vez,{" "}

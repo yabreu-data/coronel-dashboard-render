@@ -1800,3 +1800,12 @@ body * { font-variant-numeric: tabular-nums; }
 .whatsapp-action { border-color: #bfe1cd !important; background: #f3fbf6 !important; color: #176b45 !important; text-decoration: none; }
 .whatsapp-action:hover { background: #e3f6ea !important; }
 .birthday-actions { margin-bottom: 8px; }
+
+.contact-reset-button {
+  border-color: #efc9c1 !important;
+  background: #fff7f5 !important;
+  color: #a83f2b !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+}
+.contact-reset-button:hover { background: #ffe9e4 !important; }
