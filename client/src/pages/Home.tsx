@@ -11991,13 +11991,16 @@ function downloadReportPdf(
     const reportFilename =
       filename ||
       `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`;
+    console.log("REPORT_BEFORE_BLOB");
     const reportBlob = doc.output("blob");
+    console.log("REPORT_BLOB", reportBlob.size);
     const reportUrl = URL.createObjectURL(reportBlob);
     const reportLink = document.createElement("a");
     reportLink.href = reportUrl;
     reportLink.download = reportFilename;
     document.body.appendChild(reportLink);
     reportLink.click();
+    console.log("REPORT_LINK_CLICKED");
     reportLink.remove();
     window.setTimeout(() => URL.revokeObjectURL(reportUrl), 1500);
     } catch (error) {
