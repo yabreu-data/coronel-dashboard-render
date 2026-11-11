@@ -946,7 +946,6 @@ export default function Home() {
     }
     let raf = 0;
     const saveScroll = () => {
-      if (restoringScrollRef.current) return;
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         scrollByPageRef.current[pageRef.current] = getCurrentScrollTop();
@@ -990,11 +989,7 @@ export default function Home() {
       const timer = window.setTimeout(() => {
         // Si la persona ya movió la página, no le devolvemos el scroll.
         if (attempt > 0 && getCurrentScrollTop() > 4) return;
-        restoringScrollRef.current = true;
         setCurrentScrollTop(target);
-        window.setTimeout(() => {
-          restoringScrollRef.current = false;
-        }, 60);
         const maxScroll = Math.max(
           0,
           document.documentElement.scrollHeight - window.innerHeight
