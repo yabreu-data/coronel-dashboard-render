@@ -349,9 +349,35 @@ export const appRouter = router({
       .input(z.object({ from: z.string().optional(), to: z.string().optional(), userQuery: z.string().max(160).optional(), page: z.number().int().min(1).default(1), pageSize: z.number().int().min(5).max(100).default(20) }))
       .query(({ input, ctx }) => {
         if (ctx.user?.role !== "admin") return { rows: [], total: 0 };
+        const parseSessionDate = (value: string | undefined, endOfDay: boolean) => {
+          if (!value) return undefined;
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "La fecha debe tener el formato ISO YYYY-MM-DD.",
+            });
+          }
+          const date = new Date(`${value}T00:00:00.000`);
+          if (Number.isNaN(date.getTime())) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "La fecha enviada no es válida.",
+            });
+          }
+          date.setHours(
+            endOfDay ? 23 : 0,
+            endOfDay ? 59 : 0,
+            endOfDay ? 59 : 0,
+            endOfDay ? 999 : 0
+          );
+          return date;
+        };
+        const from = parseSessionDate(input.from, false);
+        const to = parseSessionDate(input.to, true);
+        if (from && to && from > to) return { rows: [], total: 0 };
         return db.listAdminSessionHistory({
-          from: input.from ? new Date(`${input.from}T00:00:00`) : undefined,
-          to: input.to ? new Date(`${input.to}T23:59:59.999`) : undefined,
+          from,
+          to,
           userQuery: input.userQuery,
           limit: input.pageSize,
           offset: (input.page - 1) * input.pageSize,

@@ -12245,10 +12245,25 @@ function AccessAdmin({
     tone: "success" | "error";
     text: string;
   } | null>(null);
+  const normalizeSessionDate = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    // El input date nativo entrega YYYY-MM-DD. Si llega un formato regional,
+    // lo convertimos para no enviar "dd/mm/aaaa" a la API.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+    const regional = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (regional) {
+      return `${regional[3]}-${regional[2].padStart(2, "0")}-${regional[1].padStart(2, "0")}`;
+    }
+    return "";
+  };
   const [sessionFrom, setSessionFrom] = useState("");
   const [sessionTo, setSessionTo] = useState("");
   const [sessionUserQuery, setSessionUserQuery] = useState("");
   const [sessionPage, setSessionPage] = useState(1);
+  const sessionRangeInvalid = Boolean(
+    sessionFrom && sessionTo && sessionFrom > sessionTo
+  );
   const pageSize = 20;
   const sessionInput = useMemo(
     () => ({
@@ -12469,6 +12484,7 @@ function AccessAdmin({
     setSessionTo("");
     setSessionUserQuery("");
     setSessionPage(1);
+    void utils.auth.adminSessions.invalidate();
   };
   return (
     <>
@@ -12831,7 +12847,7 @@ function AccessAdmin({
               type="date"
               value={sessionFrom}
               onChange={event => {
-                setSessionFrom(event.target.value);
+                setSessionFrom(normalizeSessionDate(event.target.value));
                 setSessionPage(1);
               }}
             />
@@ -12842,7 +12858,7 @@ function AccessAdmin({
               type="date"
               value={sessionTo}
               onChange={event => {
-                setSessionTo(event.target.value);
+                setSessionTo(normalizeSessionDate(event.target.value));
                 setSessionPage(1);
               }}
             />
@@ -12851,6 +12867,22 @@ function AccessAdmin({
             Limpiar fechas
           </button>
         </div>
+        {sessionRangeInvalid && (
+          <div className="admin-feedback error" role="alert">
+            La fecha <b>Desde</b> no puede ser mayor que <b>Hasta</b>.
+          </div>
+        )}
+        {sessionsQuery.error && (
+          <div className="admin-feedback error" role="alert">
+            No se pudo cargar el historial: {sessionsQuery.error.message}
+            <button
+              className="text-button"
+              onClick={() => void sessionsQuery.refetch()}
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
         {sessionRows.length ? (
           <div className="table-wrap">
             <table>
