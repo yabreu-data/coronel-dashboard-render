@@ -2619,3 +2619,43 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
     z-index: 90;
   }
 }
+
+/* Sidebar más compacto para liberar espacio del contenido */
+@media (min-width: 761px) {
+  .sidebar {
+    width: 212px !important;
+    padding: 14px 9px 12px !important;
+  }
+  .sidebar .sidebar-logo-box {
+    width: 116px !important;
+    padding: 2px !important;
+    margin-bottom: 4px !important;
+  }
+  .sidebar .sidebar-logo { max-width: 112px !important; }
+  .sidebar .brand-tagline {
+    font-size: 9px !important;
+    letter-spacing: .08em !important;
+    margin-bottom: 9px !important;
+  }
+  .sidebar .side-label,
+  .sidebar .nav-section-label {
+    font-size: 8.5px !important;
+    padding: 4px 8px !important;
+    letter-spacing: .11em !important;
+  }
+  .sidebar .nav-section { margin-top: 2px !important; }
+  .sidebar .nav-item {
+    min-height: 33px !important;
+    padding: 6px 8px !important;
+    gap: 7px !important;
+    border-radius: 8px !important;
+    font-size: 10.5px !important;
+  }
+  .sidebar .nav-item svg { width: 15px !important; height: 15px !important; }
+  .sidebar .nav-item .nav-arrow { width: 13px !important; height: 13px !important; }
+  .sidebar .nav-badge { min-width: 16px !important; height: 16px !important; font-size: 8px !important; }
+  .sidebar .sidebar-bottom { padding-top: 9px !important; }
+  .sidebar .sidebar-bottom b { font-size: 10px !important; }
+  .sidebar .sidebar-bottom span { font-size: 8.5px !important; }
+  .sidebar .nav-section.is-collapsed .nav-section-label { padding-bottom: 2px !important; }
+}
