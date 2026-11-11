@@ -1162,8 +1162,10 @@ export default function Home() {
     return true;
   });
   useEffect(() => {
+    if (!user) return;
     if (!visibleTabs.some(tab => tab.id === page)) setPage("overview");
   }, [
+    user,
     page,
     isAdmin,
     canViewCustomers,
