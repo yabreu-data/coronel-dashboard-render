@@ -988,6 +988,8 @@ export default function Home() {
     const timers: number[] = [];
     const restore = (attempt: number) => {
       const timer = window.setTimeout(() => {
+        // Si la persona ya movió la página, no le devolvemos el scroll.
+        if (attempt > 0 && getCurrentScrollTop() > 4) return;
         restoringScrollRef.current = true;
         setCurrentScrollTop(target);
         window.setTimeout(() => {
