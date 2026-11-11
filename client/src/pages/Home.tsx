@@ -2777,21 +2777,6 @@ function Profile({
               )}
             </section>
           )}
-          <section className="panel profile-security">
-            <p className="eyebrow">CÓMO ENTRAS</p>
-            <h3>Tu contraseña</h3>
-            <p>
-              Entras con tu correo y contraseña. Si olvidaste la contraseña, en
-              la pantalla de inicio usa “¿Olvidaste tu contraseña?” y te
-              enviaremos un enlace para cambiarla.
-            </p>
-            {user?.role === "admin" && (
-              <p className="muted">
-                Para dar acceso a otra persona, entra a{" "}
-                <b>Cuentas y accesos</b>.
-              </p>
-            )}
-          </section>
         </>
       ) : (
         <section className="panel session-history-panel">
