@@ -59,3 +59,22 @@ La app genera una contraseña temporal y la muestra para compartirla por un cana
 ## Importante
 
 Las credenciales SMTP no están en el repositorio ni en las variables actuales. No es posible activar un proveedor de correo desde el código sin una clave y un remitente verificados.
+
+
+## Estado actual del código (2026-11-11)
+
+- El botón de recuperación tiene **cooldown persistente de 60 segundos** para evitar `over_email_send_rate_limit`.
+- Los intentos y errores se registran en la consola del navegador con el prefijo `[Auth]`.
+- Si el correo no llega, la pantalla de recuperación ofrece **“Pedir ayuda al administrador”**: crea una solicitud visible en **Cuentas y accesos** para que el administrador genere una clave temporal.
+- El proyecto de Supabase de la app (**mmvgixdoazpxuisytnhw**) tiene `email: true` y `disable_signup: true`.
+
+### Limitación externa que sigue pendiente
+
+El envío real de correos depende del **SMTP configurado en el panel de Supabase**. Este repositorio no contiene credenciales SMTP; no es posible activar un proveedor de correo desde el código. Para que lleguen los enlaces hay que configurar en Supabase:
+
+1. **Authentication → SMTP Settings**: host, puerto, usuario, contraseña y remitente verificado.
+2. **Authentication → URL Configuration**:
+   - Site URL: `https://coronel-dashboard.onrender.com`
+   - Redirect URL: `https://coronel-dashboard.onrender.com/reset-password`
+
+Mientras no se configure el SMTP, la vía segura es la clave temporal generada por un administrador.
