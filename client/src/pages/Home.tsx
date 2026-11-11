@@ -11,6 +11,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { supabase } from "@/lib/supabase";
 import PasswordInput from "@/components/PasswordInput";
+import DatePickerField from "@/components/DatePickerField";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { startLogin } from "@/const";
@@ -23,7 +24,6 @@ import {
   ArrowUp,
   ArrowUpRight,
   Cake,
-  CalendarDays,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
@@ -12872,45 +12872,25 @@ function AccessAdmin({
           </label>
           <label className="session-date-field">
             Desde
-            <span className="session-date-control">
-              <CalendarDays size={15} />
-              <input
-                type="date"
-                value={sessionFrom}
-                aria-label="Fecha desde"
-                onClick={event => {
-                  const input = event.currentTarget as HTMLInputElement & {
-                    showPicker?: () => void;
-                  };
-                  input.showPicker?.();
-                }}
-                onChange={event => {
-                  setSessionFrom(normalizeSessionDate(event.target.value));
-                  setSessionPage(1);
-                }}
-              />
-            </span>
+            <DatePickerField
+              value={sessionFrom}
+              onChange={value => {
+                setSessionFrom(normalizeSessionDate(value));
+                setSessionPage(1);
+              }}
+              ariaLabel="Fecha desde"
+            />
           </label>
           <label className="session-date-field">
             Hasta
-            <span className="session-date-control">
-              <CalendarDays size={15} />
-              <input
-                type="date"
-                value={sessionTo}
-                aria-label="Fecha hasta"
-                onClick={event => {
-                  const input = event.currentTarget as HTMLInputElement & {
-                    showPicker?: () => void;
-                  };
-                  input.showPicker?.();
-                }}
-                onChange={event => {
-                  setSessionTo(normalizeSessionDate(event.target.value));
-                  setSessionPage(1);
-                }}
-              />
-            </span>
+            <DatePickerField
+              value={sessionTo}
+              onChange={value => {
+                setSessionTo(normalizeSessionDate(value));
+                setSessionPage(1);
+              }}
+              ariaLabel="Fecha hasta"
+            />
           </label>
           <button className="secondary-action" onClick={clearSessionFilters}>
             Limpiar fechas
