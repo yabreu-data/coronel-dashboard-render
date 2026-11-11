@@ -960,12 +960,13 @@ export default function Home() {
       });
     };
     window.addEventListener("scroll", saveScroll, { passive: true });
-    const main = document.querySelector<HTMLElement>(".main-area");
-    main?.addEventListener("scroll", saveScroll, { passive: true });
+    // El área principal puede montarse después del primer render: capturamos
+    // el scroll en fase de captura para escuchar también ese contenedor.
+    document.addEventListener("scroll", saveScroll, true);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", saveScroll);
-      main?.removeEventListener("scroll", saveScroll);
+      document.removeEventListener("scroll", saveScroll, true);
     };
   }, []);
 
