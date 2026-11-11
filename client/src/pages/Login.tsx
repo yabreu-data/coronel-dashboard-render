@@ -30,7 +30,7 @@ const labelStyle: React.CSSProperties = {
 const initialMode = (): Mode => {
   if (typeof window === "undefined") return "login";
   const requested = new URLSearchParams(window.location.search).get("mode");
-  return requested === "recovery" || requested === "request" ? requested : "login";
+  return requested === "request" ? requested : "login";
 };
 
 /**
@@ -255,9 +255,12 @@ export default function Login() {
             </form>
 
             <div className="auth-inline-row" style={{ marginTop: 14 }}>
-              <button type="button" className="auth-link" onClick={() => changeMode("recovery")}>¿Olvidaste tu contraseña?</button>
               <button type="button" className="auth-link" onClick={() => changeMode("request")}>Solicitar acceso</button>
             </div>
+            <p className="auth-help" style={{ marginTop: 12 }}>
+              Para cambiar tu contraseña, inicia sesión y entra a{" "}
+              <b>Mi cuenta → Cambiar mi contraseña</b>.
+            </p>
           </>
         )}
 
