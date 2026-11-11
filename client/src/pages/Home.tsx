@@ -3261,19 +3261,11 @@ function ExportPreviewModal({
               <>
                 <label className="pdf-date-field">
                   <span>Desde</span>
-                  <input
-                    type="date"
-                    value={fromDate}
-                    onChange={event => setFromDate(event.target.value)}
-                  />
+                  <DatePickerField value={fromDate} onChange={setFromDate} ariaLabel="Fecha desde" />
                 </label>
                 <label className="pdf-date-field">
                   <span>Hasta</span>
-                  <input
-                    type="date"
-                    value={toDate}
-                    onChange={event => setToDate(event.target.value)}
-                  />
+                  <DatePickerField value={toDate} onChange={setToDate} ariaLabel="Fecha hasta" />
                 </label>
               </>
             )}
@@ -3571,18 +3563,18 @@ function PdfPreviewModal({
             <b>Contenido del PDF</b>
             <label className="pdf-date-field">
               <span>Desde</span>
-              <input
-                type="date"
+              <DatePickerField
                 value={fromDate}
-                onChange={event => setFromDate(event.target.value)}
+                onChange={setFromDate}
+                ariaLabel="Fecha desde"
               />
             </label>
             <label className="pdf-date-field">
               <span>Hasta</span>
-              <input
-                type="date"
+              <DatePickerField
                 value={toDate}
-                onChange={event => setToDate(event.target.value)}
+                onChange={setToDate}
+                ariaLabel="Fecha hasta"
               />
             </label>
             <label className="pdf-date-field">
@@ -5009,16 +5001,14 @@ function BirthdayWorkspace({
                         </label>
                         <label>
                           <span>Próxima acción</span>
-                          <input
-                            type="date"
+                          <DatePickerField
                             value={nextActionValue}
-                            onChange={event =>
+                            onChange={value =>
                               persist(row, {
-                                nextActionAt: dateInputToIso(
-                                  event.target.value
-                                ),
+                                nextActionAt: dateInputToIso(value),
                               })
                             }
+                            ariaLabel="Próxima acción"
                           />
                           <span className="bw-quick-dates">
                             {[1, 3, 7, 14].map(days => (
@@ -5053,15 +5043,12 @@ function BirthdayWorkspace({
                         </label>
                         <label>
                           <span>Cumpleaños familiar</span>
-                          <input
-                            type="date"
-                            defaultValue={campaign?.familyBirthday ?? ""}
-                            key={`famb-${row.key}-${campaign?.familyBirthday ?? ""}`}
-                            onChange={event =>
-                              persist(row, {
-                                familyBirthday: event.target.value,
-                              })
+                          <DatePickerField
+                            value={campaign?.familyBirthday ?? ""}
+                            onChange={value =>
+                              persist(row, { familyBirthday: value })
                             }
+                            ariaLabel="Cumpleaños familiar"
                           />
                         </label>
                         <label>
@@ -7320,14 +7307,12 @@ function Priorities({
                         </label>
                         <label>
                           Para cuándo
-                          <input
-                            type="date"
+                          <DatePickerField
                             value={state.dueDate}
-                            onChange={event =>
-                              updateDraft(item, {
-                                dueDate: event.target.value,
-                              })
+                            onChange={value =>
+                              updateDraft(item, { dueDate: value })
                             }
+                            ariaLabel="Para cuándo"
                           />
                         </label>
                         <button
@@ -9095,19 +9080,11 @@ function CallsHistory({
         <div className="calls-filter-row">
           <label>
             Desde
-            <input
-              type="date"
-              value={fromDate}
-              onChange={event => setFromDate(event.target.value)}
-            />
+            <DatePickerField value={fromDate} onChange={setFromDate} ariaLabel="Fecha desde" />
           </label>
           <label>
             Hasta
-            <input
-              type="date"
-              value={toDate}
-              onChange={event => setToDate(event.target.value)}
-            />
+            <DatePickerField value={toDate} onChange={setToDate} ariaLabel="Fecha hasta" />
           </label>
           <label>
             Resultado
@@ -9259,12 +9236,12 @@ function CallsHistory({
             <div className="calls-edit-grid">
               <label>
                 Fecha
-                <input
-                  type="date"
+                <DatePickerField
                   value={draft.callDate}
-                  onChange={event =>
-                    setDraft(current => ({ ...current, callDate: event.target.value }))
+                  onChange={value =>
+                    setDraft(current => ({ ...current, callDate: value }))
                   }
+                  ariaLabel="Fecha de la llamada"
                 />
               </label>
               <label>
@@ -9313,15 +9290,12 @@ function CallsHistory({
               </label>
               <label>
                 Próxima llamada
-                <input
-                  type="date"
+                <DatePickerField
                   value={draft.nextCallDate}
-                  onChange={event =>
-                    setDraft(current => ({
-                      ...current,
-                      nextCallDate: event.target.value,
-                    }))
+                  onChange={value =>
+                    setDraft(current => ({ ...current, nextCallDate: value }))
                   }
+                  ariaLabel="Próxima llamada"
                 />
               </label>
               <label>
@@ -9954,19 +9928,11 @@ function TargetHistory({
         <div className="date-filter-controls">
           <label>
             Desde
-            <input
-              type="date"
-              value={fromDate}
-              onChange={event => setFromDate(event.target.value)}
-            />
+            <DatePickerField value={fromDate} onChange={setFromDate} ariaLabel="Fecha desde" />
           </label>
           <label>
             Hasta
-            <input
-              type="date"
-              value={toDate}
-              onChange={event => setToDate(event.target.value)}
-            />
+            <DatePickerField value={toDate} onChange={setToDate} ariaLabel="Fecha hasta" />
           </label>
           <button onClick={() => setHistoryRange("month")}>Este mes</button>
           <button onClick={() => setHistoryRange("previous")}>
@@ -11415,19 +11381,11 @@ function Team({
         <div className="date-filter-controls">
           <label>
             Desde
-            <input
-              type="date"
-              value={fromDate}
-              onChange={e => setFromDate(e.target.value)}
-            />
+            <DatePickerField value={fromDate} onChange={setFromDate} ariaLabel="Fecha desde" />
           </label>
           <label>
             Hasta
-            <input
-              type="date"
-              value={toDate}
-              onChange={e => setToDate(e.target.value)}
-            />
+            <DatePickerField value={toDate} onChange={setToDate} ariaLabel="Fecha hasta" />
           </label>
           {fromDate && toDate && fromDate > toDate && (
             <span className="form-error">
