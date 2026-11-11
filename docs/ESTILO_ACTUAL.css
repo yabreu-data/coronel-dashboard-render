@@ -2452,3 +2452,53 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
   background: #1d9b57;
   box-shadow: 0 0 0 3px rgba(29,155,87,.14);
 }
+
+/* Filtros de fecha de sesiones: campos amplios y atajos */
+.session-date-field { min-width: 150px; }
+.session-date-control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 9px;
+  border: 1px solid #cfe4d8;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #557064;
+}
+.session-date-control > svg { flex: 0 0 auto; color: #1d7a4c; }
+.session-date-control input {
+  width: 100% !important;
+  min-height: 36px;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #173b2b !important;
+  font-size: 12px !important;
+  cursor: pointer;
+}
+.session-date-control:focus-within { border-color: #1d7a4c; box-shadow: 0 0 0 3px rgba(29,122,76,.10); }
+.session-quick-ranges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: -3px 0 10px;
+}
+.session-quick-ranges > span { color: #66756b; font-size: 10px; font-weight: 800; }
+.session-quick-ranges button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid #d6e8dd;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1d5c3c;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.session-quick-ranges button:hover { border-color: #1d7a4c; background: #eef8f2; }
+@media (max-width: 760px) {
+  .session-date-field { width: 100%; }
+  .session-quick-ranges button { flex: 1 1 auto; }
+}

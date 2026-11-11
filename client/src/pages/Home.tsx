@@ -23,6 +23,7 @@ import {
   ArrowUp,
   ArrowUpRight,
   Cake,
+  CalendarDays,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
@@ -12486,6 +12487,34 @@ function AccessAdmin({
     setSessionPage(1);
     void utils.auth.adminSessions.invalidate();
   };
+  const sessionIso = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const applySessionPreset = (
+    preset: "today" | "yesterday" | "week" | "month" | "previous" | "all"
+  ) => {
+    const today = new Date();
+    const from = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const to = new Date(from);
+    if (preset === "all") {
+      clearSessionFilters();
+      return;
+    }
+    if (preset === "yesterday") {
+      from.setDate(from.getDate() - 1);
+      to.setDate(to.getDate() - 1);
+    } else if (preset === "week") {
+      from.setDate(from.getDate() - 6);
+    } else if (preset === "month") {
+      from.setDate(1);
+    } else if (preset === "previous") {
+      from.setMonth(from.getMonth() - 1, 1);
+      to.setDate(0);
+    }
+    setSessionFrom(sessionIso(from));
+    setSessionTo(sessionIso(to));
+    setSessionPage(1);
+    void utils.auth.adminSessions.invalidate();
+  };
   return (
     <>
       <div className="page-intro admin-page-intro">
@@ -12841,31 +12870,60 @@ function AccessAdmin({
               placeholder="Nombre o correo…"
             />
           </label>
-          <label>
+          <label className="session-date-field">
             Desde
-            <input
-              type="date"
-              value={sessionFrom}
-              onChange={event => {
-                setSessionFrom(normalizeSessionDate(event.target.value));
-                setSessionPage(1);
-              }}
-            />
+            <span className="session-date-control">
+              <CalendarDays size={15} />
+              <input
+                type="date"
+                value={sessionFrom}
+                aria-label="Fecha desde"
+                onClick={event => {
+                  const input = event.currentTarget as HTMLInputElement & {
+                    showPicker?: () => void;
+                  };
+                  input.showPicker?.();
+                }}
+                onChange={event => {
+                  setSessionFrom(normalizeSessionDate(event.target.value));
+                  setSessionPage(1);
+                }}
+              />
+            </span>
           </label>
-          <label>
+          <label className="session-date-field">
             Hasta
-            <input
-              type="date"
-              value={sessionTo}
-              onChange={event => {
-                setSessionTo(normalizeSessionDate(event.target.value));
-                setSessionPage(1);
-              }}
-            />
+            <span className="session-date-control">
+              <CalendarDays size={15} />
+              <input
+                type="date"
+                value={sessionTo}
+                aria-label="Fecha hasta"
+                onClick={event => {
+                  const input = event.currentTarget as HTMLInputElement & {
+                    showPicker?: () => void;
+                  };
+                  input.showPicker?.();
+                }}
+                onChange={event => {
+                  setSessionTo(normalizeSessionDate(event.target.value));
+                  setSessionPage(1);
+                }}
+              />
+            </span>
           </label>
           <button className="secondary-action" onClick={clearSessionFilters}>
             Limpiar fechas
           </button>
+        </div>
+        <div className="session-quick-ranges" aria-label="Rangos rápidos">
+          <span>Rango rápido:</span>
+          <button type="button" onClick={() => applySessionPreset("today")}>Hoy</button>
+          <button type="button" onClick={() => applySessionPreset("yesterday")}>Ayer</button>
+          <button type="button" onClick={() => applySessionPreset("week")}>Últimos 7 días</button>
+          <button type="button" onClick={() => applySessionPreset("month")}>Este mes</button>
+          <button type="button" onClick={() => applySessionPreset("previous")}>Mes anterior</button>
+          <button type="button" onClick={() => applySessionPreset("all")}>Todo</button>
         </div>
         {sessionRangeInvalid && (
           <div className="admin-feedback error" role="alert">
