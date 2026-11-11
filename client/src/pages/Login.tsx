@@ -1,6 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { isSupabaseConfigured, signInWithPassword, supabase } from "@/lib/supabase";
+import PasswordInput from "@/components/PasswordInput";
 import { useEffect, useState, type FormEvent } from "react";
 
 type Mode = "login" | "request" | "recovery";
@@ -44,8 +45,12 @@ export default function Login() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [recoveryCooldown, setRecoveryCooldown] = useState(0);
+  const [recoveryCooldown, setRecoveryCooldown] = useState(() => {
+    const until = Number(localStorage.getItem("coronel.recoveryCooldownUntil") || 0);
+    return Number.isFinite(until)
+      ? Math.max(0, Math.ceil((until - Date.now()) / 1000))
+      : 0;
+  });
   const [requestName, setRequestName] = useState("");
   const [requestEmail, setRequestEmail] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
@@ -134,15 +139,71 @@ export default function Login() {
     }
     setSubmitting(true);
     try {
-      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const redirectTo = `${window.location.origin}/reset-password`;
+      console.info("[Auth] Solicitando recuperación de contraseña", {
+        email: email.trim(),
+        redirectTo,
       });
+      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        { redirectTo }
+      );
       if (recoveryError) throw recoveryError;
-      setNotice("Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Revisa también la carpeta de spam.");
+      localStorage.setItem(
+        "coronel.recoveryCooldownUntil",
+        String(Date.now() + 60_000)
+      );
+      setRecoveryCooldown(60);
+      setNotice(
+        "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Revisa también la carpeta de spam."
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      if (/rate limit|too many/i.test(message)) setError("Se enviaron demasiados correos en poco tiempo. Intenta más tarde o pide a un administrador que restablezca tu acceso.");
-      else setError(`No se pudo enviar el correo de recuperación: ${message}`);
+      console.error("[Auth] Falló la recuperación de contraseña", {
+        message,
+        timestamp: new Date().toISOString(),
+      });
+      if (/rate limit|too many|429/i.test(message)) {
+        localStorage.setItem(
+          "coronel.recoveryCooldownUntil",
+          String(Date.now() + 60_000)
+        );
+        setRecoveryCooldown(60);
+        setError(
+          "Se enviaron demasiados correos en poco tiempo. Intenta de nuevo en un minuto o pide a un administrador que restablezca tu acceso."
+        );
+      } else {
+        setError(`No se pudo enviar el correo de recuperación: ${message}`);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRecoveryHelp = async () => {
+    setError(null);
+    setNotice(null);
+    if (!email.trim()) {
+      setError("Escribe tu correo para avisar al administrador.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await requestAccessMutation.mutateAsync({
+        name: `Recuperación · ${email.trim().split("@")[0] || "usuario"}`.slice(0, 160),
+        email: email.trim(),
+        message:
+          "Solicito apoyo para restablecer mi contraseña porque el correo de recuperación no llegó.",
+      });
+      setNotice(
+        "Aviso enviado al administrador. Podrá generar una clave temporal y compartírtela por un canal privado."
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo avisar al administrador."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -175,7 +236,15 @@ export default function Login() {
               </div>
               <div>
                 <label style={labelStyle} htmlFor="password">CONTRASEÑA</label>
-                <input id="password" type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} placeholder="••••••••" style={inputStyle} />
+                <PasswordInput
+                  id="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={event => setPassword(event.target.value)}
+                  placeholder="••••••••"
+                  inputStyle={inputStyle}
+                />
               </div>
 
               {error && <p role="alert" className="auth-error">{error}</p>}
@@ -206,13 +275,34 @@ export default function Login() {
               {error && <p role="alert" className="auth-error">{error}</p>}
               {notice && <p role="status" className="auth-success">{notice}</p>}
 
-              <button type="submit" className="auth-wall-button" disabled={submitting} style={{ opacity: submitting ? 0.7 : 1, cursor: submitting ? "wait" : "pointer" }}>
-                {submitting ? "Enviando…" : "Enviar enlace de recuperación"}
+              <button
+                type="submit"
+                className="auth-wall-button"
+                disabled={submitting || recoveryCooldown > 0}
+                style={{
+                  opacity: submitting || recoveryCooldown > 0 ? 0.7 : 1,
+                  cursor:
+                    submitting || recoveryCooldown > 0 ? "wait" : "pointer",
+                }}
+              >
+                {submitting
+                  ? "Enviando…"
+                  : recoveryCooldown > 0
+                    ? `Espera ${recoveryCooldown}s para reintentar`
+                    : "Enviar enlace de recuperación"}
               </button>
             </form>
 
             <div className="auth-inline-row" style={{ marginTop: 14 }}>
               <button type="button" className="auth-link" onClick={() => changeMode("login")}>← Volver al inicio de sesión</button>
+              <button
+                type="button"
+                className="auth-link"
+                onClick={handleRecoveryHelp}
+                disabled={submitting}
+              >
+                Pedir ayuda al administrador
+              </button>
             </div>
           </>
         )}

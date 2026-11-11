@@ -105,7 +105,7 @@ class SDKServer {
     if (!user) throw ForbiddenError("No se pudo registrar el usuario de Supabase");
     if (!user.active) throw ForbiddenError("Esta cuenta está desactivada. Solicita su recuperación a un administrador.");
 
-    await db.upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+    await db.upsertUser({ openId: user.openId, lastSignedIn: new Date(), isOnline: true });
     return user;
   }
 }

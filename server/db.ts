@@ -66,6 +66,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user[field] !== undefined) { values[field] = user[field] ?? null; updateSet[field] = user[field] ?? null; }
   }
   if (user.lastSignedIn !== undefined) { values.lastSignedIn = user.lastSignedIn; updateSet.lastSignedIn = user.lastSignedIn; }
+  if (user.isOnline !== undefined) { values.isOnline = user.isOnline; updateSet.isOnline = user.isOnline; }
   if (user.role !== undefined) { values.role = user.role; updateSet.role = user.role; }
   else if (user.openId === ENV.supabaseAdminUserId) { values.role = "admin"; updateSet.role = "admin"; }
   if (!values.lastSignedIn) values.lastSignedIn = new Date();
@@ -80,7 +81,8 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function listAccessUsers() { const db = await getDb(); if (!db) return []; return db.select({ id: users.id, openId: users.openId, name: users.name, email: users.email, role: users.role, canViewCustomers: users.canViewCustomers, canManageCalls: users.canManageCalls, canManageTargets: users.canManageTargets, canManageUsers: users.canManageUsers, canViewAudit: users.canViewAudit, active: users.active, avatarPreset: users.avatarPreset, lastSignedIn: users.lastSignedIn }).from(users).orderBy(users.name); }
+export async function listAccessUsers() { const db = await getDb(); if (!db) return []; return db.select({ id: users.id, openId: users.openId, name: users.name, email: users.email, role: users.role, canViewCustomers: users.canViewCustomers, canManageCalls: users.canManageCalls, canManageTargets: users.canManageTargets, canManageUsers: users.canManageUsers, canViewAudit: users.canViewAudit, active: users.active, isOnline: users.isOnline, avatarPreset: users.avatarPreset, lastSignedIn: users.lastSignedIn }).from(users).orderBy(users.name); }
+export async function setUserOnlineStatus(openId: string, isOnline: boolean) { const db = await getDb(); if (!db) return; await db.update(users).set({ isOnline, updatedAt: new Date() }).where(eq(users.openId, openId)); }
 export async function updateAccessUser(input: { id: number; role: "user" | "admin"; canViewCustomers: number; canManageCalls: number; canManageTargets: number; canManageUsers: number; canViewAudit: number; active: number }) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.update(users).set({ role: input.role, canViewCustomers: input.canViewCustomers, canManageCalls: input.canManageCalls, canManageTargets: input.canManageTargets, canManageUsers: input.canManageUsers, canViewAudit: input.canViewAudit, active: input.active }).where(eq(users.id, input.id)); return listAccessUsers(); }
 export async function updateUserName(openId: string, name: string) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.update(users).set({ name, updatedAt: new Date() }).where(eq(users.openId, openId)); return getUserByOpenId(openId); }
 export async function updateUserAvatar(openId: string, avatarPreset: string) { const db = await getDb(); if (!db) throw new Error("La base de datos no está disponible"); await db.update(users).set({ avatarPreset }).where(eq(users.openId, openId)); return getUserByOpenId(openId); }

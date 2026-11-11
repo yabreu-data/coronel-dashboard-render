@@ -6510,3 +6510,121 @@ button.bw-date b, button.bw-date small { color: #8a5717 !important; }
   background: rgba(255, 255, 255, .20) !important;
   color: #ffffff !important;
 }
+
+/* ============================================================
+   AJUSTES SOLICITADOS · AUTENTICACIÓN, SIDEBAR Y PERFIL
+   ============================================================ */
+
+.password-field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.password-eye {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #c5d3e1;
+  cursor: pointer;
+}
+.password-eye:hover { background: rgba(255,255,255,.08); color: #ffffff; }
+.profile-password-panel .password-eye { color: #5f7368; }
+.profile-password-panel .password-eye:hover { background: #eef8f2; color: #145c36; }
+
+/* Pestaña lateral de colapso: oscura, acoplada al borde y con esquinas derechas */
+@media (min-width: 761px) {
+  .sidebar { overflow: visible !important; }
+  .sidebar .grouped-sidebar-nav { min-height: 0; overflow-y: auto; }
+  .sidebar-collapse {
+    top: 50% !important;
+    right: -27px !important;
+    transform: translateY(-50%);
+    width: 29px !important;
+    height: 58px !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center;
+    border: 0 !important;
+    border-radius: 0 12px 12px 0 !important;
+    background: #111827 !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,.28) !important;
+    z-index: 30;
+  }
+  .sidebar-collapse:hover { background: #1f2937 !important; }
+  .sidebar-collapse svg { color: #ffffff; stroke: #ffffff; }
+}
+@media (max-width: 760px) {
+  .sidebar-collapse { display: none !important; }
+}
+
+.profile-password-panel { margin-top: 0; }
+.profile-password-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.profile-password-grid label { display: grid; gap: 5px; color: #55665c; font-size: 10px; font-weight: 800; }
+.profile-password-grid input {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 44px 8px 11px;
+  border: 1px solid #dcebe2;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #0c100d;
+  font-size: 12px;
+}
+.profile-password-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+@media (max-width: 760px) {
+  .profile-password-grid { grid-template-columns: 1fr; }
+}
+
+/* Presencia de usuarios en línea */
+.online-users-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 9px;
+}
+.online-user-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #dcebe2;
+  border-radius: 13px;
+  background: #f8fcf9;
+}
+.online-user-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 50%;
+  background: #e4f3e9;
+  color: #145c36;
+  font-size: 16px;
+}
+.online-user-card > span:nth-child(2) { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.online-user-card b { overflow: hidden; color: #173b2b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.online-user-card small { color: #66756b; font-size: 9.5px; }
+.online-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: #1d9b57;
+  box-shadow: 0 0 0 3px rgba(29,155,87,.14);
+}

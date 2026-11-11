@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 /**
  * Esquema PostgreSQL (Supabase).
@@ -23,6 +23,7 @@ export const users = pgTable("users", {
   canManageUsers: integer("canManageUsers").default(0).notNull(),
   canViewAudit: integer("canViewAudit").default(0).notNull(),
   active: integer("active").default(1).notNull(),
+  isOnline: boolean("isOnline").default(false).notNull(),
   avatarPreset: varchar("avatarPreset", { length: 40 }).default("coronel"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt")

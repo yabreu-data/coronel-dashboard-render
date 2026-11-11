@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import PasswordInput from "@/components/PasswordInput";
 import { useEffect, useState, type FormEvent } from "react";
 
 type Status = "checking" | "form" | "done" | "expired" | "error";
@@ -170,32 +171,30 @@ export default function ResetPassword() {
                 <label style={labelStyle} htmlFor="new-password">
                   NUEVA CONTRASEÑA
                 </label>
-                <input
+                <PasswordInput
                   id="new-password"
-                  type="password"
                   autoComplete="new-password"
                   required
                   minLength={MIN_PASSWORD_LENGTH}
                   value={password}
                   onChange={event => setPassword(event.target.value)}
                   placeholder="••••••••"
-                  style={inputStyle}
+                  inputStyle={inputStyle}
                 />
               </div>
               <div>
                 <label style={labelStyle} htmlFor="confirm-password">
                   REPITE LA CONTRASEÑA
                 </label>
-                <input
+                <PasswordInput
                   id="confirm-password"
-                  type="password"
                   autoComplete="new-password"
                   required
                   minLength={MIN_PASSWORD_LENGTH}
                   value={confirmation}
                   onChange={event => setConfirmation(event.target.value)}
                   placeholder="••••••••"
-                  style={inputStyle}
+                  inputStyle={inputStyle}
                 />
               </div>
 

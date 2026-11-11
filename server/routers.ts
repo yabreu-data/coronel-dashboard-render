@@ -358,7 +358,10 @@ export const appRouter = router({
         });
       }),
     logout: publicProcedure.mutation(async ({ ctx }) => {
-      if (ctx.user) await db.recordSessionEvent({ openId: ctx.user.openId, action: "logout", ipAddress: ctx.req.ip, userAgent: ctx.req.headers["user-agent"] });
+      if (ctx.user) {
+        await db.setUserOnlineStatus(ctx.user.openId, false);
+        await db.recordSessionEvent({ openId: ctx.user.openId, action: "logout", ipAddress: ctx.req.ip, userAgent: ctx.req.headers["user-agent"] });
+      }
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;

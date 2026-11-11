@@ -9,7 +9,7 @@ export function isWithinDateRange(value: string, fromDate: string, toDate: strin
   const date = parseSurveyDate(value);
   if (!date) return false;
   const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
-  const to = toDate ? new Date(`${toDate}T23:59:59`) : null;
+  const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
   if (from && to && from > to) return false;
   return (!from || date >= from) && (!to || date <= to);
 }

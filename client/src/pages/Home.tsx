@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import { trpc } from "@/lib/trpc";
+import { supabase } from "@/lib/supabase";
+import PasswordInput from "@/components/PasswordInput";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { startLogin } from "@/const";
@@ -170,6 +172,7 @@ type SystemUser = {
 };
 type AccessUser = SystemUser & {
   id: number;
+  isOnline?: boolean;
   role: "user" | "admin";
   canViewCustomers: number;
   canManageCalls: number;
@@ -280,6 +283,33 @@ const normalizeText = (value: string) =>
   clean(value)
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+const SCROLL_BY_PAGE_KEY = "coronel.scrollByPage.v1";
+
+const readScrollByPage = (): Record<string, number> => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SCROLL_BY_PAGE_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+const getCurrentScrollTop = () =>
+  Math.max(
+    document.querySelector<HTMLElement>(".main-area")?.scrollTop ?? 0,
+    window.scrollY,
+    document.documentElement.scrollTop,
+    document.body.scrollTop
+  );
+
+const setCurrentScrollTop = (top: number) => {
+  const main = document.querySelector<HTMLElement>(".main-area");
+  if (main) main.scrollTop = top;
+  document.documentElement.scrollTop = top;
+  document.body.scrollTop = top;
+  window.scrollTo({ top, behavior: "auto" });
+};
+
 const phoneDigits = (value: string) => value.replace(/\D/g, "");
 const clientKeyOf = (record: Pick<RecordItem, "phone" | "clientName">) =>
   phoneDigits(record.phone) || normalizeText(record.clientName) || "sin-nombre";
@@ -838,11 +868,18 @@ export default function Home() {
     enabled: user?.role === "admin",
     staleTime: 0,
     refetchOnMount: "always",
+    refetchInterval: 15_000,
   });
   const [page, setPage] = useState<Page>(() => {
+    const queryPage = new URLSearchParams(window.location.search).get("page") as Page | null;
+    if (queryPage && tabs.some(tab => tab.id === queryPage)) return queryPage;
     const saved = localStorage.getItem("coronel.lastPage") as Page | null;
     return saved && tabs.some(tab => tab.id === saved) ? saved : "overview";
   });
+  const pageRef = useRef(page);
+  const previousPageRef = useRef(page);
+  const scrollByPageRef = useRef<Record<string, number>>(readScrollByPage());
+  const restoringScrollRef = useRef(false);
   const [quickCallOpen, setQuickCallOpen] = useState(false);
   const [quickCallQuery, setQuickCallQuery] = useState("");
   const [quickCallProfile, setQuickCallProfile] = useState<ClientProfile | null>(
@@ -896,6 +933,78 @@ export default function Home() {
   const [clientDetailKey, setClientDetailKey] = useState<string | null>(null);
   useEffect(() => {
     localStorage.setItem("coronel.lastPage", page);
+    const url = new URL(window.location.href);
+    if (page === "overview") url.searchParams.delete("page");
+    else url.searchParams.set("page", page);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    pageRef.current = page;
+  }, [page]);
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    let raf = 0;
+    const saveScroll = () => {
+      if (restoringScrollRef.current) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        scrollByPageRef.current[pageRef.current] = getCurrentScrollTop();
+        try {
+          localStorage.setItem(
+            SCROLL_BY_PAGE_KEY,
+            JSON.stringify(scrollByPageRef.current)
+          );
+        } catch {
+          // El almacenamiento local puede estar lleno o bloqueado.
+        }
+      });
+    };
+    window.addEventListener("scroll", saveScroll, { passive: true });
+    const main = document.querySelector<HTMLElement>(".main-area");
+    main?.addEventListener("scroll", saveScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", saveScroll);
+      main?.removeEventListener("scroll", saveScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const previous = previousPageRef.current;
+    if (previous !== page) {
+      scrollByPageRef.current[previous] = getCurrentScrollTop();
+      previousPageRef.current = page;
+      try {
+        localStorage.setItem(
+          SCROLL_BY_PAGE_KEY,
+          JSON.stringify(scrollByPageRef.current)
+        );
+      } catch {
+        // Ignorar almacenamiento no disponible.
+      }
+    }
+    const target = scrollByPageRef.current[page] ?? 0;
+    const timers: number[] = [];
+    const restore = (attempt: number) => {
+      const timer = window.setTimeout(() => {
+        restoringScrollRef.current = true;
+        setCurrentScrollTop(target);
+        window.setTimeout(() => {
+          restoringScrollRef.current = false;
+        }, 60);
+        const maxScroll = Math.max(
+          0,
+          document.documentElement.scrollHeight - window.innerHeight
+        );
+        if (attempt < 5 && target > 0 && maxScroll < target - 2) {
+          restore(attempt + 1);
+        }
+      }, [0, 70, 180, 350, 700, 1200][attempt] ?? 0);
+      timers.push(timer);
+    };
+    restore(0);
+    return () => timers.forEach(timer => window.clearTimeout(timer));
   }, [page]);
   const records = (data?.records ?? []) as RecordItem[];
   const serverCatalog = (data?.serverCatalog ?? []) as ServerCatalogItem[];
@@ -1089,7 +1198,6 @@ export default function Home() {
       setQualityFilter("Todos");
     } else if (filter) setQualityFilter(filter);
     setMobileMenuOpen(false);
-    scrollAppToTop("smooth");
   };
   const openPriorityClient = (key: string) => {
     setPriorityClientKey(null);
@@ -1342,7 +1450,11 @@ export default function Home() {
           aria-label={sidebarCollapsed ? "Abrir menú" : "Ocultar menú"}
           title={sidebarCollapsed ? "Abrir menú" : "Ocultar menú"}
         >
-          {sidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+          {sidebarCollapsed ? (
+            <ChevronRight size={18} strokeWidth={2} />
+          ) : (
+            <ChevronLeft size={18} strokeWidth={2} />
+          )}
         </button>
         <div className="sidebar-logo-box">
           <img
@@ -2274,7 +2386,10 @@ function Profile({
   user: SystemUser | null;
   onLogout: () => Promise<void>;
 }) {
-  const [tab, setTab] = useState<"account" | "sessions">("account");
+  const [tab, setTab] = useState<"account" | "sessions">(() => {
+    const saved = localStorage.getItem("coronel.profileTab");
+    return saved === "sessions" ? "sessions" : "account";
+  });
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(user?.name ?? "");
@@ -2295,9 +2410,67 @@ function Profile({
       await utils.auth.me.invalidate();
     },
   });
+  const [passwordForm, setPasswordForm] = useState({
+    current: "",
+    next: "",
+    confirm: "",
+  });
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const changeOwnPassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    if (!user?.email) {
+      setPasswordError(
+        "Esta cuenta no tiene un correo visible; pide al administrador cambiar la contraseña."
+      );
+      return;
+    }
+    if (passwordForm.next.length < 8) {
+      setPasswordError("La nueva contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (passwordForm.next !== passwordForm.confirm) {
+      setPasswordError("La confirmación no coincide con la nueva contraseña.");
+      return;
+    }
+    if (passwordForm.current === passwordForm.next) {
+      setPasswordError("La nueva contraseña debe ser distinta a la actual.");
+      return;
+    }
+    setPasswordSubmitting(true);
+    try {
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwordForm.current,
+      });
+      if (verifyError) {
+        throw new Error("La contraseña actual no es correcta.");
+      }
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordForm.next,
+      });
+      if (updateError) throw updateError;
+      setPasswordForm({ current: "", next: "", confirm: "" });
+      setPasswordSuccess("Contraseña actualizada correctamente.");
+    } catch (error) {
+      setPasswordError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo cambiar la contraseña."
+      );
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  };
   useEffect(() => {
     if (user?.name) setNameDraft(user.name);
   }, [user?.name]);
+  useEffect(() => {
+    localStorage.setItem("coronel.profileTab", tab);
+  }, [tab]);
   const sessions = (sessionsQuery.data ?? []) as SessionEvent[];
   return (
     <>
@@ -2432,6 +2605,86 @@ function Profile({
               </button>
             )}
           </section>
+          {user && (
+            <section className="panel profile-password-panel">
+              <div className="panel-head">
+                <div>
+                  <p className="eyebrow">SEGURIDAD</p>
+                  <h3>Cambiar mi contraseña</h3>
+                  <small className="muted">
+                    Valida tu contraseña actual antes de guardar la nueva.
+                  </small>
+                </div>
+                <Pill tone="green">Tu cuenta</Pill>
+              </div>
+              <form onSubmit={changeOwnPassword}>
+                <div className="profile-password-grid">
+                  <label>
+                    Contraseña actual
+                    <PasswordInput
+                      autoComplete="current-password"
+                      required
+                      value={passwordForm.current}
+                      onChange={event =>
+                        setPasswordForm(current => ({
+                          ...current,
+                          current: event.target.value,
+                        }))
+                      }
+                      placeholder="Tu contraseña actual"
+                    />
+                  </label>
+                  <label>
+                    Nueva contraseña
+                    <PasswordInput
+                      autoComplete="new-password"
+                      required
+                      minLength={8}
+                      value={passwordForm.next}
+                      onChange={event =>
+                        setPasswordForm(current => ({
+                          ...current,
+                          next: event.target.value,
+                        }))
+                      }
+                      placeholder="Mínimo 8 caracteres"
+                    />
+                  </label>
+                  <label>
+                    Repetir nueva contraseña
+                    <PasswordInput
+                      autoComplete="new-password"
+                      required
+                      minLength={8}
+                      value={passwordForm.confirm}
+                      onChange={event =>
+                        setPasswordForm(current => ({
+                          ...current,
+                          confirm: event.target.value,
+                        }))
+                      }
+                      placeholder="Repite la nueva"
+                    />
+                  </label>
+                </div>
+                {passwordError && <p className="form-error">{passwordError}</p>}
+                {passwordSuccess && (
+                  <p className="success-inline">✓ {passwordSuccess}</p>
+                )}
+                <div className="profile-password-actions">
+                  <button
+                    type="submit"
+                    className="small-action"
+                    disabled={passwordSubmitting}
+                  >
+                    {passwordSubmitting
+                      ? "Validando y guardando…"
+                      : "Cambiar contraseña"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
           {user && (
             <section className="panel avatar-picker-panel">
               <div className="panel-head">
@@ -7223,7 +7476,17 @@ function Clients({
   onReset: () => void;
   onBackToPriorities: () => void;
 }) {
-  const [segment, setSegment] = useState("Todos");
+  const [segment, setSegment] = useState(() => {
+    const saved = localStorage.getItem("coronel.clientsSegment");
+    return ["Todos", "En riesgo", "Fiel", "Recurrente", "Nuevo"].includes(
+      saved || ""
+    )
+      ? (saved as string)
+      : "Todos";
+  });
+  useEffect(() => {
+    localStorage.setItem("coronel.clientsSegment", segment);
+  }, [segment]);
   const segmentLabel = (value: string) =>
     value === "En riesgo"
       ? "Por recuperar"
@@ -10920,8 +11183,14 @@ function Team({
   const [saved, setSaved] = useState(false);
   const [targetsOpen, setTargetsOpen] = useState(false);
   const [teamTab, setTeamTab] = useState<"resumen" | "personas" | "metas">(
-    "resumen"
+    () => {
+      const saved = localStorage.getItem("coronel.teamTab");
+      return saved === "personas" || saved === "metas" ? saved : "resumen";
+    }
   );
+  useEffect(() => {
+    localStorage.setItem("coronel.teamTab", teamTab);
+  }, [teamTab]);
   const utils = trpc.useUtils();
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -12257,6 +12526,42 @@ function AccessAdmin({
           </div>
         </div>
       )}
+      <section className="panel online-users-panel">
+        <div className="panel-head">
+          <div>
+            <p className="eyebrow">PRESENCIA EN TIEMPO REAL</p>
+            <h3>Usuarios en línea</h3>
+            <small className="muted">
+              Se actualiza automáticamente cada 15 segundos.
+            </small>
+          </div>
+          <Pill tone={users.some(account => account.isOnline) ? "green" : "neutral"}>
+            {users.filter(account => account.isOnline && account.active).length} en línea
+          </Pill>
+        </div>
+        {users.filter(account => account.isOnline && account.active).length ? (
+          <div className="online-users-list">
+            {users
+              .filter(account => account.isOnline && account.active)
+              .map(account => (
+                <div className="online-user-card" key={account.id}>
+                  <span className="online-user-avatar">
+                    {avatarSymbol(account.avatarPreset)}
+                  </span>
+                  <span>
+                    <b>{account.name || account.email || "Usuario"}</b>
+                    <small>
+                      {account.role === "admin" ? "Administrador" : "Equipo"}
+                    </small>
+                  </span>
+                  <span className="online-dot" aria-label="En línea" />
+                </div>
+              ))}
+          </div>
+        ) : (
+          <Empty text="Nadie tiene una sesión activa en este momento." />
+        )}
+      </section>
       <section className="panel access-requests-panel">
         <div className="panel-head">
           <div>
@@ -12391,6 +12696,9 @@ function AccessAdmin({
                           {account.role === "admin"
                             ? "Administrador"
                             : "Equipo"}
+                        </Pill>
+                        <Pill tone={account.isOnline ? "green" : "neutral"}>
+                          {account.isOnline ? "En línea" : "Desconectado"}
                         </Pill>
                         <Pill tone={account.active ? "green" : "red"}>
                           {account.active ? "Con acceso" : "Sin acceso"}
