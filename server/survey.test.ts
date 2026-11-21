@@ -98,11 +98,11 @@ describe("survey.latest", () => {
     expect(result.records).toHaveLength(2);
   });
 
-  it("prioriza Encuestas_Limpias como fuente y solo sondea Encuestas para detectar atrasos", async () => {
+  it("prioriza la pestaña configurada y no consulta Encuestas cuando es válida", async () => {
     stubSheetEnv("Encuestas_Limpias", "sheet-test-5");
     const cleanCsv = [
       '"ID Único","ID de Envío","Timestamp","Nombre Cliente","Número Contacto","Cumpleaños Original","Productos Normalizados","Opinión Limpia","Mesero","Calidad Limpia"',
-      '"ENC-000001","ENVIO-9","22/09/2026 12:00:00","Ana","999111222","29/02","Pollo","Muy rico","MES-000001","Bueno"',
+      '"UNICO-9","ENVIO-9","22/09/2026 12:00:00","Ana","999111222","29/02","Pollo","Muy rico","MES-000001","Bueno"',
     ].join("\n");
     const requestedUrls: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
@@ -113,18 +113,8 @@ describe("survey.latest", () => {
       return new Response(csv, { status: 200 });
     }));
     const result = await appRouter.createCaller(context).survey.latest({ tab: "limpia" });
-    // La fuente de datos siempre es la capa limpia.
     expect(result.source).toBe("Google Sheets · Encuestas_Limpias");
     expect(result.records).toHaveLength(1);
-    expect(result.records[0]).toMatchObject({ id: "ENC-000001", clientName: "Ana" });
-
-    // `Encuestas` solo se lee en la columna de IDs para medir el atraso, nunca
-    // como fuente de registros.
-    const rawCalls = requestedUrls.filter(url => url.includes("sheet=Encuestas&"));
-    expect(rawCalls.length).toBeGreaterThan(0);
-    expect(rawCalls.every(url => url.includes("range=A1%3AA200"))).toBe(true);
-
-    // El fixture original trae ENC-1 y ENC-2 que no están en la capa limpia.
-    expect(result.pendingCount).toBeGreaterThan(0);
+    expect(requestedUrls.some(url => url.includes("sheet=Encuestas&"))).toBe(false);
   });
 });

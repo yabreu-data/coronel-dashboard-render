@@ -31,20 +31,7 @@ type SurveyRecord = { id: string; timestamp: string; clientName: string; phone: 
 type ServerCatalogItem = { id: string; name: string; active: boolean };
 
 const IGNORED_SURVEY_IDS = new Set(["ENC-000116"]);
-type SurveyDiagnostics = { pendingCount: number; lastCleanTimestamp: string };
-type SurveyPayloadValue = {
-  records: SurveyRecord[];
-  serverCatalog: ServerCatalogItem[];
-};
-const surveyCache = new Map<
-  string,
-  {
-    at: number;
-    sheet: string;
-    value: SurveyPayloadValue;
-    diagnostics: SurveyDiagnostics;
-  }
->();
+const surveyCache = new Map<string, { at: number; sheet: string; value: { records: SurveyRecord[]; serverCatalog: ServerCatalogItem[] } }>();
 
 function getSheetId() {
   return (process.env.GOOGLE_SHEET_ID || "").trim() || DEFAULT_SHEET_ID;
@@ -61,30 +48,6 @@ function hasSurveyHeaders(headers: string[]) {
     normalized.some(value => SURVEY_ID_HEADERS.includes(value)) &&
     normalized.some(value => SURVEY_TIMESTAMP_HEADERS.includes(value))
   );
-}
-
-/** Interpreta `dd/mm/yyyy HH:mm:ss`, `dd/mm/yyyy` y variantes ISO. */
-function parseSurveyTimestamp(value: string): Date | null {
-  const text = String(value || "").trim();
-  if (!text) return null;
-  const local = text.match(
-    /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/
-  );
-  if (local) {
-    const yearRaw = Number(local[3]);
-    const year = yearRaw < 100 ? (yearRaw <= 26 ? 2000 + yearRaw : 1900 + yearRaw) : yearRaw;
-    const date = new Date(
-      year,
-      Number(local[2]) - 1,
-      Number(local[1]),
-      Number(local[4] || 0),
-      Number(local[5] || 0),
-      Number(local[6] || 0)
-    );
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-  const parsed = new Date(text);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 function normalizeCell(value: string) {
@@ -188,24 +151,6 @@ async function fetchSheetMatrix(sheetId: string, sheet: string, range: string) {
   return parseCsv(await response.text());
 }
 
-/**
- * Lee los IDs de la pestaña original `Encuestas`. El Sheet la mantiene en un
- * formato transpuesto (una fila por campo), así que extraemos todos los
- * identificadores `ENC-###` de las primeras filas para saber cuántas encuestas
- * nuevas esperan ser depuradas en `Encuestas_Limpias`.
- */
-async function getRawSurveyIds(): Promise<string[]> {
-  try {
-    // La columna A concentra los identificadores de la hoja transpuesta; es la
-    // lectura más liviana y devuelve todos los `ENC-###` existentes.
-    const matrix = await fetchSheetMatrix(getSheetId(), FALLBACK_SURVEY_SHEET, "A1:A200");
-    const text = matrix.map(row => row.join(" ")).join(" ");
-    const ids = text.match(/ENC-\d+/g) ?? [];
-    return Array.from(new Set(ids.map(id => id.toUpperCase())));
-  } catch {
-    return [];
-  }
-}
 
 async function fetchSurveyMatrix(sheetId: string, sheet: string) {
   const columnRange = sheet === "Encuestas_Limpias" ? "A:Z" : "A:M";
@@ -333,12 +278,7 @@ async function getSurveyPayload(sheet: string, force = false) {
   const cacheKey = `${getSheetId()}::${sheet}`;
   const cached = surveyCache.get(cacheKey);
   if (!force && cached && Date.now() - cached.at < SURVEY_CACHE_TTL_MS) {
-    return {
-      ...cached.value,
-      ...cached.diagnostics,
-      sheet: cached.sheet,
-      cached: true,
-    };
+    return { ...cached.value, sheet: cached.sheet, cached: true };
   }
 
   const load = async (target: string) => {
@@ -362,42 +302,10 @@ async function getSurveyPayload(sheet: string, force = false) {
 
     const value = await load(resolvedSheet);
 
-    const diagnostics: SurveyDiagnostics = {
-      pendingCount: 0,
-      lastCleanTimestamp: "",
-    };
-    if (resolvedSheet !== FALLBACK_SURVEY_SHEET) {
-      const cleanIds = new Set(value.records.map(record => record.id.toUpperCase()));
-      const rawIds = await getRawSurveyIds();
-      diagnostics.pendingCount = rawIds.filter(
-        id => !cleanIds.has(id) && !IGNORED_SURVEY_IDS.has(id)
-      ).length;
-      const latest = value.records.reduce<Date | null>((acc, record) => {
-        const parsed = parseSurveyTimestamp(record.timestamp);
-        if (!parsed) return acc;
-        return !acc || parsed > acc ? parsed : acc;
-      }, null);
-      diagnostics.lastCleanTimestamp = latest
-        ? latest.toLocaleDateString("es-PE", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
-        : "";
-    }
-
-    const entry = { at: Date.now(), sheet: resolvedSheet, value, diagnostics };
-    surveyCache.set(cacheKey, entry);
-    return { ...value, ...diagnostics, sheet: resolvedSheet, cached: false };
+    surveyCache.set(cacheKey, { at: Date.now(), sheet: resolvedSheet, value });
+    return { ...value, sheet: resolvedSheet, cached: false };
   } catch (error) {
-    if (cached) {
-      return {
-        ...cached.value,
-        ...cached.diagnostics,
-        sheet: cached.sheet,
-        cached: true,
-      };
-    }
+    if (cached) return { ...cached.value, sheet: cached.sheet, cached: true };
     throw error;
   }
 }
@@ -516,28 +424,15 @@ export const appRouter = router({
         const fallbackUsed =
           requested !== FALLBACK_SURVEY_SHEET && payload.sheet === FALLBACK_SURVEY_SHEET;
 
-        const baseWarning = fallbackUsed
-          ? `La pestaña "${requested}" no está disponible: se muestran datos SIN DEPURAR de "${FALLBACK_SURVEY_SHEET}". Ejecuta "Datos → Actualizar Encuestas_Limpias" en el Google Sheet para activar la fuente limpia.`
-          : null;
-
-        const pendingWarning =
-          !fallbackUsed && payload.pendingCount > 0
-            ? `La pestaña "Encuestas_Limpias" está atrasada: su último registro es del ${
-                payload.lastCleanTimestamp || "—"
-              } y hay ${payload.pendingCount} encuesta${
-                payload.pendingCount === 1 ? "" : "s"
-              } nueva${payload.pendingCount === 1 ? "" : "s"} en "Encuestas" sin depurar. Abre el Google Sheet y ejecuta "Datos → Actualizar Encuestas_Limpias" para incorporarlas.`
-            : null;
-
         return {
           records: payload.records,
           serverCatalog: payload.serverCatalog,
           fetchedAt: new Date().toISOString(),
           source: `Google Sheets · ${payload.sheet}`,
           fallbackUsed,
-          pendingCount: payload.pendingCount ?? 0,
-          lastCleanTimestamp: payload.lastCleanTimestamp ?? "",
-          warning: baseWarning ?? pendingWarning,
+          warning: fallbackUsed
+            ? `La pestaña "${requested}" no está disponible: se muestran datos SIN DEPURAR de "${FALLBACK_SURVEY_SHEET}".`
+            : null,
         };
       }),
   }),

@@ -829,11 +829,10 @@ function Empty({ text }: { text: string }) {
 export default function Home() {
   const { user, logout, loading: authLoading } = useAuth();
   const [sourceTab, setSourceTab] = useState<"original" | "limpia">("limpia");
-  const [forceSync, setForceSync] = useState(false);
   const { data, isLoading, isFetching, refetch, error } =
     trpc.survey.latest.useQuery(
-      { tab: sourceTab, force: forceSync },
-      { refetchInterval: 60000, staleTime: 15000 }
+      { tab: sourceTab },
+      { refetchInterval: 300000, staleTime: 120000 }
     );
   const callsQuery = trpc.calls.list.useQuery();
   const birthdayCampaignsQuery = trpc.birthdayCampaigns.list.useQuery(
@@ -1601,11 +1600,7 @@ export default function Home() {
             <Button
               variant="outline"
               className="refresh-button"
-              onClick={async () => {
-                setForceSync(true);
-                await refetch();
-                setForceSync(false);
-              }}
+              onClick={() => refetch()}
             >
               <RefreshCw size={16} className={isFetching ? "spin" : ""} />{" "}
               Actualizar
@@ -1687,43 +1682,6 @@ export default function Home() {
             </button>
           </div>
         )}
-        {sourceTab === "limpia" &&
-          !data?.fallbackUsed &&
-          (data?.pendingCount ?? 0) > 0 && (
-            <div className="sync-lag-banner" role="status" aria-live="polite">
-              <div className="sync-lag-icon">
-                <AlertTriangle size={20} />
-              </div>
-              <div>
-                <strong>
-                  {data?.pendingCount} encuesta
-                  {data?.pendingCount === 1 ? "" : "s"} nueva
-                  {data?.pendingCount === 1 ? "" : "s"} sin incorporar
-                </strong>
-                <p>
-                  La pestaña <b>Encuestas_Limpias</b> llega hasta{" "}
-                  <b>{data?.lastCleanTimestamp || "—"}</b>. Las respuestas más
-                  recientes siguen en <b>Encuestas</b> y no cuentan en los
-                  indicadores.
-                </p>
-                <small>
-                  Abre el Google Sheet y ejecuta{" "}
-                  <b>Datos → Actualizar Encuestas_Limpias</b>. Después pulsa
-                  Actualizar aquí.
-                </small>
-              </div>
-              <button
-                className="sync-lag-action"
-                onClick={async () => {
-                  setForceSync(true);
-                  await refetch();
-                  setForceSync(false);
-                }}
-              >
-                Revisar ahora
-              </button>
-            </div>
-          )}
         <div className="mobile-nav-wrap">
           <div className="mobile-nav-label">
             <LayoutDashboard size={14} /> NAVEGACIÓN DEL REPORTE
