@@ -829,18 +829,27 @@ function Empty({ text }: { text: string }) {
 export default function Home() {
   const { user, logout, loading: authLoading } = useAuth();
   const [sourceTab, setSourceTab] = useState<"original" | "limpia">("limpia");
-  // `forceSync` solo se activa al pulsar Actualizar, para que un clic siempre
-  // lea la hoja real y no la caché de 60s del servidor.
-  const [forceSync, setForceSync] = useState(false);
+  const surveyUtils = trpc.useUtils();
   const { data, isLoading, isFetching, refetch, error } =
     trpc.survey.latest.useQuery(
-      { tab: sourceTab, force: forceSync },
+      { tab: sourceTab },
       { refetchInterval: 300000, staleTime: 120000 }
     );
+  /**
+   * Un solo clic debe leer la hoja real, no la caché de 60s del servidor.
+   * Pedimos la versión forzada y la guardamos en la misma clave que renderiza
+   * la pantalla, para que lo mostrado sea siempre lo recién leído.
+   */
   const refreshNow = async () => {
-    setForceSync(true);
-    await refetch();
-    setForceSync(false);
+    try {
+      const fresh = await surveyUtils.survey.latest.fetch({
+        tab: sourceTab,
+        force: true,
+      });
+      surveyUtils.survey.latest.setData({ tab: sourceTab }, fresh);
+    } catch {
+      await refetch();
+    }
   };
   const callsQuery = trpc.calls.list.useQuery();
   const birthdayCampaignsQuery = trpc.birthdayCampaigns.list.useQuery(
