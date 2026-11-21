@@ -829,11 +829,19 @@ function Empty({ text }: { text: string }) {
 export default function Home() {
   const { user, logout, loading: authLoading } = useAuth();
   const [sourceTab, setSourceTab] = useState<"original" | "limpia">("limpia");
+  // `forceSync` solo se activa al pulsar Actualizar, para que un clic siempre
+  // lea la hoja real y no la caché de 60s del servidor.
+  const [forceSync, setForceSync] = useState(false);
   const { data, isLoading, isFetching, refetch, error } =
     trpc.survey.latest.useQuery(
-      { tab: sourceTab },
+      { tab: sourceTab, force: forceSync },
       { refetchInterval: 300000, staleTime: 120000 }
     );
+  const refreshNow = async () => {
+    setForceSync(true);
+    await refetch();
+    setForceSync(false);
+  };
   const callsQuery = trpc.calls.list.useQuery();
   const birthdayCampaignsQuery = trpc.birthdayCampaigns.list.useQuery(
     undefined,
@@ -1600,7 +1608,7 @@ export default function Home() {
             <Button
               variant="outline"
               className="refresh-button"
-              onClick={() => refetch()}
+              onClick={() => void refreshNow()}
             >
               <RefreshCw size={16} className={isFetching ? "spin" : ""} />{" "}
               Actualizar
